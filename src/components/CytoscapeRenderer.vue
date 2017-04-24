@@ -14,9 +14,6 @@ export default {
     console.log('CytoscapeRenderer created!', this.$refs.container)
     this.cy = cytoscape({
       container: this.$refs.container,
-      elements: [
-        {data: {id: 'n1', label: 'Click Me!'}, position: {x: 100, y: 40}}
-      ],
       style: [
         {
           selector: 'node',
@@ -57,6 +54,13 @@ export default {
       layout: {
         name: 'preset'
       }
+    })
+    //
+    this.cy.on('select', 'node', event => {
+      this.$store.dispatch('onSelectTopic', event.target.id())
+    })
+    this.cy.on('select', 'edge', event => {
+      this.$store.dispatch('onSelectAssoc', event.target.id())
     })
     //
     this.$store.watch(

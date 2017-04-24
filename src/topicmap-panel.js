@@ -11,8 +11,7 @@ const actions = {
     }
     state.renderer = renderer
   },
-  setTopicmapData (_, topicmap) {
-    console.log('setTopicmapData', topicmap)
+  displayTopicmap (_, topicmap) {
     state.topicmap = topicmap
   }
 }

@@ -1,14 +1,18 @@
 {
   "name": "dm5-topicmap-panel",
   "version": "5.0.0-SNAPSHOT",
-  "description": "",
+  "description": "The DeepaMehta 5 topicmap panel as a composable GUI component",
   "author": "Jörg Richter",
   "main": "dist/dm5-topicmap-panel.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jri/dm5-topicmap-panel.git"
+  },
   "scripts": {
     "build": "webpack -p --progress --hide-modules"
   },
   "dependencies": {
-    "cytoscape": "^3.0.0"
+    "cytoscape": "https://github.com/cytoscape/cytoscape.js.git"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",

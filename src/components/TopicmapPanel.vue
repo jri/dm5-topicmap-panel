@@ -17,7 +17,7 @@ export default {
 <style>
 #topicmap-panel {
   display: flex;
-  flex-basis: 70%;
+  flex-basis: 70%;    /* ### TODO: make independent from parent */
   overflow: hidden;
 }
 </style>
