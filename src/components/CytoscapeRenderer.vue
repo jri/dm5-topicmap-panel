@@ -11,7 +11,6 @@ export default {
   }),
 
   mounted () {
-    console.log('CytoscapeRenderer created!', this.$refs.container)
     this.cy = cytoscape({
       container: this.$refs.container,
       style: [
@@ -20,7 +19,7 @@ export default {
           style: {
             'shape': 'rectangle',
             'background-color': 'hsl(210, 100%, 90%)',
-            'padding': '2px',
+            'padding': '3px',
             'width': 'label',
             'height': 'label',
             'label': 'data(label)',
@@ -30,7 +29,7 @@ export default {
         {
           selector: 'edge',
           style: {
-            'width': 4,
+            'width': 3,
             'line-color': 'rgb(178, 178, 178)',
             'curve-style': 'bezier',
             'label': 'data(label)',
@@ -40,7 +39,7 @@ export default {
         {
           selector: 'node:selected',
           style: {
-            'border-width': 3,
+            'border-width': 2,
             'border-color': 'red'
           }
         },
