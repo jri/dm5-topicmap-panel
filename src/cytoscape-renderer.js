@@ -20,12 +20,9 @@ const actions = {
 
   // WebSocket messages
 
-  _setTopicPosition ({rootState}, {topicmapId, topicId, x, y}) {
+  _setTopicPosition ({rootState}, {topicmapId, topicId, pos}) {
     if (topicmapId === topicmap.id) {
-      // ### TODO
-      console.log('renderer _setTopicPosition CURRENT TOPICMAP')
-    } else {
-      console.log('renderer _setTopicPosition')
+      cy.getElementById(topicId).position(pos)
     }
   }
 }
