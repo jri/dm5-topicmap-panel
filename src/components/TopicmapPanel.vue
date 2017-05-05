@@ -1,5 +1,6 @@
 <template>
   <div class="topicmap-panel">
+    <slot name="dm5-topicmap-panel"></slot>
     <component :is="renderer"></component>
   </div>
 </template>
