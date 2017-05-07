@@ -108,7 +108,10 @@ function eventListeners(dispatch) {
     })
     cy.on('tap', e => {
       if (e.target === cy) {
-        dispatch('onBackgroundTap', e.position)
+        dispatch('onBackgroundTap', {
+          model:    e.position,
+          rendered: e.renderedPosition
+        })
       }
     })
     events = true
