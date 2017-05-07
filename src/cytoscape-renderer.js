@@ -86,10 +86,10 @@ function initialize() {
 function eventListeners(dispatch) {
   if (!events) {
     cy.on('select', 'node', e => {
-      dispatch('selectTopic', e.target.id())
+      dispatch('onTopicSelect', e.target.id())
     })
     cy.on('select', 'edge', e => {
-      dispatch('selectAssoc', e.target.id())
+      dispatch('onAssocSelect', e.target.id())
     })
     cy.on('tapstart', 'node', e => {
       var node = e.target
@@ -99,12 +99,17 @@ function eventListeners(dispatch) {
       })
       cy.one('tapend', e => {
         if (drag) {
-          dispatch('setTopicPosition', {
+          dispatch('onTopicDragged', {
             id: node.id(),
             pos: node.position()
           })
         }
       })
+    })
+    cy.on('tap', e => {
+      if (e.target === cy) {
+        dispatch('onBackgroundTap', e.position)
+      }
     })
     events = true
   }
