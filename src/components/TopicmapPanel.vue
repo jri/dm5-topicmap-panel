@@ -7,7 +7,6 @@
 
 <script>
 export default {
-
   computed: {
     renderer () {
       // ### TODO: renderer registry

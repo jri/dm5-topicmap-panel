@@ -1,4 +1,5 @@
 import cytoscape from 'cytoscape'
+import dm5 from 'dm5'
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
@@ -12,13 +13,20 @@ var events = false      // tracks Cytoscape event listener registration, which i
 
 const actions = {
 
-  setTopicmap ({dispatch}, _topicmap) {
+  renderTopicmap ({dispatch}, _topicmap) {
     topicmap = _topicmap
     eventListeners(dispatch)
     refresh()
   },
 
   // WebSocket messages
+
+  _addTopicToTopicmap (_, {topicmapId, topic}) {
+    if (topicmapId === topicmap.id) {
+      const node = cy.add(cyNode(new dm5.TopicmapTopic(topic)))  // TODO: instantiation should be done by the websocket dispatcher
+      node.select()          // ### FIXME
+    }
+  },
 
   _setTopicPosition (_, {topicmapId, topicId, pos}) {
     if (topicmapId === topicmap.id) {
@@ -122,23 +130,34 @@ function refresh () {
   console.log('refresh')
   var elems = []
   topicmap.forEachTopic(topic => {
-    elems.push({
-      data: {
-        id:    topic.id,
-        label: topic.value
-      },
-      position: topic.getPosition()
-    })
+    elems.push(cyNode(topic))
   })
   topicmap.forEachAssoc(assoc => {
-    elems.push({
-      data: {
-        id:     assoc.id,
-        label:  assoc.value,
-        source: assoc.role1.topic_id,
-        target: assoc.role2.topic_id
-      }
-    })
+    elems.push(cyEdge(assoc))
   })
   cy.add(elems)
+}
+
+/**
+ * @param   topic   A TopicmapTopic
+ */
+function cyNode (topic) {
+  return {
+    data: {
+      id:    topic.id,
+      label: topic.value
+    },
+    position: topic.getPosition()
+  }
+}
+
+function cyEdge (assoc) {
+  return {
+    data: {
+      id:     assoc.id,
+      label:  assoc.value,
+      source: assoc.role1.topic_id,
+      target: assoc.role2.topic_id
+    }
+  }
 }
