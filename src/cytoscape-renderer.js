@@ -19,12 +19,17 @@ const actions = {
     refresh()
   },
 
+  addTopicAndSelect (_, id) {
+    console.log('addTopicAndSelect', id)
+    const node = cy.add(cyNode(topicmap.getTopic(id)))
+    node.select()
+  },
+
   // WebSocket messages
 
   _addTopicToTopicmap (_, {topicmapId, topic}) {
     if (topicmapId === topicmap.id) {
-      const node = cy.add(cyNode(new dm5.TopicmapTopic(topic)))  // TODO: instantiation should be done by the websocket dispatcher
-      node.select()          // ### FIXME
+      cy.add(cyNode(new dm5.TopicmapTopic(topic)))  // TODO: instantiation should be done by the websocket dispatcher
     }
   },
 
@@ -117,8 +122,8 @@ function eventListeners(dispatch) {
     cy.on('tap', e => {
       if (e.target === cy) {
         dispatch('onBackgroundTap', {
-          model:    e.position,
-          rendered: e.renderedPosition
+          model:  e.position,
+          render: e.renderedPosition
         })
       }
     })
