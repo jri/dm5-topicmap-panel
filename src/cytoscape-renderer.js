@@ -19,24 +19,22 @@ const actions = {
     refresh()
   },
 
-  addTopicAndSelect (_, id) {
-    console.log('addTopicAndSelect', id)
-    const node = cy.add(cyNode(topicmap.getTopic(id)))
-    node.select()
+  // sync view with model
+
+  addTopic (_, id) {
+    console.log('addTopic', id)
+    cy.add(cyNode(topicmap.getTopic(id)))
   },
 
-  // WebSocket messages
-
-  _addTopicToTopicmap (_, {topicmapId, topic}) {
-    if (topicmapId === topicmap.id) {
-      cy.add(cyNode(new dm5.TopicmapTopic(topic)))  // TODO: instantiation should be done by the websocket dispatcher
-    }
+  select (_, id) {
+    console.log('select', id)
+    cy.getElementById(id.toString()).select()
   },
 
-  _setTopicPosition (_, {topicmapId, topicId, pos}) {
-    if (topicmapId === topicmap.id) {
-      cy.getElementById(topicId).position(pos)
-    }
+  setTopicPosition (_, id) {
+    console.log('setTopicPosition', id)
+    const pos = topicmap.getTopic(id).getPosition()
+    cy.getElementById(id.toString()).position(pos)   // TODO: think about Cytoscape string IDs
   }
 }
 
@@ -99,10 +97,10 @@ function initialize() {
 function eventListeners(dispatch) {
   if (!events) {
     cy.on('select', 'node', e => {
-      dispatch('onTopicSelect', e.target.id())
+      dispatch('selectTopic', e.target.id())
     })
     cy.on('select', 'edge', e => {
-      dispatch('onAssocSelect', e.target.id())
+      dispatch('selectAssoc', e.target.id())
     })
     cy.on('tapstart', 'node', e => {
       var node = e.target
@@ -144,7 +142,7 @@ function refresh () {
 }
 
 /**
- * @param   topic   A TopicmapTopic
+ * @param   topic   A ViewTopic
  */
 function cyNode (topic) {
   return {
