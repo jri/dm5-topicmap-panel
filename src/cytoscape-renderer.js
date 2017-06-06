@@ -45,6 +45,13 @@ export default {
 // Cytoscape
 
 function initialize() {
+  // get style from CSS variables
+  const style = window.getComputedStyle(document.body)
+  // Note: getPropertyValue() transforms " into ' what can't be parsed by Cytoscape then
+  const font     = style.getPropertyValue('--main-font-family').replace(/'/g, '"')
+  const nodeSize = style.getPropertyValue('--main-font-size')
+  const edgeSize = style.getPropertyValue('--label-font-size')
+  //
   return cytoscape({
     container: document.getElementById('cytoscape-renderer'),
     style: [
@@ -57,6 +64,8 @@ function initialize() {
           'width': 'label',
           'height': 'label',
           'label': 'data(label)',
+          'font-family': font,
+          'font-size': nodeSize,
           'text-valign': 'center'
         }
       },
@@ -67,7 +76,8 @@ function initialize() {
           'line-color': 'rgb(178, 178, 178)',
           'curve-style': 'bezier',
           'label': 'data(label)',
-          'font-size': 13,
+          'font-family': font,
+          'font-size': edgeSize,
           'text-margin-y': '-10',
           'text-rotation': 'autorotate'
         }
