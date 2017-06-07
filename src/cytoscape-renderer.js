@@ -1,4 +1,5 @@
 import cytoscape from 'cytoscape'
+import cxtmenu from 'cytoscape-cxtmenu'
 import dm5 from 'dm5'
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
@@ -10,6 +11,9 @@ var topicmap            // topicmap to render (a Topicmap object)
 
 var cy = initialize()   // the Cytoscape instance
 var events = false      // tracks Cytoscape event listener registration, which is lazy
+
+cxtmenu(cytoscape)      // register extension
+initContextMenus()
 
 const actions = {
 
@@ -47,7 +51,7 @@ export default {
 function initialize() {
   // get style from CSS variables
   const style = window.getComputedStyle(document.body)
-  // Note: getPropertyValue() transforms " into ' what can't be parsed by Cytoscape then
+  // Note: someone (getPropertyValue()?/css-loader?) transforms " into ' what can't be parsed by Cytoscape then
   const font     = style.getPropertyValue('--main-font-family').replace(/'/g, '"')
   const nodeSize = style.getPropertyValue('--main-font-size')
   const edgeSize = style.getPropertyValue('--label-font-size')
@@ -103,8 +107,42 @@ function initialize() {
   })
 }
 
+function initContextMenus () {
+  // TODO
+  cy.cxtmenu({
+    selector: 'node',
+    commands: [
+      {
+        content: 'Hide Topic'
+      },
+      {
+        content: 'Delete Topic'
+      }
+    ]
+  })
+  cy.cxtmenu({
+    selector: 'edge',
+    commands: [
+      {
+        content: 'Hide Association'
+      },
+      {
+        content: 'Delete Association'
+      }
+    ]
+  })
+  cy.cxtmenu({
+    selector: 'core',
+    commands: [
+      {
+        content: 'Create'
+      }
+    ]
+  })
+}
+
 // lazy registration of Cytoscape event listeners
-function eventListeners(dispatch) {
+function eventListeners (dispatch) {
   if (!events) {
     cy.on('select', 'node', e => {
       dispatch('selectTopic', e.target.id())
