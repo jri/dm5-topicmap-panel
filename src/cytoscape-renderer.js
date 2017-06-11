@@ -207,8 +207,8 @@ function cyEdge (assoc) {
     data: {
       id:     assoc.id,
       label:  assoc.value,
-      source: assoc.role1.topic_id,
-      target: assoc.role2.topic_id
+      source: assoc.role1.topicId,
+      target: assoc.role2.topicId
     }
   }
 }
