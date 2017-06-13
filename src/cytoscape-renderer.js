@@ -30,6 +30,11 @@ const actions = {
     cy.add(cyNode(topicmap.getTopic(id)))
   },
 
+  updateTopic (_, id) {
+    console.log('updateTopic', id)
+    cy.getElementById(id.toString()).data('label', topicmap.getTopic(id).value)
+  },
+
   select (_, id) {
     console.log('select', id)
     cy.getElementById(id.toString()).select()
@@ -46,7 +51,7 @@ export default {
   actions
 }
 
-// Cytoscape
+// ---
 
 function initialize() {
   // get style from CSS variables
