@@ -7,7 +7,7 @@ import dm5 from 'dm5'
 // We have to bind topicmap data to the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
-var topicmap            // topicmap to render (a Topicmap object)
+var topicmap            // view model: the topicmap to render (a Topicmap object)
 
 var cy = initialize()   // the Cytoscape instance
 var events = false      // tracks Cytoscape event listener registration, which is lazy
@@ -17,33 +17,32 @@ initContextMenus()
 
 const actions = {
 
-  renderTopicmap ({dispatch}, _topicmap) {
+  // sync renderer with view model
+
+  syncTopicmap ({dispatch}, _topicmap) {
     topicmap = _topicmap
     eventListeners(dispatch)
-    refresh()
+    refreshTopicmap()
   },
 
-  // sync view with model
-
-  addTopic (_, id) {
-    console.log('addTopic', id)
+  syncShowTopic (_, id) {
+    console.log('syncShowTopic', id)
     cy.add(cyNode(topicmap.getTopic(id)))
   },
 
-  updateTopic (_, id) {
-    console.log('updateTopic', id)
-    cy.getElementById(id.toString()).data('label', topicmap.getTopic(id).value)
+  syncTopicLabel (_, id) {
+    console.log('syncTopicLabel', id)
+    cyElement(id).data('label', topicmap.getTopic(id).value)
   },
 
-  select (_, id) {
-    console.log('select', id)
-    cy.getElementById(id.toString()).select()
+  syncSelection (_, id) {
+    console.log('syncSelection', id)
+    cyElement(id).select()
   },
 
-  setTopicPosition (_, id) {
-    console.log('setTopicPosition', id)
-    const pos = topicmap.getTopic(id).getPosition()
-    cy.getElementById(id.toString()).position(pos)   // TODO: think about Cytoscape string IDs
+  syncTopicPosition (_, id) {
+    console.log('syncTopicPosition', id)
+    cyElement(id).position(topicmap.getTopic(id).getPosition())
   }
 }
 
@@ -182,8 +181,8 @@ function eventListeners (dispatch) {
   }
 }
 
-function refresh () {
-  console.log('refresh')
+function refreshTopicmap () {
+  console.log('refresh topicmap')
   var elems = []
   topicmap.forEachTopic(topic => {
     elems.push(cyNode(topic))
@@ -195,7 +194,9 @@ function refresh () {
 }
 
 /**
- * @param   topic   A ViewTopic
+ * Builds a Cytoscape node from a DM ViewTopic.
+ *
+ * @param   topic   A DM ViewTopic
  */
 function cyNode (topic) {
   return {
@@ -207,6 +208,11 @@ function cyNode (topic) {
   }
 }
 
+/**
+ * Builds a Cytoscape edge from a DM Assoc.
+ *
+ * @param   assoc   A DM Assoc
+ */
 function cyEdge (assoc) {
   return {
     data: {
@@ -216,4 +222,13 @@ function cyEdge (assoc) {
       target: assoc.role2.topicId
     }
   }
+}
+
+/**
+ * Gets the Cytoscape element with the given ID.
+ *
+ * @param   id    a DM object id (number)
+ */
+function cyElement(id) {
+  return cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
 }
