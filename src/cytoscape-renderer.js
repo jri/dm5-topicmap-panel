@@ -169,9 +169,9 @@ function eventListeners (dispatch) {
         }
       })
     })
-    cy.on('tap', evt => {
+    cy.on('cxttap', evt => {
       if (evt.target === cy) {
-        dispatch('onBackgroundTap', {
+        dispatch('onBackgroundRightClick', {
           model:  evt.position,
           render: evt.renderedPosition
         })
