@@ -1,4 +1,4 @@
-# The DeepaMehta 5 topicmap panel as a composable GUI component
+# DeepaMehta 5 Topicmap Panel
 
 ## Version History
 

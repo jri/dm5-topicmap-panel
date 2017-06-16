@@ -7,7 +7,7 @@ import dm5 from 'dm5'
 // We have to bind topicmap data to the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
-var topicmap            // view model: the topicmap to render (a Topicmap object)
+var topicmap            // view model: the rendered topicmap (a Topicmap object)
 
 var cy = initialize()   // the Cytoscape instance
 var events = false      // tracks Cytoscape event listener registration, which is lazy
@@ -25,9 +25,14 @@ const actions = {
     refreshTopicmap()
   },
 
-  syncShowTopic (_, id) {
-    console.log('syncShowTopic', id)
+  syncAddTopic (_, id) {
+    console.log('syncAddTopic', id)
     cy.add(cyNode(topicmap.getTopic(id)))
+  },
+
+  syncAddAssoc (_, id) {
+    console.log('syncAddAssoc', id)
+    cy.add(cyEdge(topicmap.getAssoc(id)))
   },
 
   syncTopicLabel (_, id) {
@@ -35,8 +40,8 @@ const actions = {
     cyElement(id).data('label', topicmap.getTopic(id).value)
   },
 
-  syncSelection (_, id) {
-    console.log('syncSelection', id)
+  syncSelect (_, id) {
+    console.log('syncSelect', id)
     cyElement(id).select()
   },
 
@@ -132,14 +137,6 @@ function initContextMenus () {
       },
       {
         content: 'Delete Association'
-      }
-    ]
-  })
-  cy.cxtmenu({
-    selector: 'core',
-    commands: [
-      {
-        content: 'Create'
       }
     ]
   })
