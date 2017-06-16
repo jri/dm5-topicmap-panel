@@ -145,37 +145,45 @@ function initContextMenus () {
 // lazy registration of Cytoscape event listeners
 function eventListeners (dispatch) {
   if (!events) {
-    cy.on('select', 'node', e => {
-      dispatch('selectTopic', e.target.id())
+    cy.on('select', 'node', evt => {
+      dispatch('selectTopic', id(evt))
     })
-    cy.on('select', 'edge', e => {
-      dispatch('selectAssoc', e.target.id())
+    cy.on('select', 'edge', evt => {
+      dispatch('selectAssoc', id(evt))
     })
-    cy.on('tapstart', 'node', e => {
-      var node = e.target
+    cy.on('unselect', evt => {
+      dispatch('unselect', id(evt))
+    })
+    cy.on('tapstart', 'node', evt => {
+      var node = evt.target
       var drag = false
-      node.one('tapdrag', e => {
+      node.one('tapdrag', evt => {
         drag = true
       })
-      cy.one('tapend', e => {
+      cy.one('tapend', evt => {
         if (drag) {
           dispatch('onTopicDragged', {
-            id: node.id(),
+            id: Number(node.id()),
             pos: node.position()
           })
         }
       })
     })
-    cy.on('tap', e => {
-      if (e.target === cy) {
+    cy.on('tap', evt => {
+      if (evt.target === cy) {
         dispatch('onBackgroundTap', {
-          model:  e.position,
-          render: e.renderedPosition
+          model:  evt.position,
+          render: evt.renderedPosition
         })
       }
     })
     events = true
   }
+}
+
+function id(evt) {
+  // Note: cytoscape element IDs are strings
+  return Number(evt.target.id())
 }
 
 function refreshTopicmap () {
