@@ -3,7 +3,7 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import dm5 from 'dm5'
 
 // settings
-const padding = 5
+const padding = 8
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
@@ -83,8 +83,13 @@ function initialize() {
         style: {
           'shape': 'rectangle',
           'background-color': '#d0e0f0',
-          'background-image': renderTopic,
-          // 'background-opacity': 0,
+          'background-image': renderIcon,
+          'background-width': 20,
+          'background-height': 20,
+          // 'background-fit': 'contain',
+          'background-position-x': 0,
+          'background-position-y': 3,
+          'background-opacity': 0,
           // 'background-clip': 'none',
           'padding': padding,
           'width': 'label',
@@ -92,7 +97,10 @@ function initialize() {
           'label': 'data(label)',
           'font-family': font,
           'font-size': nodeSize,
-          'text-valign': 'center'
+          'text-valign': 'center',
+          'text-margin-x': 16,
+          // 'text-wrap': 'wrap',
+          // 'text-max-width': 50
         }
       },
       {
@@ -194,7 +202,12 @@ function eventListeners (dispatch) {
   }
 }
 
-function renderTopic (ele) {
+function renderIcon (ele) {
+  return ele.data('icon')
+}
+
+// TODO: not used
+function renderSVG (ele) {
   // var label = ele.data('label')
   var width = ele.outerWidth()
   var height = ele.outerHeight()
@@ -231,7 +244,8 @@ function cyNode (topic) {
   return {
     data: {
       id:    topic.id,
-      label: topic.value
+      label: topic.value,
+      icon:  topic.getIcon()
     },
     position: topic.getPosition()
   }
