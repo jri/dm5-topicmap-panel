@@ -45,6 +45,7 @@ const actions = {
 
   syncSelect (_, id) {
     console.log('syncSelect', id)
+    cy.elements(":selected").unselect()
     cyElement(id).select()
   },
 
@@ -119,7 +120,7 @@ function initialize() {
       {
         selector: 'node:selected',
         style: {
-          'border-width': 2,
+          'border-width': 3,
           'border-color': 'red'
         }
       },
@@ -134,32 +135,6 @@ function initialize() {
       name: 'preset'
     },
     wheelSensitivity: 0.2
-  })
-}
-
-function initContextMenus () {
-  // TODO
-  cy.cxtmenu({
-    selector: 'node',
-    commands: [
-      {
-        content: 'Hide Topic'
-      },
-      {
-        content: 'Delete Topic'
-      }
-    ]
-  })
-  cy.cxtmenu({
-    selector: 'edge',
-    commands: [
-      {
-        content: 'Hide Association'
-      },
-      {
-        content: 'Delete Association'
-      }
-    ]
   })
 }
 
@@ -200,6 +175,32 @@ function eventListeners (dispatch) {
     })
     events = true
   }
+}
+
+function initContextMenus () {
+  // TODO
+  cy.cxtmenu({
+    selector: 'node',
+    commands: [
+      {
+        content: 'Hide Topic'
+      },
+      {
+        content: 'Delete Topic'
+      }
+    ]
+  })
+  cy.cxtmenu({
+    selector: 'edge',
+    commands: [
+      {
+        content: 'Hide Association'
+      },
+      {
+        content: 'Delete Association'
+      }
+    ]
+  })
 }
 
 function renderIcon (ele) {
