@@ -2,6 +2,9 @@ import cytoscape from 'cytoscape'
 import cxtmenu from 'cytoscape-cxtmenu'
 import dm5 from 'dm5'
 
+// settings
+const padding = 5
+
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
 // We have to bind topicmap data to the Cytoscape graph model manually anyways.
@@ -79,8 +82,11 @@ function initialize() {
         selector: 'node',
         style: {
           'shape': 'rectangle',
-          'background-color': 'hsl(210, 100%, 90%)',
-          'padding': '3px',
+          'background-color': '#d0e0f0',
+          'background-image': renderTopic,
+          // 'background-opacity': 0,
+          // 'background-clip': 'none',
+          'padding': padding,
           'width': 'label',
           'height': 'label',
           'label': 'data(label)',
@@ -188,7 +194,18 @@ function eventListeners (dispatch) {
   }
 }
 
-function id(evt) {
+function renderTopic (ele) {
+  // var label = ele.data('label')
+  var width = ele.outerWidth()
+  var height = ele.outerHeight()
+  // console.log('renderTopic', label, width, height, padding)
+  var svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+    <text x="${width - 20}" y="${height}" fill="blue">HX</text>
+  </svg>`
+  return 'data:image/svg+xml;base64,' + btoa(svg)
+}
+
+function id (evt) {
   // Note: cytoscape element IDs are strings
   return Number(evt.target.id())
 }
