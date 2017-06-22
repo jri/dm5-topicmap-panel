@@ -48,6 +48,13 @@ const actions = {
   syncTopicPosition (_, id) {
     console.log('syncTopicPosition', id)
     cyElement(id).position(topicmap.getTopic(id).getPosition())
+  },
+
+  // ---
+
+  shutdownRenderer () {
+    // TODO
+    console.log('Unregistering cxtmenu extension')
   }
 }
 

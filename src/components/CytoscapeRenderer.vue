@@ -4,8 +4,14 @@
 
 <script>
 export default {
+
   mounted () {
     this.$store.registerModule('cytoscapeRenderer', require('../cytoscape-renderer').default)
+  },
+
+  destroyed () {
+    console.log('CytosscapeRenderer destroyed')
+    this.$store.dispatch('shutdownRenderer')
   }
 }
 </script>
