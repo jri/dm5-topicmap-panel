@@ -1,5 +1,7 @@
 <template>
-  <div id="cytoscape-renderer"></div>
+  <div id="cytoscape-renderer">
+    <div id="measurement-box"></div>
+  </div>
 </template>
 
 <script>
@@ -20,5 +22,10 @@ export default {
 #cytoscape-renderer {
   flex: auto;
   overflow: hidden;
+}
+
+#measurement-box {
+  position: absolute;
+  visibility: hidden;
 }
 </style>

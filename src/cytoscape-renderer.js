@@ -3,19 +3,25 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import dm5 from 'dm5'
 
 // settings
-const padding = 8
+// get style from CSS variables
+const style = window.getComputedStyle(document.body)
+const fontFamily    = style.getPropertyValue('--main-font-family')
+const mainFontSize  = style.getPropertyValue('--main-font-size')
+const labelFontSize = style.getPropertyValue('--label-font-size')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
 // We have to bind topicmap data to the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
-var topicmap            // view model: the rendered topicmap (a Topicmap object)
+var topicmap              // view model: the rendered topicmap (a Topicmap object)
 
-var cy = initialize()   // the Cytoscape instance
-var events = false      // tracks Cytoscape event listener registration, which is lazy
+const cy = initialize()   // the Cytoscape instance
+var events = false        // tracks Cytoscape event listener registration, which is lazy
 
-cxtmenu(cytoscape)      // register extension
+const box = document.getElementById('measurement-box')
+
+cxtmenu(cytoscape)        // register extension
 initContextMenus()
 
 const actions = {
@@ -69,13 +75,6 @@ export default {
 // ---
 
 function initialize() {
-  // get style from CSS variables
-  const style = window.getComputedStyle(document.body)
-  // Note: someone (getPropertyValue()?/css-loader?) transforms " into ' what can't be parsed by Cytoscape then
-  const font     = style.getPropertyValue('--main-font-family').replace(/'/g, '"')
-  const nodeSize = style.getPropertyValue('--main-font-size')
-  const edgeSize = style.getPropertyValue('--label-font-size')
-  //
   return cytoscape({
     container: document.getElementById('cytoscape-renderer'),
     style: [
@@ -83,23 +82,23 @@ function initialize() {
         selector: 'node',
         style: {
           'shape': 'rectangle',
-          'background-color': '#d0e0f0',
-          'background-image': renderIcon,
-          'background-width': 20,
-          'background-height': 20,
+          // 'background-color': '#d0e0f0',
+          'background-image': ele => renderSVG(ele).svg,
+          // 'background-width': 20,
+          // 'background-height': 20,
           // 'background-fit': 'contain',
-          'background-position-x': 0,
-          'background-position-y': 3,
+          // 'background-position-x': 0,
+          // 'background-position-y': 3,
           'background-opacity': 0,
           // 'background-clip': 'none',
-          'padding': padding,
-          'width': 'label',
-          'height': 'label',
-          'label': 'data(label)',
-          'font-family': font,
-          'font-size': nodeSize,
-          'text-valign': 'center',
-          'text-margin-x': 16,
+          // 'padding': padding,
+          'width':  ele => renderSVG(ele).width,
+          'height': ele => renderSVG(ele).height,
+          // 'label': 'data(label)',
+          // 'font-family': fontFamily,
+          // 'font-size': mainFontSize,
+          // 'text-valign': 'center',
+          // 'text-margin-x': 16,
           // 'text-wrap': 'wrap',
           // 'text-max-width': 50
         }
@@ -111,8 +110,9 @@ function initialize() {
           'line-color': 'rgb(178, 178, 178)',
           'curve-style': 'bezier',
           'label': 'data(label)',
-          'font-family': font,
-          'font-size': edgeSize,
+          // Note: someone (getPropertyValue()?/css-loader?) transforms " into ' what can't be parsed by Cytoscape then
+          'font-family': fontFamily.replace(/'/g, '"'),
+          'font-size': labelFontSize,
           'text-margin-y': '-10',
           'text-rotation': 'autorotate'
         }
@@ -203,20 +203,33 @@ function initContextMenus () {
   })
 }
 
+// TODO: not used
 function renderIcon (ele) {
   return ele.data('icon')
 }
 
-// TODO: not used
 function renderSVG (ele) {
-  // var label = ele.data('label')
-  var width = ele.outerWidth()
-  var height = ele.outerHeight()
-  // console.log('renderTopic', label, width, height, padding)
+  var label = ele.data('label')
+  var size = measureText(label)
+  var width = size.width
+  var height = size.height
+  // console.log('renderSVG', label, width, height, fontFamily)
   var svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-    <text x="${width - 20}" y="${height}" fill="blue">HX</text>
+    <rect x="0" y="0" width="${width}" height="${height}" fill="#d0e0f0"></rect>
+    <text x="0" y="${height}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
   </svg>`
-  return 'data:image/svg+xml;base64,' + btoa(svg)
+  return {
+    svg: 'data:image/svg+xml;base64,' + btoa(svg),
+    width, height
+  }
+}
+
+function measureText(text) {
+  box.textContent = text
+  return {
+    width: box.clientWidth,
+    height: box.clientHeight
+  }
 }
 
 function id (evt) {
