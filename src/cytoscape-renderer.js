@@ -1,6 +1,13 @@
 import cytoscape from 'cytoscape'
 import cxtmenu from 'cytoscape-cxtmenu'
+import fa from 'font-awesome/fonts/fontawesome-webfont.svg'
 import dm5 from 'dm5'
+
+var faFont
+dm5.restClient.getXML(fa).then(svg => {
+  console.log('Font Awesome SVG loaded', svg)
+  faFont = svg.querySelector('font')
+})
 
 // settings
 // get style from CSS variables
@@ -210,13 +217,15 @@ function renderIcon (ele) {
 
 function renderSVG (ele) {
   var label = ele.data('label')
+  var iconPath = faGlyphPath(['user', '_387', 'music'][Math.floor(3 * Math.random())])
   var size = measureText(label)
-  var width = size.width
+  var width = size.width + 30
   var height = size.height
   // console.log('renderSVG', label, width, height, fontFamily)
   var svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
     <rect x="0" y="0" width="${width}" height="${height}" fill="#d0e0f0"></rect>
-    <text x="0" y="${height}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
+    <text x="30" y="${height}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
+    <path d="${iconPath}" transform="scale(0.008 -0.008) translate(600 -1800)"></path>
   </svg>`
   return {
     svg: 'data:image/svg+xml;base64,' + btoa(svg),
@@ -230,6 +239,10 @@ function measureText(text) {
     width: box.clientWidth,
     height: box.clientHeight
   }
+}
+
+function faGlyphPath (glyphName) {
+  return faFont.querySelector(`glyph[glyph-name="${glyphName}"]`).getAttribute('d')
 }
 
 function id (evt) {
