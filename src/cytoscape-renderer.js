@@ -12,9 +12,10 @@ dm5.restClient.getXML(fa).then(svg => {
 // settings
 // get style from CSS variables
 const style = window.getComputedStyle(document.body)
-const fontFamily    = style.getPropertyValue('--main-font-family')
-const mainFontSize  = style.getPropertyValue('--main-font-size')
-const labelFontSize = style.getPropertyValue('--label-font-size')
+const fontFamily      = style.getPropertyValue('--main-font-family')
+const mainFontSize    = style.getPropertyValue('--main-font-size')
+const labelFontSize   = style.getPropertyValue('--label-font-size')
+const backgroundColor = style.getPropertyValue('--background-color')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
@@ -217,15 +218,16 @@ function renderIcon (ele) {
 
 function renderSVG (ele) {
   var label = ele.data('label')
-  var iconPath = faGlyphPath(['user', '_387', 'music'][Math.floor(3 * Math.random())])
+  var iconPath = faGlyphPath(ele.data('icon'))
+  var iconColor = '#36a'
   var size = measureText(label)
-  var width = size.width + 30
-  var height = size.height
+  var width = size.width + 32
+  var height = size.height + 8
   // console.log('renderSVG', label, width, height, fontFamily)
   var svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-    <rect x="0" y="0" width="${width}" height="${height}" fill="#d0e0f0"></rect>
-    <text x="30" y="${height}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
-    <path d="${iconPath}" transform="scale(0.008 -0.008) translate(600 -1800)"></path>
+    <rect x="0" y="0" width="${width}" height="${height}" fill="${backgroundColor}"></rect>
+    <text x="26" y="${height - 7}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
+    <path d="${iconPath}" fill="${iconColor}" transform="scale(0.009 -0.009) translate(600 -2000)"></path>
   </svg>`
   return {
     svg: 'data:image/svg+xml;base64,' + btoa(svg),
@@ -241,8 +243,12 @@ function measureText(text) {
   }
 }
 
-function faGlyphPath (glyphName) {
-  return faFont.querySelector(`glyph[glyph-name="${glyphName}"]`).getAttribute('d')
+function faGlyphPath (unicode) {
+  try {
+    return faFont.querySelector(`glyph[unicode="${unicode}"]`).getAttribute('d')
+  } catch (e) {
+    throw Error(`Glyph "${unicode}" not found`)
+  }
 }
 
 function id (evt) {
