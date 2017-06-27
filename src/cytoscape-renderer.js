@@ -90,25 +90,13 @@ function initialize() {
         selector: 'node',
         style: {
           'shape': 'rectangle',
-          // 'background-color': '#d0e0f0',
-          'background-image': ele => renderSVG(ele).svg,
-          // 'background-width': 20,
-          // 'background-height': 20,
-          // 'background-fit': 'contain',
-          // 'background-position-x': 0,
-          // 'background-position-y': 3,
+          'background-image': ele => renderNode(ele).svg,
           'background-opacity': 0,
-          // 'background-clip': 'none',
-          // 'padding': padding,
-          'width':  ele => renderSVG(ele).width,
-          'height': ele => renderSVG(ele).height,
-          // 'label': 'data(label)',
-          // 'font-family': fontFamily,
-          // 'font-size': mainFontSize,
-          // 'text-valign': 'center',
-          // 'text-margin-x': 16,
-          // 'text-wrap': 'wrap',
-          // 'text-max-width': 50
+          'width':  ele => renderNode(ele).width,
+          'height': ele => renderNode(ele).height,
+          'border-width': 3,
+          'border-color': 'red',
+          'border-opacity': 0
         }
       },
       {
@@ -128,8 +116,7 @@ function initialize() {
       {
         selector: 'node:selected',
         style: {
-          'border-width': 3,
-          'border-color': 'red'
+          'border-opacity': 1,
         }
       },
       {
@@ -216,15 +203,16 @@ function renderIcon (ele) {
   return ele.data('icon')
 }
 
-function renderSVG (ele) {
-  var label = ele.data('label')
-  var iconPath = faGlyphPath(ele.data('icon'))
-  var iconColor = '#36a'
-  var size = measureText(label)
-  var width = size.width + 32
-  var height = size.height + 8
-  // console.log('renderSVG', label, width, height, fontFamily)
-  var svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+// TODO: memoization
+function renderNode (ele) {
+  const label = ele.data('label')
+  const iconPath = faGlyphPath(ele.data('icon'))
+  const iconColor = '#36a'
+  const size = measureText(label)
+  const width = size.width + 32
+  const height = size.height + 8
+  // console.log('renderNode', label, width, height, fontFamily)
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
     <rect x="0" y="0" width="${width}" height="${height}" fill="${backgroundColor}"></rect>
     <text x="26" y="${height - 7}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
     <path d="${iconPath}" fill="${iconColor}" transform="scale(0.009 -0.009) translate(600 -2000)"></path>
@@ -258,7 +246,7 @@ function id (evt) {
 
 function refreshTopicmap () {
   console.log('refresh topicmap')
-  var elems = []
+  const elems = []
   topicmap.forEachTopic(topic => {
     elems.push(cyNode(topic))
   })
