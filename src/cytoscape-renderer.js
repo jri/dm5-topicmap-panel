@@ -106,8 +106,7 @@ function initialize() {
           'line-color': 'rgb(178, 178, 178)',
           'curve-style': 'bezier',
           'label': 'data(label)',
-          // Note: someone (getPropertyValue()?/css-loader?) transforms " into ' what can't be parsed by Cytoscape then
-          'font-family': fontFamily.replace(/'/g, '"'),
+          'font-family': fontFamily,
           'font-size': labelFontSize,
           'text-margin-y': '-10',
           'text-rotation': 'autorotate'
