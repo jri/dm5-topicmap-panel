@@ -95,7 +95,6 @@ function initialize() {
           'width':  ele => renderNode(ele).width,
           'height': ele => renderNode(ele).height,
           'border-width': 3,
-          'border-color': 'red',
           'border-opacity': 0
         }
       },
@@ -115,7 +114,15 @@ function initialize() {
       {
         selector: 'node:selected',
         style: {
-          'border-opacity': 1,
+          'border-color': 'red',
+          'border-opacity': 1
+        }
+      },
+      {
+        selector: 'node.hover',
+        style: {
+          'border-color': '#36a',
+          'border-opacity': 1
         }
       },
       {
@@ -145,16 +152,21 @@ function eventListeners (dispatch) {
       dispatch('unselect', id(evt))
     })
     cy.on('tapstart', 'node', evt => {
-      var node = evt.target
-      var drag = false
-      node.one('tapdrag', evt => {
-        drag = true
-      })
+      const dragState = new DragState(evt.target)
+      cy.on('tapdrag', dragHandler(dragState))
       cy.one('tapend', evt => {
-        if (drag) {
+        cy.off('tapdrag')
+        if (dragState.hoverNode) {
+          dragState.unhover()
+          dragState.resetPosition()
+          dispatch('onTopicDroppedOntoTopic', {
+            topicId: dragState.node.id(),
+            droppedOntoTopicId: dragState.hoverNode.id()
+          })
+        } else if (dragState.drag) {
           dispatch('onTopicDragged', {
-            id: Number(node.id()),
-            pos: node.position()
+            id: Number(dragState.node.id()),
+            pos: dragState.node.position()
           })
         }
       })
@@ -168,6 +180,53 @@ function eventListeners (dispatch) {
       }
     })
     events = true
+  }
+}
+
+/**
+ * Maintains state for dragging a node and hovering another node.
+ */
+class DragState {
+
+  constructor (node) {
+    this.node = node              // the dragged node
+    this.nodePosition = {         // the dragged node's original position. Note: a new pos object must be created.
+      x: node.position('x'),
+      y: node.position('y')
+    }
+    this.hoverNode = undefined    // the node hovered while dragging
+    this.drag = false             // true once dragging starts
+  }
+
+  hover () {
+    this.hoverNode.addClass('hover')
+  }
+
+  unhover () {
+    this.hoverNode.removeClass('hover')
+  }
+
+  resetPosition () {
+    this.node.position(this.nodePosition)
+  }
+}
+
+function dragHandler (dragState) {
+  return function (evt) {
+    var _node = nodeAt(evt.position, dragState.node)
+    if (_node) {
+      if (_node !== dragState.hoverNode) {
+        dragState.hoverNode && dragState.unhover()
+        dragState.hoverNode = _node
+        dragState.hover()
+      }
+    } else {
+      if (dragState.hoverNode) {
+        dragState.unhover()
+        dragState.hoverNode = undefined
+      }
+    }
+    dragState.drag = true
   }
 }
 
@@ -228,6 +287,24 @@ function measureText(text) {
     width: box.clientWidth,
     height: box.clientHeight
   }
+}
+
+function nodeAt(pos, excludeNode) {
+  var foundNode
+  cy.nodes().forEach(node => {
+    if (node !== excludeNode && isInside(pos, node)) {
+      foundNode = node
+      return false  // abort iteration
+    }
+  })
+  return foundNode
+}
+
+function isInside(pos, node) {
+  var x = pos.x
+  var y = pos.y
+  var box = node.boundingBox()
+  return x > box.x1 && x < box.x2 && y > box.y1 && y < box.y2
 }
 
 function faGlyphPath (unicode) {
