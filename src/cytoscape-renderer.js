@@ -65,7 +65,10 @@ const actions = {
 
   syncTopicPosition (_, id) {
     console.log('syncTopicPosition', id)
-    cyElement(id).position(topicmap.getTopic(id).getPosition())
+    cyElement(id).animate({
+      position: topicmap.getTopic(id).getPosition(),
+      easing: 'ease-in-out-cubic'
+    })
   },
 
   // ---
@@ -184,7 +187,7 @@ function eventListeners (dispatch) {
 }
 
 /**
- * Maintains state for dragging a node and hovering another node.
+ * Maintains display state for dragging a node and hovering other nodes.
  */
 class DragState {
 
@@ -207,7 +210,11 @@ class DragState {
   }
 
   resetPosition () {
-    this.node.position(this.nodePosition)
+    this.node.animate({
+      position: this.nodePosition,
+      easing: 'ease-in-out-cubic',
+      duration: 200
+    })
   }
 }
 
@@ -294,7 +301,7 @@ function nodeAt(pos, excludeNode) {
   cy.nodes().forEach(node => {
     if (node !== excludeNode && isInside(pos, node)) {
       foundNode = node
-      return false  // abort iteration
+      return false    // abort iteration
     }
   })
   return foundNode
