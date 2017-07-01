@@ -37,6 +37,7 @@ const actions = {
   // sync renderer with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
+    console.log('syncTopicmap', _topicmap.id)
     topicmap = _topicmap
     eventListeners(dispatch)
     refreshTopicmap()
@@ -263,11 +264,6 @@ function initContextMenus () {
   })
 }
 
-// TODO: not used
-function renderIcon (ele) {
-  return ele.data('icon')
-}
-
 // TODO: memoization
 function renderNode (ele) {
   const label = ele.data('label')
@@ -328,7 +324,6 @@ function id (evt) {
 }
 
 function refreshTopicmap () {
-  console.log('refresh topicmap')
   const elems = []
   topicmap.forEachTopic(topic => {
     elems.push(cyNode(topic))
@@ -342,16 +337,16 @@ function refreshTopicmap () {
 /**
  * Builds a Cytoscape node from a DM ViewTopic.
  *
- * @param   topic   A DM ViewTopic
+ * @param   viewTopic   A DM ViewTopic
  */
-function cyNode (topic) {
+function cyNode (viewTopic) {
   return {
     data: {
-      id:    topic.id,
-      label: topic.value,
-      icon:  topic.getIcon()
+      id:    viewTopic.id,
+      label: viewTopic.value,
+      icon:  viewTopic.getIcon()
     },
-    position: topic.getPosition()
+    position: viewTopic.getPosition()
   }
 }
 
