@@ -272,14 +272,13 @@ function renderNode (ele) {
   const size = measureText(label)
   const width = size.width + 32
   const height = size.height + 8
-  const svg = `<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
       <rect x="0" y="0" width="${width}" height="${height}" fill="${backgroundColor}"></rect>
       <text x="26" y="${height - 7}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
       <path d="${iconPath}" fill="${iconColor}" transform="scale(0.009 -0.009) translate(600 -2000)"></path>
     </svg>`
   return {
-    svg: 'data:image/svg+xml;base64,' + btoa(svg),
+    svg: 'data:image/svg+xml,' + encodeURIComponent(svg),
     width, height
   }
 }
