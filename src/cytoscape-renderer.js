@@ -58,6 +58,11 @@ const actions = {
     cyElement(id).data('label', topicmap.getTopic(id).value)
   },
 
+  syncAssocLabel (_, id) {
+    console.log('syncAssocLabel', id)
+    cyElement(id).data('label', topicmap.getAssoc(id).value)
+  },
+
   syncSelect (_, id) {
     console.log('syncSelect', id)
     cy.elements(":selected").unselect()
