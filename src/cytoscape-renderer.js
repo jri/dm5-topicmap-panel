@@ -25,12 +25,11 @@ const backgroundColor = style.getPropertyValue('--background-color')
 var topicmap              // view model: the rendered topicmap (a Topicmap object)
 
 const cy = initialize()   // the Cytoscape instance
-var events = false        // tracks Cytoscape event listener registration, which is lazy
+var init = false          // tracks Cytoscape event listener registration and context menu initialization, which is lazy
 
 const box = document.getElementById('measurement-box')
 
 cxtmenu(cytoscape)        // register extension
-initContextMenus()
 
 const actions = {
 
@@ -38,8 +37,14 @@ const actions = {
 
   syncTopicmap ({dispatch}, _topicmap) {
     console.log('syncTopicmap', _topicmap.id)
+    // lazy initialization
+    if (!init) {
+      eventListeners(dispatch)
+      initContextMenus(dispatch)
+      init = true
+    }
+    //
     topicmap = _topicmap
-    eventListeners(dispatch)
     refreshTopicmap()
   },
 
@@ -150,46 +155,43 @@ function initialize() {
 
 // lazy registration of Cytoscape event listeners
 function eventListeners (dispatch) {
-  if (!events) {
-    cy.on('select', 'node', evt => {
-      dispatch('selectTopic', id(evt))
-    })
-    cy.on('select', 'edge', evt => {
-      dispatch('selectAssoc', id(evt))
-    })
-    cy.on('unselect', evt => {
-      dispatch('unselect', id(evt))
-    })
-    cy.on('tapstart', 'node', evt => {
-      const dragState = new DragState(evt.target)
-      cy.on('tapdrag', dragHandler(dragState))
-      cy.one('tapend', evt => {
-        cy.off('tapdrag')
-        if (dragState.hoverNode) {
-          dragState.unhover()
-          dragState.resetPosition()
-          dispatch('onTopicDroppedOntoTopic', {
-            topicId: dragState.node.id(),
-            droppedOntoTopicId: dragState.hoverNode.id()
-          })
-        } else if (dragState.drag) {
-          dispatch('onTopicDragged', {
-            id: Number(dragState.node.id()),
-            pos: dragState.node.position()
-          })
-        }
-      })
-    })
-    cy.on('cxttap', evt => {
-      if (evt.target === cy) {
-        dispatch('onBackgroundRightClick', {
-          model:  evt.position,
-          render: evt.renderedPosition
+  cy.on('select', 'node', evt => {
+    dispatch('selectTopic', id(evt))
+  })
+  cy.on('select', 'edge', evt => {
+    dispatch('selectAssoc', id(evt))
+  })
+  cy.on('unselect', evt => {
+    dispatch('unselect', id(evt))
+  })
+  cy.on('tapstart', 'node', evt => {
+    const dragState = new DragState(evt.target)
+    cy.on('tapdrag', dragHandler(dragState))
+    cy.one('tapend', evt => {
+      cy.off('tapdrag')
+      if (dragState.hoverNode) {
+        dragState.unhover()
+        dragState.resetPosition()
+        dispatch('onTopicDroppedOntoTopic', {
+          topicId: dragState.node.id(),
+          droppedOntoTopicId: dragState.hoverNode.id()
+        })
+      } else if (dragState.drag) {
+        dispatch('onTopicDragged', {
+          id: Number(dragState.node.id()),
+          pos: dragState.node.position()
         })
       }
     })
-    events = true
-  }
+  })
+  cy.on('cxttap', evt => {
+    if (evt.target === cy) {
+      dispatch('onBackgroundRightClick', {
+        model:  evt.position,
+        render: evt.renderedPosition
+      })
+    }
+  })
 }
 
 /**
@@ -243,13 +245,14 @@ function dragHandler (dragState) {
   }
 }
 
-function initContextMenus () {
+function initContextMenus (dispatch) {
   // TODO
   cy.cxtmenu({
     selector: 'node',
     commands: [
       {
-        content: 'Hide Topic'
+        content: 'Hide Topic',
+        select: hideTopic
       },
       {
         content: 'Delete Topic'
@@ -260,13 +263,27 @@ function initContextMenus () {
     selector: 'edge',
     commands: [
       {
-        content: 'Hide Association'
+        content: 'Hide Association',
+        select: hideAssoc
       },
       {
         content: 'Delete Association'
       }
     ]
   })
+
+  function hideTopic(ele) {
+    ele.connectedEdges().forEach(edge => {
+      dispatch('onHideAssoc', edge.id())
+    })
+    ele.remove()
+    dispatch('onHideTopic', ele.id())
+  }
+
+  function hideAssoc(ele) {
+    ele.remove()
+    dispatch('onHideAssoc', ele.id())
+  }
 }
 
 // TODO: memoization
@@ -330,7 +347,9 @@ function id (evt) {
 function refreshTopicmap () {
   const elems = []
   topicmap.forEachTopic(topic => {
-    elems.push(cyNode(topic))
+    if (topic.isVisible()) {
+      elems.push(cyNode(topic))
+    }
   })
   topicmap.forEachAssoc(assoc => {
     elems.push(cyEdge(assoc))
