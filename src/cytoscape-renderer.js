@@ -5,7 +5,7 @@ import dm5 from 'dm5'
 
 var faFont
 dm5.restClient.getXML(fa).then(svg => {
-  console.log('Font Awesome SVG loaded', svg)
+  // console.log('Font Awesome SVG loaded', svg)
   faFont = svg.querySelector('font')
 })
 
@@ -19,7 +19,7 @@ const backgroundColor = style.getPropertyValue('--background-color')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
-// We have to bind topicmap data to the Cytoscape graph model manually anyways.
+// We have to snyc topicmap data with the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
 var topicmap              // view model: the rendered topicmap (a Topicmap object)
@@ -82,11 +82,26 @@ const actions = {
     })
   },
 
+  syncTopicVisibility (_, id) {
+    console.log('syncTopicVisibility', id)
+    const viewTopic = topicmap.getTopic(id)
+    if (viewTopic.isVisible()) {
+      cy.add(cyNode(viewTopic))
+    } else {
+      cyElement(id).remove()
+    }
+  },
+
+  syncRemoveAssoc (_, id) {
+    console.log('syncRemoveAssoc', id)
+    cyElement(id).remove()
+  },
+
   // ---
 
   shutdownRenderer () {
-    // TODO
     console.log('Unregistering cxtmenu extension')
+    // TODO
   }
 }
 
@@ -104,7 +119,7 @@ function initialize() {
         selector: 'node',
         style: {
           'shape': 'rectangle',
-          'background-image': ele => renderNode(ele).svg,
+          'background-image': ele => renderNode(ele).url,
           'background-opacity': 0,
           'width':  ele => renderNode(ele).width,
           'height': ele => renderNode(ele).height,
@@ -246,7 +261,6 @@ function dragHandler (dragState) {
 }
 
 function initContextMenus (dispatch) {
-  // TODO
   cy.cxtmenu({
     selector: 'node',
     commands: [
@@ -256,6 +270,7 @@ function initContextMenus (dispatch) {
       },
       {
         content: 'Delete Topic'
+        // TODO
       }
     ]
   })
@@ -268,6 +283,7 @@ function initContextMenus (dispatch) {
       },
       {
         content: 'Delete Association'
+        // TODO
       }
     ]
   })
@@ -300,7 +316,7 @@ function renderNode (ele) {
       <path d="${iconPath}" fill="${iconColor}" transform="scale(0.009 -0.009) translate(600 -2000)"></path>
     </svg>`
   return {
-    svg: 'data:image/svg+xml,' + encodeURIComponent(svg),
+    url: 'data:image/svg+xml,' + encodeURIComponent(svg),
     width, height
   }
 }
@@ -346,9 +362,9 @@ function id (evt) {
 
 function refreshTopicmap () {
   const elems = []
-  topicmap.forEachTopic(topic => {
-    if (topic.isVisible()) {
-      elems.push(cyNode(topic))
+  topicmap.forEachTopic(viewTopic => {
+    if (viewTopic.isVisible()) {
+      elems.push(cyNode(viewTopic))
     }
   })
   topicmap.forEachAssoc(assoc => {
