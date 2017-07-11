@@ -171,13 +171,13 @@ function initialize() {
 // lazy registration of Cytoscape event listeners
 function eventListeners (dispatch) {
   cy.on('select', 'node', evt => {
-    dispatch('selectTopic', id(evt))
+    dispatch('selectTopic', id(evt.target))
   })
   cy.on('select', 'edge', evt => {
-    dispatch('selectAssoc', id(evt))
+    dispatch('selectAssoc', id(evt.target))
   })
   cy.on('unselect', evt => {
-    dispatch('unselect', id(evt))
+    dispatch('unselect', id(evt.target))
   })
   cy.on('tapstart', 'node', evt => {
     const dragState = new DragState(evt.target)
@@ -188,12 +188,12 @@ function eventListeners (dispatch) {
         dragState.unhover()
         dragState.resetPosition()
         dispatch('onTopicDroppedOntoTopic', {
-          topicId: dragState.node.id(),
-          droppedOntoTopicId: dragState.hoverNode.id()
+          topicId: dragState.node.id(),                   // FIXME: number ID?
+          droppedOntoTopicId: dragState.hoverNode.id()    // FIXME: number ID?
         })
       } else if (dragState.drag) {
         dispatch('onTopicDragged', {
-          id: Number(dragState.node.id()),
+          id: Number(dragState.node.id()),                // FIXME: number ID?
           pos: dragState.node.position()
         })
       }
@@ -290,12 +290,12 @@ function initContextMenus (dispatch) {
 
   function hideTopic(ele) {
     ele.remove()
-    dispatch('onHideTopic', ele.id())
+    dispatch('onHideTopic', id(ele))
   }
 
   function hideAssoc(ele) {
     ele.remove()
-    dispatch('onHideAssoc', ele.id())
+    dispatch('onHideAssoc', id(ele))
   }
 }
 
@@ -352,11 +352,6 @@ function faGlyphPath (unicode) {
   }
 }
 
-function id (evt) {
-  // Note: cytoscape element IDs are strings
-  return Number(evt.target.id())
-}
-
 function refreshTopicmap () {
   const elems = []
   topicmap.forEachTopic(viewTopic => {
@@ -409,4 +404,9 @@ function cyEdge (assoc) {
  */
 function cyElement(id) {
   return cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
+}
+
+function id (ele) {
+  // Note: cytoscape element IDs are strings
+  return Number(ele.id())
 }
