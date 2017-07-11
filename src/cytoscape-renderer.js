@@ -210,7 +210,7 @@ function eventListeners (dispatch) {
 }
 
 /**
- * Maintains display state for dragging a node and hovering other nodes.
+ * Maintains state for dragging a node and hovering other nodes.
  */
 class DragState {
 
@@ -289,9 +289,6 @@ function initContextMenus (dispatch) {
   })
 
   function hideTopic(ele) {
-    ele.connectedEdges().forEach(edge => {
-      dispatch('onHideAssoc', edge.id())
-    })
     ele.remove()
     dispatch('onHideTopic', ele.id())
   }
