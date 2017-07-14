@@ -269,8 +269,8 @@ function initContextMenus (dispatch) {
         select: hideTopic
       },
       {
-        content: 'Delete Topic'
-        // TODO
+        content: 'Delete Topic',
+        select: deleteTopic
       }
     ]
   })
@@ -282,8 +282,8 @@ function initContextMenus (dispatch) {
         select: hideAssoc
       },
       {
-        content: 'Delete Association'
-        // TODO
+        content: 'Delete Association',
+        select: deleteAssoc
       }
     ]
   })
@@ -296,6 +296,16 @@ function initContextMenus (dispatch) {
   function hideAssoc(ele) {
     ele.remove()
     dispatch('onHideAssoc', id(ele))
+  }
+
+  function deleteTopic(ele) {
+    ele.remove()
+    dispatch('onDeleteTopic', id(ele))
+  }
+
+  function deleteAssoc(ele) {
+    ele.remove()
+    dispatch('onDeleteAssoc', id(ele))
   }
 }
 
