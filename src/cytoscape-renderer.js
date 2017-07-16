@@ -92,6 +92,11 @@ const actions = {
     }
   },
 
+  syncRemoveTopic (_, id) {
+    console.log('syncRemoveTopic', id)
+    cyElement(id).remove()
+  },
+
   syncRemoveAssoc (_, id) {
     console.log('syncRemoveAssoc', id)
     cyElement(id).remove()
