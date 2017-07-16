@@ -33,7 +33,7 @@ cxtmenu(cytoscape)        // register extension
 
 const actions = {
 
-  // sync renderer with view model
+  // sync view with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
     console.log('syncTopicmap', _topicmap.id)
@@ -377,6 +377,7 @@ function refreshTopicmap () {
   topicmap.forEachAssoc(assoc => {
     elems.push(cyEdge(assoc))
   })
+  cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
 }
 
