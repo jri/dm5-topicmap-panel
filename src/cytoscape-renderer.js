@@ -3,13 +3,6 @@ import cxtmenu from 'cytoscape-cxtmenu'
 import fa from 'font-awesome/fonts/fontawesome-webfont.svg'
 import dm5 from 'dm5'
 
-var faFont
-dm5.restClient.getXML(fa).then(svg => {
-  // console.log('Font Awesome SVG loaded', svg)
-  faFont = svg.querySelector('font')
-})
-
-// settings
 // get style from CSS variables
 const style = window.getComputedStyle(document.body)
 const fontFamily      = style.getPropertyValue('--main-font-family')
@@ -24,14 +17,22 @@ const backgroundColor = style.getPropertyValue('--background-color')
 
 var topicmap              // view model: the rendered topicmap (a Topicmap object)
 
-const cy = initialize()   // the Cytoscape instance
+var faFont                // Font Awesome SVG <font> element
 var init = false          // tracks Cytoscape event listener registration and context menu initialization, which is lazy
 
+const cy = initialize()   // the Cytoscape instance
 const box = document.getElementById('measurement-box')
 
 cxtmenu(cytoscape)        // register extension
 
 const actions = {
+
+  initTopicmapRenderer () {
+    return dm5.restClient.getXML(fa).then(svg => {
+      console.log('### FA SVG ready!')
+      faFont = svg.querySelector('font')
+    })
+  },
 
   // sync view with view model
 
@@ -363,7 +364,7 @@ function faGlyphPath (unicode) {
   try {
     return faFont.querySelector(`glyph[unicode="${unicode}"]`).getAttribute('d')
   } catch (e) {
-    throw Error(`Glyph "${unicode}" not found`)
+    throw Error(`FA glyph "${unicode}" not available (${e})`)
   }
 }
 
