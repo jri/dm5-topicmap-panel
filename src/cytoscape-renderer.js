@@ -183,6 +183,7 @@ function eventListeners (dispatch) {
     dispatch('selectAssoc', id(evt.target))
   })
   cy.on('unselect', evt => {
+    console.log('unselect event', id(evt.target))
     dispatch('unselect', id(evt.target))
   })
   cy.on('tapstart', 'node', evt => {
@@ -296,22 +297,22 @@ function initContextMenus (dispatch) {
 
   function hideTopic(ele) {
     ele.remove()
-    dispatch('onHideTopic', id(ele))
+    dispatch('hideTopic', id(ele))
   }
 
   function hideAssoc(ele) {
     ele.remove()
-    dispatch('onHideAssoc', id(ele))
+    dispatch('hideAssoc', id(ele))
   }
 
   function deleteTopic(ele) {
     ele.remove()
-    dispatch('onDeleteTopic', id(ele))
+    dispatch('deleteTopic', id(ele))
   }
 
   function deleteAssoc(ele) {
     ele.remove()
-    dispatch('onDeleteAssoc', id(ele))
+    dispatch('deleteAssoc', id(ele))
   }
 }
 
