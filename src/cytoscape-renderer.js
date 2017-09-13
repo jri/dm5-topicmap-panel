@@ -23,16 +23,14 @@ var init = false          // tracks Cytoscape event listener registration and co
 const cy = initialize()   // the Cytoscape instance
 const box = document.getElementById('measurement-box')
 
+const svgReady = dm5.restClient.getXML(fa).then(svg => {
+  console.log('### SVG ready!')
+  faFont = svg.querySelector('font')
+})
+
 cxtmenu(cytoscape)        // register extension
 
 const actions = {
-
-  initTopicmapRenderer () {
-    return dm5.restClient.getXML(fa).then(svg => {
-      console.log('### FA SVG ready!')
-      faFont = svg.querySelector('font')
-    })
-  },
 
   // sync view with view model
 
@@ -46,7 +44,7 @@ const actions = {
     }
     //
     topicmap = _topicmap
-    refreshTopicmap()
+    svgReady.then(renderTopicmap)
   },
 
   syncAddTopic (_, id) {
@@ -183,7 +181,6 @@ function eventListeners (dispatch) {
     dispatch('selectAssoc', id(evt.target))
   })
   cy.on('unselect', evt => {
-    console.log('unselect event', id(evt.target))
     dispatch('unselect', id(evt.target))
   })
   cy.on('tapstart', 'node', evt => {
@@ -295,22 +292,22 @@ function initContextMenus (dispatch) {
     ]
   })
 
-  function hideTopic(ele) {
+  function hideTopic (ele) {
     ele.remove()
     dispatch('hideTopic', id(ele))
   }
 
-  function hideAssoc(ele) {
+  function hideAssoc (ele) {
     ele.remove()
     dispatch('hideAssoc', id(ele))
   }
 
-  function deleteTopic(ele) {
+  function deleteTopic (ele) {
     ele.remove()
     dispatch('deleteTopic', id(ele))
   }
 
-  function deleteAssoc(ele) {
+  function deleteAssoc (ele) {
     ele.remove()
     dispatch('deleteAssoc', id(ele))
   }
@@ -335,7 +332,7 @@ function renderNode (ele) {
   }
 }
 
-function measureText(text) {
+function measureText (text) {
   box.textContent = text
   return {
     width: box.clientWidth,
@@ -343,7 +340,7 @@ function measureText(text) {
   }
 }
 
-function nodeAt(pos, excludeNode) {
+function nodeAt (pos, excludeNode) {
   var foundNode
   cy.nodes().forEach(node => {
     if (node !== excludeNode && isInside(pos, node)) {
@@ -354,7 +351,7 @@ function nodeAt(pos, excludeNode) {
   return foundNode
 }
 
-function isInside(pos, node) {
+function isInside (pos, node) {
   var x = pos.x
   var y = pos.y
   var box = node.boundingBox()
@@ -369,7 +366,7 @@ function faGlyphPath (unicode) {
   }
 }
 
-function refreshTopicmap () {
+function renderTopicmap () {
   const elems = []
   topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
@@ -419,8 +416,10 @@ function cyEdge (assoc) {
  * Gets the Cytoscape element with the given ID.
  *
  * @param   id    a DM object id (number)
+ *
+ * @return  A collection of 1 or 0 elements.
  */
-function cyElement(id) {
+function cyElement (id) {
   return cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
 }
 
