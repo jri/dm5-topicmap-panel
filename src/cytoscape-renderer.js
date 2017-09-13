@@ -23,16 +23,14 @@ var init = false          // tracks Cytoscape event listener registration and co
 const cy = initialize()   // the Cytoscape instance
 const box = document.getElementById('measurement-box')
 
+const loadSVG = dm5.restClient.getXML(fa).then(svg => {
+  console.log('### SVG ready!')
+  faFont = svg.querySelector('font')
+})
+
 cxtmenu(cytoscape)        // register extension
 
 const actions = {
-
-  initTopicmapRenderer () {
-    return dm5.restClient.getXML(fa).then(svg => {
-      console.log('### FA SVG ready!')
-      faFont = svg.querySelector('font')
-    })
-  },
 
   // sync view with view model
 
@@ -46,7 +44,7 @@ const actions = {
     }
     //
     topicmap = _topicmap
-    refreshTopicmap()
+    loadSVG.then(renderTopicmap)
   },
 
   syncAddTopic (_, id) {
@@ -183,7 +181,6 @@ function eventListeners (dispatch) {
     dispatch('selectAssoc', id(evt.target))
   })
   cy.on('unselect', evt => {
-    console.log('unselect event', id(evt.target))
     dispatch('unselect', id(evt.target))
   })
   cy.on('tapstart', 'node', evt => {
