@@ -181,7 +181,7 @@ function eventListeners (dispatch) {
     dispatch('selectAssoc', id(evt.target))
   })
   cy.on('unselect', evt => {
-    dispatch('unselect', id(evt.target))
+    dispatch('unselectIf', id(evt.target))
   })
   cy.on('tapstart', 'node', evt => {
     const dragState = new DragState(evt.target)
