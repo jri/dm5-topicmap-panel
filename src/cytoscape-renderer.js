@@ -44,7 +44,9 @@ const actions = {
     }
     //
     topicmap = _topicmap
-    svgReady.then(renderTopicmap)
+    return new Promise((resolve, reject) => {
+      svgReady.then(renderTopicmap).then(resolve)
+    })
   },
 
   syncAddTopic (_, id) {
@@ -68,7 +70,7 @@ const actions = {
   },
 
   syncSelect (_, id) {
-    console.log('syncSelect', id)
+    console.log('syncSelect', id, cyElement(id).length)
     cy.elements(":selected").unselect()
     cyElement(id).select()
   },
@@ -174,14 +176,27 @@ function initialize() {
 
 // lazy registration of Cytoscape event listeners
 function eventListeners (dispatch) {
-  cy.on('select', 'node', evt => {
+  cy.on('tap', 'node', evt => {
+    console.log('"tap node" event!', id(evt.target))
     dispatch('selectTopic', id(evt.target))
   })
-  cy.on('select', 'edge', evt => {
+  cy.on('tap', 'edge', evt => {
+    console.log('"tap edge" event!', id(evt.target))
     dispatch('selectAssoc', id(evt.target))
   })
-  cy.on('unselect', evt => {
-    dispatch('unselectIf', id(evt.target))
+  cy.on('tap', evt => {
+    if (evt.target === cy) {
+      console.log('"tap background" event!')
+      dispatch('onBackgroundClick')
+    }
+  })
+  cy.on('cxttap', evt => {
+    if (evt.target === cy) {
+      dispatch('onBackgroundRightClick', {
+        model:  evt.position,
+        render: evt.renderedPosition
+      })
+    }
   })
   cy.on('tapstart', 'node', evt => {
     const dragState = new DragState(evt.target)
@@ -202,14 +217,6 @@ function eventListeners (dispatch) {
         })
       }
     })
-  })
-  cy.on('cxttap', evt => {
-    if (evt.target === cy) {
-      dispatch('onBackgroundRightClick', {
-        model:  evt.position,
-        render: evt.renderedPosition
-      })
-    }
   })
 }
 
@@ -378,6 +385,7 @@ function renderTopicmap () {
   })
   cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
+  console.log('### Topicmap rendering complete!')
 }
 
 /**
