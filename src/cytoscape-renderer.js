@@ -44,7 +44,7 @@ const actions = {
     }
     //
     topicmap = _topicmap
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       svgReady.then(renderTopicmap).then(resolve)
     })
   },
