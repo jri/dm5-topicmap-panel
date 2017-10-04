@@ -182,8 +182,13 @@ function initialize() {
 // lazy registration of Cytoscape event listeners
 function eventListeners (dispatch) {
   cy.on('tap', 'node', evt => {
-    console.log('"tap node" event!', id(evt.target))
-    dispatch('selectTopic', id(evt.target))
+    const clicks = evt.originalEvent.detail
+    console.log('"tap node" event!', id(evt.target), clicks)
+    if (clicks === 1) {
+      dispatch('selectTopic', id(evt.target))
+    } else if (clicks === 2) {
+      dispatch('onTopicDoubleClick', evt.target.data('viewTopic'))
+    }
   })
   cy.on('tap', 'edge', evt => {
     console.log('"tap edge" event!', id(evt.target))
@@ -394,25 +399,26 @@ function renderTopicmap () {
 }
 
 /**
- * Builds a Cytoscape node from a DM ViewTopic.
+ * Builds a Cytoscape node from a dm5.ViewTopic
  *
- * @param   viewTopic   A DM ViewTopic
+ * @param   viewTopic   A dm5.ViewTopic
  */
 function cyNode (viewTopic) {
   return {
     data: {
       id:    viewTopic.id,
       label: viewTopic.value,
-      icon:  viewTopic.getIcon()
+      icon:  viewTopic.getIcon(),
+      viewTopic
     },
     position: viewTopic.getPosition()
   }
 }
 
 /**
- * Builds a Cytoscape edge from a DM Assoc.
+ * Builds a Cytoscape edge from a dm5.Assoc
  *
- * @param   assoc   A DM Assoc
+ * @param   assoc   A dm5.Assoc
  */
 function cyEdge (assoc) {
   return {
