@@ -49,6 +49,13 @@ const actions = {
     })
   },
 
+  syncStyles (_, assocTypeColors) {
+    console.log('syncStyles', assocTypeColors)
+    for (const typeUri in assocTypeColors) {
+      cy.style().selector(`edge[typeUri='${typeUri}']`).style({'line-color': assocTypeColors[typeUri]})
+    }
+  },
+
   syncAddTopic (_, id) {
     console.log('syncAddTopic', id)
     cy.add(cyNode(topicmap.getTopic(id)))
@@ -423,10 +430,11 @@ function cyNode (viewTopic) {
 function cyEdge (assoc) {
   return {
     data: {
-      id:     assoc.id,
-      label:  assoc.value,
-      source: assoc.role1.topicId,
-      target: assoc.role2.topicId
+      id:      assoc.id,
+      typeUri: assoc.typeUri,
+      label:   assoc.value,
+      source:  assoc.role1.topicId,
+      target:  assoc.role2.topicId
     }
   }
 }
