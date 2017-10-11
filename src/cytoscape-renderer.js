@@ -66,14 +66,18 @@ const actions = {
     cy.add(cyEdge(topicmap.getAssoc(id)))
   },
 
-  syncTopicLabel (_, id) {
-    console.log('syncTopicLabel', id)
+  syncTopic (_, id) {
+    console.log('syncTopic', id)
     cyElement(id).data('label', topicmap.getTopic(id).value)
   },
 
-  syncAssocLabel (_, id) {
-    console.log('syncAssocLabel', id)
-    cyElement(id).data('label', topicmap.getAssoc(id).value)
+  syncAssoc (_, id) {
+    console.log('syncAssoc', id)
+    const assoc = topicmap.getAssoc(id)
+    cyElement(id).data({
+      typeUri: assoc.typeUri,
+      label:   assoc.value
+    })
   },
 
   syncSelect ({dispatch}, id) {
