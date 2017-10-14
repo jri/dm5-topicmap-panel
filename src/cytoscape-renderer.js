@@ -170,16 +170,16 @@ function initialize() {
         }
       },
       {
+        selector: 'edge:selected',
+        style: {
+          'width': 6
+        }
+      },
+      {
         selector: 'node.hover',
         style: {
           'border-color': '#36a',
           'border-opacity': 1
-        }
-      },
-      {
-        selector: 'edge:selected',
-        style: {
-          'line-color': 'red'
         }
       }
     ],
