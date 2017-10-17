@@ -63,7 +63,10 @@ const actions = {
 
   syncAddAssoc (_, id) {
     console.log('syncAddAssoc', id)
-    cy.add(cyEdge(topicmap.getAssoc(id)))
+    const assoc = topicmap.getAssoc(id)
+    if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
+      cy.add(cyEdge(assoc))
+    }
   },
 
   syncTopic (_, id) {
@@ -402,7 +405,9 @@ function renderTopicmap () {
     }
   })
   topicmap.forEachAssoc(assoc => {
-    elems.push(cyEdge(assoc))
+    if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
+      elems.push(cyEdge(assoc))
+    }
   })
   cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
