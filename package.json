@@ -9,7 +9,7 @@
     "url": "https://github.com/jri/dm5-topicmap-panel.git"
   },
   "dependencies": {
-    "cytoscape": "^3.2.3",
+    "cytoscape": "^3.2.7",
     "cytoscape-cxtmenu": "^2.10.3"
   }
 }

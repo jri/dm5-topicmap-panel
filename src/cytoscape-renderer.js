@@ -5,10 +5,12 @@ import dm5 from 'dm5'
 
 // get style from CSS variables
 const style = window.getComputedStyle(document.body)
-const fontFamily      = style.getPropertyValue('--main-font-family')
-const mainFontSize    = style.getPropertyValue('--main-font-size')
-const labelFontSize   = style.getPropertyValue('--label-font-size')
-const backgroundColor = style.getPropertyValue('--background-color')
+const fontFamily       = style.getPropertyValue('--main-font-family')
+const mainFontSize     = style.getPropertyValue('--main-font-size')
+const labelFontSize    = style.getPropertyValue('--label-font-size')
+const iconColor        = style.getPropertyValue('--color-topic-icon')
+const hoverBorderColor = style.getPropertyValue('--color-topic-hover')
+const backgroundColor  = style.getPropertyValue('--background-color')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
@@ -24,7 +26,7 @@ const cy = initialize()   // the Cytoscape instance
 const box = document.getElementById('measurement-box')
 
 const svgReady = dm5.restClient.getXML(fa).then(svg => {
-  console.log('### SVG ready!')
+  // console.log('### SVG ready!')
   faFont = svg.querySelector('font')
 })
 
@@ -35,7 +37,7 @@ const actions = {
   // sync view with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
-    console.log('syncTopicmap', _topicmap.id)
+    // console.log('syncTopicmap', _topicmap.id)
     // lazy initialization
     if (!init) {
       eventListeners(dispatch)
@@ -50,7 +52,7 @@ const actions = {
   },
 
   syncStyles (_, assocTypeColors) {
-    console.log('syncStyles', assocTypeColors)
+    // console.log('syncStyles', assocTypeColors)
     for (const typeUri in assocTypeColors) {
       cy.style().selector(`edge[typeUri='${typeUri}']`).style({'line-color': assocTypeColors[typeUri]})
     }
@@ -70,12 +72,12 @@ const actions = {
   },
 
   syncTopic (_, id) {
-    console.log('syncTopic', id)
+    // console.log('syncTopic', id)
     cyElement(id).data('label', topicmap.getTopic(id).value)
   },
 
   syncAssoc (_, id) {
-    console.log('syncAssoc', id)
+    // console.log('syncAssoc', id)
     const assoc = topicmap.getAssoc(id)
     cyElement(id).data({
       typeUri: assoc.typeUri,
@@ -85,12 +87,12 @@ const actions = {
 
   syncSelect ({dispatch}, id) {
     dispatch('syncUnselect')
-    console.log('syncSelect', id, cyElement(id).length)
+    // console.log('syncSelect', id, cyElement(id).length)
     cyElement(id).select()
   },
 
   syncUnselect (_, id) {
-    console.log('syncUnselect')
+    // console.log('syncUnselect')
     cy.elements(":selected").unselect()
   },
 
@@ -181,7 +183,7 @@ function initialize() {
       {
         selector: 'node.hover',
         style: {
-          'border-color': '#36a',
+          'border-color': hoverBorderColor,
           'border-opacity': 1
         }
       }
@@ -197,7 +199,7 @@ function initialize() {
 function eventListeners (dispatch) {
   cy.on('tap', 'node', evt => {
     const clicks = evt.originalEvent.detail
-    console.log('"tap node" event!', id(evt.target), clicks)
+    // console.log('"tap node" event!', id(evt.target), clicks)
     if (clicks === 1) {
       dispatch('selectTopic', id(evt.target))
     } else if (clicks === 2) {
@@ -205,12 +207,12 @@ function eventListeners (dispatch) {
     }
   })
   cy.on('tap', 'edge', evt => {
-    console.log('"tap edge" event!', id(evt.target))
+    // console.log('"tap edge" event!', id(evt.target))
     dispatch('selectAssoc', id(evt.target))
   })
   cy.on('tap', evt => {
     if (evt.target === cy) {
-      console.log('"tap background" event!')
+      // console.log('"tap background" event!')
       dispatch('onBackgroundClick')
     }
   })
@@ -348,7 +350,6 @@ function initContextMenus (dispatch) {
 function renderNode (ele) {
   const label = ele.data('label')
   const iconPath = faGlyphPath(ele.data('icon'))
-  const iconColor = '#36a'
   const size = measureText(label)
   const width = size.width + 32
   const height = size.height + 8
@@ -411,7 +412,7 @@ function renderTopicmap () {
   })
   cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
-  console.log('### Topicmap rendering complete!')
+  // console.log('### Topicmap rendering complete!')
 }
 
 /**
