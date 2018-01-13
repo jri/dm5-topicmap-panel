@@ -59,12 +59,12 @@ const actions = {
   },
 
   syncAddTopic (_, id) {
-    console.log('syncAddTopic', id)
+    // console.log('syncAddTopic', id)
     cy.add(cyNode(topicmap.getTopic(id)))
   },
 
   syncAddAssoc (_, id) {
-    console.log('syncAddAssoc', id)
+    // console.log('syncAddAssoc', id)
     const assoc = topicmap.getAssoc(id)
     if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
       cy.add(cyEdge(assoc))

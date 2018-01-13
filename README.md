@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.7** -- Jan 13, 2018
+
+* Topic colors customizable via CSS vars
+
 **0.6** -- Oct 19, 2017
 
 * Colored associations
@@ -22,4 +26,4 @@
 
 ------------
 Jörg Richter  
-Oct 19, 2017
+Jan 13, 2018
