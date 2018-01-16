@@ -91,7 +91,7 @@ const actions = {
     cyElement(id).select()
   },
 
-  syncUnselect (_, id) {
+  syncUnselect () {
     // console.log('syncUnselect')
     cy.elements(":selected").unselect()
   },
