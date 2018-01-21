@@ -112,11 +112,23 @@ const actions = {
     dispatch('syncUnselect')
     // console.log('syncSelect', id, cyElement(id).length)
     cyElement(id).select()
+    //
+    if (AUTO_LAYOUT) {
+      // createLayout()
+      layout.run()
+    }
   },
 
-  syncUnselect () {
-    // console.log('syncUnselect')
+  syncUnselect ({dispatch}) {
+    console.log('syncUnselect')
     cy.elements(":selected").unselect()
+    //
+    if (AUTO_LAYOUT) {
+      // restore original positions
+      topicmap.forEachTopic(viewTopic => {
+        dispatch('syncTopicPosition', viewTopic.id)
+      })
+    }
   },
 
   syncTopicPosition (_, id) {
@@ -194,7 +206,9 @@ function initialize() {
         selector: 'node:selected',
         style: {
           'border-color': 'red',
-          'border-opacity': 1
+          'border-opacity': 1,
+          'width': 250,   // TODO: calculate reasonable size
+          'height': 150
         }
       },
       {
