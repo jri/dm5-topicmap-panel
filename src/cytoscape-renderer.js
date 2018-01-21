@@ -1,4 +1,5 @@
 import cytoscape from 'cytoscape'
+import coseBilkent from 'cytoscape-cose-bilkent'
 import cxtmenu from 'cytoscape-cxtmenu'
 import fa from 'font-awesome/fonts/fontawesome-webfont.svg'
 import dm5 from 'dm5'
@@ -30,14 +31,36 @@ const svgReady = dm5.restClient.getXML(fa).then(svg => {
   faFont = svg.querySelector('font')
 })
 
-cxtmenu(cytoscape)        // register extension
+// register extensions
+cytoscape.use(coseBilkent)
+cytoscape.use(cxtmenu)
+
+const AUTO_LAYOUT = true
+
+var layout
+
+function createLayout() {
+  layout = cy.layout({
+    name: 'cose-bilkent',
+    // animate: 'end',
+    // animationDuration: 2000,
+    fit: false,
+    randomize: false,
+    nodeRepulsion: 1000,
+    idealEdgeLength: 0,
+    edgeElasticity: 0,
+    stop () {
+      console.log('layout stop')
+    }
+  })
+}
 
 const actions = {
 
   // sync view with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
-    // console.log('syncTopicmap', _topicmap.id)
+    console.log('syncTopicmap', _topicmap.id)
     // lazy initialization
     if (!init) {
       eventListeners(dispatch)
@@ -127,7 +150,7 @@ const actions = {
   // ---
 
   shutdownRenderer () {
-    console.log('Unregistering cxtmenu extension')
+    // console.log('Unregistering cxtmenu extension')
     // TODO
   }
 }
@@ -241,6 +264,10 @@ function eventListeners (dispatch) {
           id: Number(dragState.node.id()),                // FIXME: number ID?
           pos: dragState.node.position()
         })
+        if (AUTO_LAYOUT) {
+          // createLayout()
+          layout.run()
+        }
       }
     })
   })
@@ -412,6 +439,11 @@ function renderTopicmap () {
   })
   cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
+  //
+  if (AUTO_LAYOUT) {
+    createLayout()
+    layout.run()
+  }
   // console.log('### Topicmap rendering complete!')
 }
 
