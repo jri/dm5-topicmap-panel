@@ -46,12 +46,12 @@ function createLayout() {
     // animationDuration: 2000,
     fit: false,
     randomize: false,
-    nodeRepulsion: 500,
+    nodeRepulsion: 1000,
     idealEdgeLength: 0,
     edgeElasticity: 0,
     tile: false,
     stop () {
-      console.log('layout stop')
+      // console.log('layout stop')
     }
   })
 }
@@ -118,12 +118,22 @@ const actions = {
     })
   },
 
-  syncSelect (_, id) {
+  /**
+   * @param   selection   {
+   *                        type: "topic"|"assoc"
+   *                        id: topicId|assocId
+   *                      }
+   */
+  syncSelect (_, selection) {
     // TODO: is syncUnselect still required? Also if AUTO_LAYOUT is not set?
     _syncUnselect().then(() => {
       // console.log('syncSelect', id, cyElement(id).length)
-      state.selectedTopic = topicmap.getTopic(id)   // update state
-      cyElement(id).select()                        // sync view
+      // update state
+      if (selection.type === 'topic') {
+        state.selectedTopic = topicmap.getTopic(selection.id)
+      }
+      // sync view
+      cyElement(selection.id).select()
       //
       if (AUTO_LAYOUT) {
         // createLayout()
