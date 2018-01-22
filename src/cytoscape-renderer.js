@@ -13,18 +13,18 @@ const iconColor        = style.getPropertyValue('--color-topic-icon')
 const hoverBorderColor = style.getPropertyValue('--color-topic-hover')
 const backgroundColor  = style.getPropertyValue('--background-color')
 
-// Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
+// Note: the topicmap is not vuex state. (This store module provides no state at all, only actions. ### FIXDOC)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
 // We have to snyc topicmap data with the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
-var topicmap              // view model: the rendered topicmap (a Topicmap object)
+var topicmap              // view model: the rendered topicmap (a dm5.Topicmap object)
+
+var cy                    // the Cytoscape instance
+var box                   // the measurement box
 
 var faFont                // Font Awesome SVG <font> element
 var init = false          // tracks Cytoscape event listener registration and context menu initialization, which is lazy
-
-const cy = initialize()   // the Cytoscape instance
-const box = document.getElementById('measurement-box')
 
 const svgReady = dm5.restClient.getXML(fa).then(svg => {
   // console.log('### SVG ready!')
@@ -49,13 +49,23 @@ function createLayout() {
     nodeRepulsion: 1000,
     idealEdgeLength: 0,
     edgeElasticity: 0,
+    tile: false,
     stop () {
       console.log('layout stop')
     }
   })
 }
 
+const state = {
+  selectedTopic: undefined    // a dm5.ViewTopic
+}
+
 const actions = {
+
+  initCytoscape () {
+    cy = initialize()
+    box = document.getElementById('measurement-box')
+  },
 
   // sync view with view model
 
@@ -111,7 +121,8 @@ const actions = {
   syncSelect ({dispatch}, id) {
     dispatch('syncUnselect')
     // console.log('syncSelect', id, cyElement(id).length)
-    cyElement(id).select()
+    state.selectedTopic = topicmap.getTopic(id)   // update state
+    cyElement(id).select()                        // sync view
     //
     if (AUTO_LAYOUT) {
       // createLayout()
@@ -121,7 +132,8 @@ const actions = {
 
   syncUnselect ({dispatch}) {
     console.log('syncUnselect')
-    cy.elements(":selected").unselect()
+    state.selectedTopic = undefined               // update state
+    cy.elements(":selected").unselect()           // sync view
     //
     if (AUTO_LAYOUT) {
       // restore original positions
@@ -168,6 +180,7 @@ const actions = {
 }
 
 export default {
+  state,
   actions
 }
 
