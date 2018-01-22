@@ -46,7 +46,7 @@ function createLayout() {
     // animationDuration: 2000,
     fit: false,
     randomize: false,
-    nodeRepulsion: 1000,
+    nodeRepulsion: 500,
     idealEdgeLength: 0,
     edgeElasticity: 0,
     tile: false,
@@ -118,37 +118,28 @@ const actions = {
     })
   },
 
-  syncSelect ({dispatch}, id) {
-    dispatch('syncUnselect')
-    // console.log('syncSelect', id, cyElement(id).length)
-    state.selectedTopic = topicmap.getTopic(id)   // update state
-    cyElement(id).select()                        // sync view
-    //
-    if (AUTO_LAYOUT) {
-      // createLayout()
-      layout.run()
-    }
+  syncSelect (_, id) {
+    // TODO: is syncUnselect still required? Also if AUTO_LAYOUT is not set?
+    _syncUnselect().then(() => {
+      // console.log('syncSelect', id, cyElement(id).length)
+      state.selectedTopic = topicmap.getTopic(id)   // update state
+      cyElement(id).select()                        // sync view
+      //
+      if (AUTO_LAYOUT) {
+        // createLayout()
+        layout.run()
+      }
+    })
   },
 
-  syncUnselect ({dispatch}) {
+  syncUnselect () {
     console.log('syncUnselect')
-    state.selectedTopic = undefined               // update state
-    cy.elements(":selected").unselect()           // sync view
-    //
-    if (AUTO_LAYOUT) {
-      // restore original positions
-      topicmap.forEachTopic(viewTopic => {
-        dispatch('syncTopicPosition', viewTopic.id)
-      })
-    }
+    _syncUnselect()
   },
 
   syncTopicPosition (_, id) {
     console.log('syncTopicPosition', id)
-    cyElement(id).animate({
-      position: topicmap.getTopic(id).getPosition(),
-      easing: 'ease-in-out-cubic'
-    })
+    _syncTopicPosition(id)
   },
 
   syncTopicVisibility (_, id) {
@@ -220,7 +211,7 @@ function initialize() {
         style: {
           'border-color': 'red',
           'border-opacity': 1,
-          'width': 250,   // TODO: calculate reasonable size
+          'width': 250,   // TODO: calculate reasonable size, only if AUTO_LAYOUT
           'height': 150
         }
       },
@@ -472,6 +463,38 @@ function renderTopicmap () {
     layout.run()
   }
   // console.log('### Topicmap rendering complete!')
+}
+
+/**
+ * @return  a promise that is resolved once the animation is complete.
+ */
+function restoreTopicPositions () {
+  const promises = []
+  topicmap.forEachTopic(viewTopic => {
+    if (viewTopic.isVisible()) {
+      promises.push(_syncTopicPosition(viewTopic.id))
+    }
+  })
+  return Promise.all(promises)
+}
+
+/**
+ * @return  a promise that is resolved once the animation is complete.
+ */
+function _syncTopicPosition (id) {
+  return cyElement(id).animation({
+    position: topicmap.getTopic(id).getPosition(),
+    easing: 'ease-in-out-cubic'
+  }).play().promise()
+}
+
+function _syncUnselect () {
+  state.selectedTopic = undefined               // update state
+  cy.elements(":selected").unselect()           // sync view
+  //
+  if (AUTO_LAYOUT) {
+    return restoreTopicPositions()
+  }
 }
 
 /**
