@@ -40,7 +40,7 @@ cytoscape.use(cxtmenu)
 //
 
 const state = {
-  selectedTopic: undefined    // a dm5.ViewTopic
+  ele: undefined          // a Cytoscape element (node or edge)
 }
 
 const actions = {
@@ -101,25 +101,21 @@ const actions = {
     })
   },
 
-  /**
-   * @param   selection   {
-   *                        type: "topic"|"assoc"
-   *                        id: topicId|assocId
-   *                      }
-   */
-  syncSelect (_, selection) {
-    // TODO: is syncUnselect still required? Also if FISHEYE is not set?
+  syncSelect (_, id) {
+    // console.log('syncSelect', id, cyElement(id).length)
+    // Note: programmatic unselect() is required for browser history navigation.
+    // When interactively selecting a node Cytoscape removes the current selection before.
+    // When progrmmatically selecting a node Cytoscape does *not* remove the current selection.
     _syncUnselect().then(() => {
-      // console.log('syncSelect', id, cyElement(id).length)
       // update state
-      if (selection.type === 'topic') {
-        state.selectedTopic = topicmap.getTopic(selection.id)
-      }
+      state.ele = cyElement(id)
       // sync view
-      const node = cyElement(selection.id).select()
+      // Note: select() is needed to restore selection after switching topicmap.
+      state.ele.select()
       //
-      if (FISHEYE) {
-        fisheyeAnimation(node)
+      if (state.ele.isNode() && FISHEYE) {
+        state.ele.style({width: 250, height: 150})    // TODO: calculate size
+        fisheyeAnimation(state.ele)
       }
     })
   },
@@ -202,9 +198,7 @@ function initialize() {
         selector: 'node:selected',
         style: {
           'border-color': 'red',
-          'border-opacity': 1,
-          'width': 250,   // TODO: calculate reasonable size, only if FISHEYE
-          'height': 150
+          'border-opacity': 1
         }
       },
       {
@@ -380,11 +374,13 @@ function initContextMenus (dispatch) {
 }
 
 function fisheyeAnimation(node) {
-  node.lock()
+  // Note: node locking diminishes layout quality.
+  // TODO: remove locking? Adjusting the position of the topic details DOM is required then.
+  // node.lock()
   cy.layout({
     name: 'cose-bilkent',
     stop () {
-      node.unlock()
+      // node.unlock()
     },
     // animate: 'end',
     // animationDuration: 2000,
@@ -490,12 +486,25 @@ function _syncTopicPosition (id) {
 }
 
 function _syncUnselect () {
-  state.selectedTopic = undefined               // update state
-  cy.elements(":selected").unselect()           // sync view
-  //
-  if (FISHEYE) {
-    return restoreTopicPositions()
+  const ele = state.ele
+  console.log('_syncUnselect', ele)
+  if (ele) {
+    // update state
+    state.ele = undefined
+    //
+    // sync view
+    // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
+    // In this situation cy.elements(":selected") would return a non-empty collection.
+    // Note: when the user clicks on the background Cytoscape unselects the selected element by default.
+    // Calling cy.elements(":selected") afterwards would return an empty collection.
+    ele.unselect()
+    //
+    if (ele.isNode() && FISHEYE) {
+      ele.style({width: '', height: ''})
+      return restoreTopicPositions()
+    }
   }
+  return Promise.resolve()
 }
 
 /**

@@ -1,5 +1,5 @@
 <template>
-  <div class="dm5-topic-detail" v-if="topic" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
+  <div class="dm5-topic-detail" v-if="node" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
     <dm5-object-renderer></dm5-object-renderer>
   </div>
 </template>
@@ -9,12 +9,16 @@ export default {
 
   computed: {
 
-    topic () {
-      return this.$store.state.cytoscapeRenderer.selectedTopic
+    ele () {
+      return this.$store.state.cytoscapeRenderer.ele
+    },
+
+    node () {
+      return this.ele && this.ele.isNode() && this.ele
     },
 
     pos () {
-      const pos = this.topic.getPosition()
+      const pos = this.node.position()
       return {
         x: pos.x - this.size.width / 2,
         y: pos.y - this.size.height / 2
