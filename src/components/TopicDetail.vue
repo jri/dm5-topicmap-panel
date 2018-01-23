@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-topic-detail" v-if="topic" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
-    {{topic.id}}
+    <dm5-object-renderer></dm5-object-renderer>
   </div>
 </template>
 
@@ -24,6 +24,10 @@ export default {
     size () {
       return {width: 250, height: 150}    // TODO
     }
+  },
+
+  components: {
+    'dm5-object-renderer': require('dm5-object-renderer')
   }
 }
 </script>

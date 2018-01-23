@@ -1,3 +1,5 @@
+const FISHEYE = true
+
 import cytoscape from 'cytoscape'
 import coseBilkent from 'cytoscape-cose-bilkent'
 import cxtmenu from 'cytoscape-cxtmenu'
@@ -35,26 +37,7 @@ const svgReady = dm5.restClient.getXML(fa).then(svg => {
 cytoscape.use(coseBilkent)
 cytoscape.use(cxtmenu)
 
-const AUTO_LAYOUT = true
-
-var layout
-
-function createLayout() {
-  layout = cy.layout({
-    name: 'cose-bilkent',
-    // animate: 'end',
-    // animationDuration: 2000,
-    fit: false,
-    randomize: false,
-    nodeRepulsion: 1000,
-    idealEdgeLength: 0,
-    edgeElasticity: 0,
-    tile: false,
-    stop () {
-      // console.log('layout stop')
-    }
-  })
-}
+//
 
 const state = {
   selectedTopic: undefined    // a dm5.ViewTopic
@@ -125,7 +108,7 @@ const actions = {
    *                      }
    */
   syncSelect (_, selection) {
-    // TODO: is syncUnselect still required? Also if AUTO_LAYOUT is not set?
+    // TODO: is syncUnselect still required? Also if FISHEYE is not set?
     _syncUnselect().then(() => {
       // console.log('syncSelect', id, cyElement(id).length)
       // update state
@@ -133,11 +116,10 @@ const actions = {
         state.selectedTopic = topicmap.getTopic(selection.id)
       }
       // sync view
-      cyElement(selection.id).select()
+      const node = cyElement(selection.id).select()
       //
-      if (AUTO_LAYOUT) {
-        // createLayout()
-        layout.run()
+      if (FISHEYE) {
+        fisheyeAnimation(node)
       }
     })
   },
@@ -221,7 +203,7 @@ function initialize() {
         style: {
           'border-color': 'red',
           'border-opacity': 1,
-          'width': 250,   // TODO: calculate reasonable size, only if AUTO_LAYOUT
+          'width': 250,   // TODO: calculate reasonable size, only if FISHEYE
           'height': 150
         }
       },
@@ -292,10 +274,6 @@ function eventListeners (dispatch) {
           id: Number(dragState.node.id()),                // FIXME: number ID?
           pos: dragState.node.position()
         })
-        if (AUTO_LAYOUT) {
-          // createLayout()
-          layout.run()
-        }
       }
     })
   })
@@ -401,6 +379,24 @@ function initContextMenus (dispatch) {
   }
 }
 
+function fisheyeAnimation(node) {
+  node.lock()
+  cy.layout({
+    name: 'cose-bilkent',
+    stop () {
+      node.unlock()
+    },
+    // animate: 'end',
+    // animationDuration: 2000,
+    fit: false,
+    randomize: false,
+    nodeRepulsion: 1000,
+    idealEdgeLength: 0,
+    edgeElasticity: 0,
+    tile: false
+  }).run()
+}
+
 // TODO: memoization
 function renderNode (ele) {
   const label = ele.data('label')
@@ -467,11 +463,6 @@ function renderTopicmap () {
   })
   cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
-  //
-  if (AUTO_LAYOUT) {
-    createLayout()
-    layout.run()
-  }
   // console.log('### Topicmap rendering complete!')
 }
 
@@ -502,7 +493,7 @@ function _syncUnselect () {
   state.selectedTopic = undefined               // update state
   cy.elements(":selected").unselect()           // sync view
   //
-  if (AUTO_LAYOUT) {
+  if (FISHEYE) {
     return restoreTopicPositions()
   }
 }
