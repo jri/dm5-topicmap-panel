@@ -1,6 +1,8 @@
 <template>
-  <dm5-object-renderer class="dm5-topic-detail" v-if="node" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
-  </dm5-object-renderer>
+  <div class="dm5-topic-detail" v-if="node" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
+    <h3>{{title}}</h3>
+    <dm5-object-renderer></dm5-object-renderer>
+  </div>
 </template>
 
 <script>
@@ -18,6 +20,10 @@ export default {
 
     node () {
       return this.ele && this.ele.isNode() && this.ele
+    },
+
+    title () {
+      return this.node.data('label')
     },
 
     pos () {
@@ -43,5 +49,7 @@ export default {
 .dm5-topic-detail {
   position: absolute;
   background-color: #fee;
+  min-width: 100px;
+  max-width: 300px;
 }
 </style>

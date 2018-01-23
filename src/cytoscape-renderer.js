@@ -112,6 +112,7 @@ const actions = {
     // When interactively selecting a node Cytoscape removes the current selection before.
     // When progrmmatically selecting a node Cytoscape does *not* remove the current selection.
     _syncUnselect().then(() => {
+      console.log('restore animation complete')
       // update state
       state.ele = cyElement(id)
       if (state.ele.size() != 1) {
@@ -401,10 +402,12 @@ function fisheyeAnimation(node) {
   cy.layout({
     name: 'cose-bilkent',
     stop () {
+      console.log('fisheye animation complete')
+      node.style('background-image-opacity', 0)
       // node.unlock()
     },
     // animate: 'end',
-    // animationDuration: 2000,
+    // animationDuration: 3000,
     fit: false,
     randomize: false,
     nodeRepulsion: 1000,
@@ -501,6 +504,7 @@ function restoreTopicPositions () {
  */
 function _syncTopicPosition (id) {
   return cyElement(id).animation({
+    // duration: 3000,
     position: topicmap.getTopic(id).getPosition(),
     easing: 'ease-in-out-cubic'
   }).play().promise()
@@ -521,7 +525,7 @@ function _syncUnselect () {
     ele.unselect()
     //
     if (ele.isNode() && FISHEYE) {
-      ele.style({width: '', height: ''})
+      ele.style({width: '', height: '', 'background-image-opacity': ''})
       return restoreTopicPositions()
     }
   }
