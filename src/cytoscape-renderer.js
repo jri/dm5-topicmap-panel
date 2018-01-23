@@ -5,6 +5,7 @@ import coseBilkent from 'cytoscape-cose-bilkent'
 import cxtmenu from 'cytoscape-cxtmenu'
 import fa from 'font-awesome/fonts/fontawesome-webfont.svg'
 import dm5 from 'dm5'
+import Vue from 'vue'
 
 // get style from CSS variables
 const style = window.getComputedStyle(document.body)
@@ -40,7 +41,11 @@ cytoscape.use(cxtmenu)
 //
 
 const state = {
-  ele: undefined          // a Cytoscape element (node or edge)
+
+  ele: undefined,         // Selected Cytoscape element (node or edge).
+                          // Undefined if there is no selection.
+
+  size: undefined         // Size of in-map topic detail (object with "width" and "height" properties).
 }
 
 const actions = {
@@ -109,19 +114,35 @@ const actions = {
     _syncUnselect().then(() => {
       // update state
       state.ele = cyElement(id)
+      if (state.ele.size() != 1) {
+        console.warn('syncSelect:', id, 'not found', state.ele.size())
+      }
       // sync view
       // Note: select() is needed to restore selection after switching topicmap.
       state.ele.select()
       //
       if (state.ele.isNode() && FISHEYE) {
-        state.ele.style({width: 250, height: 150})    // TODO: calculate size
-        fisheyeAnimation(state.ele)
+        // TODO: synchronization
+        Vue.nextTick().then(() => {
+          const box = document.querySelector('.dm5-topic-detail')
+          if (box) {
+            state.size = {
+              width:  box.clientWidth,
+              height: box.clientHeight
+            }
+            console.log('FISHEYE', id, state.size.width, state.size.height)
+            state.ele.style(state.size)
+            fisheyeAnimation(state.ele)
+          } else {
+            console.warn('syncSelect: detail DOM for', id, 'not yet ready')
+          }
+        })
       }
     })
   },
 
   syncUnselect () {
-    console.log('syncUnselect')
+    // console.log('syncUnselect')
     _syncUnselect()
   },
 
@@ -487,7 +508,7 @@ function _syncTopicPosition (id) {
 
 function _syncUnselect () {
   const ele = state.ele
-  console.log('_syncUnselect', ele)
+  // console.log('_syncUnselect', ele)
   if (ele) {
     // update state
     state.ele = undefined

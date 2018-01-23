@@ -1,7 +1,6 @@
 <template>
-  <div class="dm5-topic-detail" v-if="node" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
-    <dm5-object-renderer></dm5-object-renderer>
-  </div>
+  <dm5-object-renderer class="dm5-topic-detail" v-if="node" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
+  </dm5-object-renderer>
 </template>
 
 <script>
@@ -13,20 +12,24 @@ export default {
       return this.$store.state.cytoscapeRenderer.ele
     },
 
+    size () {
+      return this.$store.state.cytoscapeRenderer.size
+    },
+
     node () {
       return this.ele && this.ele.isNode() && this.ele
     },
 
     pos () {
-      const pos = this.node.position()
-      return {
-        x: pos.x - this.size.width / 2,
-        y: pos.y - this.size.height / 2
+      const p = this.node.position()
+      const pos = {x: p.x, y: p.y}
+      if (this.size) {
+        pos.x -= this.size.width  / 2
+        pos.y -= this.size.height / 2
+      } else {
+        console.warn('state "size" for', this.node.id(), 'not yet known')
       }
-    },
-
-    size () {
-      return {width: 250, height: 150}    // TODO
+      return pos
     }
   },
 
@@ -40,7 +43,5 @@ export default {
 .dm5-topic-detail {
   position: absolute;
   background-color: #fee;
-  width: 250px;   /* TODO */
-  height: 150px;  /* TODO */
 }
 </style>
