@@ -9,14 +9,14 @@
 export default {
 
   created () {
-    console.log('CytoscapeRenderer created')
+    // console.log('CytoscapeRenderer created')
     this.$store.registerModule('cytoscapeRenderer', require('../cytoscape-renderer').default)
   },
 
   // Note: while loading cytoscape-renderer.js the Cytoscape instance is created. At this time the DOM
   // must be ready. So we do the loading only in the mounted() hook. (created() would be too early.) ### FIXDOC
   mounted () {
-    console.log('CytoscapeRenderer mounted')
+    // console.log('CytoscapeRenderer mounted')
     this.$store.dispatch('initCytoscape')
   },
 

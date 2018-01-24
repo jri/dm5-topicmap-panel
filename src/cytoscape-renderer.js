@@ -106,38 +106,24 @@ const actions = {
     })
   },
 
-  syncSelect (_, id) {
+  /**
+   * @param   p   a promise resolved once topic data has arrived and global "object" state is up-to-date.
+   */
+  syncSelect (_, {id, p}) {
     // console.log('syncSelect', id, cyElement(id).length)
     // Note: programmatic unselect() is required for browser history navigation.
     // When interactively selecting a node Cytoscape removes the current selection before.
     // When progrmmatically selecting a node Cytoscape does *not* remove the current selection.
-    _syncUnselect().then(() => {
+    _syncUnselect().then(() => p).then(() => {
       console.log('restore animation complete')
-      // update state
-      state.ele = cyElement(id)
+      // update state + sync view
+      // Note: select() is needed to restore selection after switching topicmap.
+      state.ele = cyElement(id).select()
       if (state.ele.size() != 1) {
         console.warn('syncSelect:', id, 'not found', state.ele.size())
       }
-      // sync view
-      // Note: select() is needed to restore selection after switching topicmap.
-      state.ele.select()
-      //
       if (state.ele.isNode() && FISHEYE) {
-        // TODO: synchronization
-        Vue.nextTick().then(() => {
-          const box = document.querySelector('.dm5-topic-detail')
-          if (box) {
-            state.size = {
-              width:  box.clientWidth,
-              height: box.clientHeight
-            }
-            console.log('FISHEYE', id, state.size.width, state.size.height)
-            state.ele.style(state.size)
-            fisheyeAnimation(state.ele)
-          } else {
-            console.warn('syncSelect: detail DOM for', id, 'not yet ready')
-          }
-        })
+        showTopicDetails()
       }
     })
   },
@@ -395,6 +381,24 @@ function initContextMenus (dispatch) {
   }
 }
 
+function showTopicDetails() {
+  Vue.nextTick().then(() => {   // TODO: nextTick() needed?
+    const box = document.querySelector('.dm5-topic-detail')
+    if (box) {
+      state.size = {
+        width:  box.clientWidth,
+        height: box.clientHeight
+      }
+      console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
+      state.ele.style(state.size)
+      fisheyeAnimation(state.ele)
+    } else {
+      console.warn('syncSelect: detail DOM for', id(state.ele), 'not yet ready')
+    }
+  })
+}
+
+// TODO: drop arg. Operate on state instead.
 function fisheyeAnimation(node) {
   // Note: node locking diminishes layout quality.
   // TODO: remove locking? Adjusting the position of the topic details DOM is required then.
@@ -489,8 +493,9 @@ function renderTopicmap () {
 /**
  * @return  a promise that is resolved once the animation is complete.
  */
-function restoreTopicPositions () {
+function playRestoreAnimation () {
   const promises = []
+  console.log('starting restore animation')
   topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
       promises.push(_syncTopicPosition(viewTopic.id))
@@ -510,6 +515,9 @@ function _syncTopicPosition (id) {
   }).play().promise()
 }
 
+/**
+ * @return  a promise that is resolved once the restore animation is complete.
+ */
 function _syncUnselect () {
   const ele = state.ele
   // console.log('_syncUnselect', ele)
@@ -526,7 +534,7 @@ function _syncUnselect () {
     //
     if (ele.isNode() && FISHEYE) {
       ele.style({width: '', height: '', 'background-image-opacity': ''})
-      return restoreTopicPositions()
+      return playRestoreAnimation()
     }
   }
   return Promise.resolve()
