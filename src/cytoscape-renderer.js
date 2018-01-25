@@ -382,7 +382,8 @@ function initContextMenus (dispatch) {
 }
 
 function showTopicDetails() {
-  Vue.nextTick().then(() => {   // TODO: nextTick() needed?
+  // Note: we determine the detail size by measuring the DOM, which is only updated in next tick
+  Vue.nextTick().then(() => {
     const box = document.querySelector('.dm5-topic-detail')
     if (box) {
       state.size = {
@@ -391,24 +392,22 @@ function showTopicDetails() {
       }
       console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
       state.ele.style(state.size)
-      fisheyeAnimation(state.ele)
+      playFisheyeAnimation()
     } else {
       console.warn('syncSelect: detail DOM for', id(state.ele), 'not yet ready')
     }
   })
 }
 
-// TODO: drop arg. Operate on state instead.
-function fisheyeAnimation(node) {
+function playFisheyeAnimation() {
   // Note: node locking diminishes layout quality.
-  // TODO: remove locking? Adjusting the position of the topic details DOM is required then.
-  // node.lock()
+  // state.ele.lock()
   cy.layout({
     name: 'cose-bilkent',
     stop () {
       console.log('fisheye animation complete')
-      node.style('background-image-opacity', 0)
-      // node.unlock()
+      state.ele.style('background-image-opacity', 0)
+      // state.ele.unlock()
     },
     // animate: 'end',
     // animationDuration: 3000,
@@ -493,20 +492,6 @@ function renderTopicmap () {
 /**
  * @return  a promise that is resolved once the animation is complete.
  */
-function playRestoreAnimation () {
-  const promises = []
-  console.log('starting restore animation')
-  topicmap.forEachTopic(viewTopic => {
-    if (viewTopic.isVisible()) {
-      promises.push(_syncTopicPosition(viewTopic.id))
-    }
-  })
-  return Promise.all(promises)
-}
-
-/**
- * @return  a promise that is resolved once the animation is complete.
- */
 function _syncTopicPosition (id) {
   return cyElement(id).animation({
     // duration: 3000,
@@ -538,6 +523,20 @@ function _syncUnselect () {
     }
   }
   return Promise.resolve()
+}
+
+/**
+ * @return  a promise that is resolved once the animation is complete.
+ */
+function playRestoreAnimation () {
+  const promises = []
+  console.log('starting restore animation')
+  topicmap.forEachTopic(viewTopic => {
+    if (viewTopic.isVisible()) {
+      promises.push(_syncTopicPosition(viewTopic.id))
+    }
+  })
+  return Promise.all(promises)
 }
 
 /**
