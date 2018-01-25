@@ -1,7 +1,11 @@
+const FISHEYE = true
+
 import cytoscape from 'cytoscape'
+import coseBilkent from 'cytoscape-cose-bilkent'
 import cxtmenu from 'cytoscape-cxtmenu'
 import fa from 'font-awesome/fonts/fontawesome-webfont.svg'
 import dm5 from 'dm5'
+import Vue from 'vue'
 
 // get style from CSS variables
 const style = window.getComputedStyle(document.body)
@@ -12,32 +16,49 @@ const iconColor        = style.getPropertyValue('--color-topic-icon')
 const hoverBorderColor = style.getPropertyValue('--color-topic-hover')
 const backgroundColor  = style.getPropertyValue('--background-color')
 
-// Note: the topicmap is not vuex state. (This store module provides no state at all, only actions.)
+// Note: the topicmap is not vuex state. (This store module provides no state at all, only actions. ### FIXDOC)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
 // We have to snyc topicmap data with the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
-var topicmap              // view model: the rendered topicmap (a Topicmap object)
+var topicmap              // view model: the rendered topicmap (a dm5.Topicmap object)
+
+var cy                    // the Cytoscape instance
+var box                   // the measurement box
 
 var faFont                // Font Awesome SVG <font> element
 var init = false          // tracks Cytoscape event listener registration and context menu initialization, which is lazy
-
-const cy = initialize()   // the Cytoscape instance
-const box = document.getElementById('measurement-box')
 
 const svgReady = dm5.restClient.getXML(fa).then(svg => {
   // console.log('### SVG ready!')
   faFont = svg.querySelector('font')
 })
 
-cxtmenu(cytoscape)        // register extension
+// register extensions
+cytoscape.use(coseBilkent)
+cytoscape.use(cxtmenu)
+
+//
+
+const state = {
+
+  ele: undefined,         // Selected Cytoscape element (node or edge).
+                          // Undefined if there is no selection.
+
+  size: undefined         // Size of in-map topic detail (object with "width" and "height" properties).
+}
 
 const actions = {
+
+  initCytoscape () {
+    cy = initialize()
+    box = document.getElementById('measurement-box')
+  },
 
   // sync view with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
-    // console.log('syncTopicmap', _topicmap.id)
+    console.log('syncTopicmap', _topicmap.id)
     // lazy initialization
     if (!init) {
       eventListeners(dispatch)
@@ -85,23 +106,36 @@ const actions = {
     })
   },
 
-  syncSelect ({dispatch}, id) {
-    dispatch('syncUnselect')
+  /**
+   * @param   p   a promise resolved once topic data has arrived and global "object" state is up-to-date.
+   */
+  syncSelect (_, {id, p}) {
     // console.log('syncSelect', id, cyElement(id).length)
-    cyElement(id).select()
+    // Note: programmatic unselect() is required for browser history navigation.
+    // When interactively selecting a node Cytoscape removes the current selection before.
+    // When progrmmatically selecting a node Cytoscape does *not* remove the current selection.
+    _syncUnselect().then(() => p).then(() => {
+      console.log('restore animation complete')
+      // update state + sync view
+      // Note: select() is needed to restore selection after switching topicmap.
+      state.ele = cyElement(id).select()
+      if (state.ele.size() != 1) {
+        console.warn('syncSelect:', id, 'not found', state.ele.size())
+      }
+      if (state.ele.isNode() && FISHEYE) {
+        showTopicDetails()
+      }
+    })
   },
 
   syncUnselect () {
     // console.log('syncUnselect')
-    cy.elements(":selected").unselect()
+    _syncUnselect()
   },
 
   syncTopicPosition (_, id) {
     console.log('syncTopicPosition', id)
-    cyElement(id).animate({
-      position: topicmap.getTopic(id).getPosition(),
-      easing: 'ease-in-out-cubic'
-    })
+    _syncTopicPosition(id)
   },
 
   syncTopicVisibility (_, id) {
@@ -127,12 +161,13 @@ const actions = {
   // ---
 
   shutdownRenderer () {
-    console.log('Unregistering cxtmenu extension')
+    // console.log('Unregistering cxtmenu extension')
     // TODO
   }
 }
 
 export default {
+  state,
   actions
 }
 
@@ -346,6 +381,45 @@ function initContextMenus (dispatch) {
   }
 }
 
+function showTopicDetails() {
+  // Note: we determine the detail size by measuring the DOM, which is only updated in next tick
+  Vue.nextTick().then(() => {
+    const box = document.querySelector('.dm5-topic-detail')
+    if (box) {
+      state.size = {
+        width:  box.clientWidth,
+        height: box.clientHeight
+      }
+      console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
+      state.ele.style(state.size)
+      playFisheyeAnimation()
+    } else {
+      console.warn('syncSelect: detail DOM for', id(state.ele), 'not yet ready')
+    }
+  })
+}
+
+function playFisheyeAnimation() {
+  // Note: node locking diminishes layout quality.
+  // state.ele.lock()
+  cy.layout({
+    name: 'cose-bilkent',
+    stop () {
+      console.log('fisheye animation complete')
+      state.ele.style('background-image-opacity', 0)
+      // state.ele.unlock()
+    },
+    // animate: 'end',
+    // animationDuration: 3000,
+    fit: false,
+    randomize: false,
+    nodeRepulsion: 1000,
+    idealEdgeLength: 0,
+    edgeElasticity: 0,
+    tile: false
+  }).run()
+}
+
 // TODO: memoization
 function renderNode (ele) {
   const label = ele.data('label')
@@ -413,6 +487,56 @@ function renderTopicmap () {
   cy.remove("*")  // "*" is the group selector "all"
   cy.add(elems)
   // console.log('### Topicmap rendering complete!')
+}
+
+/**
+ * @return  a promise that is resolved once the animation is complete.
+ */
+function _syncTopicPosition (id) {
+  return cyElement(id).animation({
+    // duration: 3000,
+    position: topicmap.getTopic(id).getPosition(),
+    easing: 'ease-in-out-cubic'
+  }).play().promise()
+}
+
+/**
+ * @return  a promise that is resolved once the restore animation is complete.
+ */
+function _syncUnselect () {
+  const ele = state.ele
+  // console.log('_syncUnselect', ele)
+  if (ele) {
+    // update state
+    state.ele = undefined
+    //
+    // sync view
+    // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
+    // In this situation cy.elements(":selected") would return a non-empty collection.
+    // Note: when the user clicks on the background Cytoscape unselects the selected element by default.
+    // Calling cy.elements(":selected") afterwards would return an empty collection.
+    ele.unselect()
+    //
+    if (ele.isNode() && FISHEYE) {
+      ele.style({width: '', height: '', 'background-image-opacity': ''})
+      return playRestoreAnimation()
+    }
+  }
+  return Promise.resolve()
+}
+
+/**
+ * @return  a promise that is resolved once the animation is complete.
+ */
+function playRestoreAnimation () {
+  const promises = []
+  console.log('starting restore animation')
+  topicmap.forEachTopic(viewTopic => {
+    if (viewTopic.isVisible()) {
+      promises.push(_syncTopicPosition(viewTopic.id))
+    }
+  })
+  return Promise.all(promises)
 }
 
 /**
