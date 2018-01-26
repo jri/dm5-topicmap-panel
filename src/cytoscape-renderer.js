@@ -391,7 +391,7 @@ function showTopicDetails() {
         height: box.clientHeight
       }
       console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
-      state.ele.style(state.size)
+      state.ele.style(state.size).style('background-image-opacity', 0)    // fisheye element style
       playFisheyeAnimation()
     } else {
       console.warn('syncSelect: detail DOM for', id(state.ele), 'not yet ready')
@@ -406,7 +406,6 @@ function playFisheyeAnimation() {
     name: 'cose-bilkent',
     stop () {
       console.log('fisheye animation complete')
-      state.ele.style('background-image-opacity', 0)
       // state.ele.unlock()
     },
     // animate: 'end',
@@ -518,7 +517,7 @@ function _syncUnselect () {
     ele.unselect()
     //
     if (ele.isNode() && FISHEYE) {
-      ele.style({width: '', height: '', 'background-image-opacity': ''})
+      ele.style({width: '', height: '', 'background-image-opacity': ''})    // restore element style
       return playRestoreAnimation()
     }
   }
