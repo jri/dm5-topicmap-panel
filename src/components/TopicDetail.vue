@@ -48,7 +48,8 @@ export default {
 <style>
 .dm5-topic-detail {
   position: absolute;
-  background-color: #fee;
+  padding: 0 12px 12px 12px;
+  background-color: var(--background-color);
   min-width: 100px;
   max-width: 300px;
 }
