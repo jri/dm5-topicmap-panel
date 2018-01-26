@@ -1,17 +1,22 @@
 <template>
   <div class="dm5-topicmap-panel">
-    <slot name="dm5-topicmap-panel"></slot>
+    <dm5-toolbar></dm5-toolbar>
     <component :is="renderer"></component>
   </div>
 </template>
 
 <script>
 export default {
+
   computed: {
     renderer () {
       // ### TODO: renderer registry
       return require('./CytoscapeRenderer')
     }
+  },
+
+  components: {
+    'dm5-toolbar': require('./Toolbar')
   }
 }
 </script>
