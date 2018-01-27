@@ -1,7 +1,8 @@
 <template>
   <div id="cytoscape-renderer">
-    <topic-detail></topic-detail>
+    <div id="cytoscape-container"></div>
     <div id="measurement-box"></div>
+    <topic-detail></topic-detail>
   </div>
 </template>
 
@@ -37,7 +38,11 @@ export default {
   overflow: hidden;
 }
 
-#measurement-box {
+#cytoscape-renderer #cytoscape-container {
+  height: 100%;
+}
+
+#cytoscape-renderer #measurement-box {
   position: absolute;
   visibility: hidden;
 }

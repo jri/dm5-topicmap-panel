@@ -179,7 +179,7 @@ export default {
 
 function initialize() {
   return cytoscape({
-    container: document.getElementById('cytoscape-renderer'),
+    container: document.getElementById('cytoscape-container'),
     style: [
       {
         selector: 'node',
@@ -395,7 +395,7 @@ function showTopicDetails() {
         height: box.clientHeight
       }
       console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
-      state.ele.style(state.size).style('background-image-opacity', 0)    // fisheye element style
+      state.ele.style(state.size)   // fisheye element style
       playFisheyeAnimation()
     } else {
       console.warn('syncSelect: detail DOM for', id(state.ele), 'not yet ready')
@@ -521,7 +521,7 @@ function _syncUnselect () {
     ele.unselect()
     //
     if (ele.isNode() && FISHEYE) {
-      ele.style({width: '', height: '', 'background-image-opacity': ''})    // restore element style
+      ele.style({width: '', height: ''})    // restore element style
       return playRestoreAnimation()
     }
   }

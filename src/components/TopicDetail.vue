@@ -64,5 +64,6 @@ export default {
   background-color: var(--background-color);
   min-width: 100px;
   max-width: 300px;
+  z-index: 8;   /* Cytoscape canvases are at 1, 2, 3; Toolbar is at 10 */
 }
 </style>
