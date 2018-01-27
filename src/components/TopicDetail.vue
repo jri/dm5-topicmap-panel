@@ -1,5 +1,5 @@
 <template>
-  <div class="dm5-topic-detail" v-if="node" :style="{top: pos.y + 'px', left: pos.x + 'px'}">
+  <div class="dm5-topic-detail" v-if="node" :style="style">
     <h3>{{title}}</h3>
     <dm5-object-renderer></dm5-object-renderer>
   </div>
@@ -18,6 +18,10 @@ export default {
       return this.$store.state.cytoscapeRenderer.size
     },
 
+    zoom () {
+      return this.$store.state.cytoscapeRenderer.zoom
+    },
+
     node () {
       return this.ele && this.ele.isNode() && this.ele
     },
@@ -26,8 +30,16 @@ export default {
       return this.node.data('label')
     },
 
+    style () {
+      return {
+        top:  this.pos.y + 'px',
+        left: this.pos.x + 'px',
+        transform: `scale(${this.zoom})`
+      }
+    },
+
     pos () {
-      const p = this.node.position()
+      const p = this.node.renderedPosition()
       const pos = {x: p.x, y: p.y}
       if (this.size) {
         pos.x -= this.size.width  / 2

@@ -45,13 +45,17 @@ const state = {
   ele: undefined,         // Selected Cytoscape element (node or edge).
                           // Undefined if there is no selection.
 
-  size: undefined         // Size of in-map topic detail (object with "width" and "height" properties).
+  size: undefined,        // Size of in-map topic detail (object with "width" and "height" properties).
+
+  zoom: 1                 // TODO: real init value
 }
 
 const actions = {
 
   initCytoscape () {
-    cy = initialize()
+    cy = initialize().on('zoom', () => {
+      state.zoom = cy.zoom()
+    })
     box = document.getElementById('measurement-box')
   },
 
