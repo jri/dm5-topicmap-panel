@@ -1,5 +1,6 @@
 <template>
   <div class="dm5-topic-detail" v-if="node" :style="style">
+    <el-button class="menu-button fa fa-bars" type="text" @contextmenu.native.prevent="openMenu"></el-button>
     <h3>{{title}}</h3>
     <dm5-object-renderer></dm5-object-renderer>
   </div>
@@ -7,6 +8,14 @@
 
 <script>
 export default {
+
+  created () {
+    // console.log('dm5-topic-detail created')
+  },
+
+  mounted () {
+    // console.log('dm5-topic-detail mounted')
+  },
 
   computed: {
 
@@ -51,6 +60,14 @@ export default {
     }
   },
 
+  methods: {
+    openMenu () {
+      this.node.emit('cxttapstart', {
+        position: {x: 100, y: 100}, renderedPosition: {x: 100, y: 100}, rp: {x: 100, y: 100}  // TODO
+      })
+    }
+  },
+
   components: {
     'dm5-object-renderer': require('dm5-object-renderer')
   }
@@ -64,6 +81,12 @@ export default {
   background-color: var(--background-color);
   min-width: 100px;
   max-width: 300px;
-  z-index: 8;   /* Cytoscape canvases are at 1, 2, 3; Toolbar is at 10 */
+}
+
+.dm5-topic-detail .menu-button {
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  padding: 0;
 }
 </style>
