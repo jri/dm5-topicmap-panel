@@ -265,9 +265,10 @@ function eventListeners (dispatch) {
   })
   cy.on('tapstart', 'node', evt => {
     const dragState = new DragState(evt.target)
-    cy.on('tapdrag', dragHandler(dragState))
+    const handler = dragHandler(dragState)
+    cy.on('tapdrag', handler)
     cy.one('tapend', evt => {
-      cy.off('tapdrag')
+      cy.off('tapdrag', handler)
       if (dragState.hoverNode) {
         dragState.unhover()
         dragState.resetPosition()
