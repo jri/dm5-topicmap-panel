@@ -119,7 +119,7 @@ const actions = {
     // When interactively selecting a node Cytoscape removes the current selection before.
     // When progrmmatically selecting a node Cytoscape does *not* remove the current selection.
     _syncUnselect().then(() => p).then(() => {
-      console.log('restore animation complete')
+      // console.log('restore animation complete')
       // update state + sync view
       // Note: select() is needed to restore selection after switching topicmap.
       state.ele = cyElement(id).select()
@@ -349,7 +349,8 @@ function initContextMenus (dispatch) {
         content: 'Delete Topic',
         select: deleteTopic
       }
-    ]
+    ],
+    atMouse: true
   })
   cy.cxtmenu({
     selector: 'edge',
@@ -395,7 +396,7 @@ function showTopicDetails() {
         width:  box.clientWidth,
         height: box.clientHeight
       }
-      console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
+      // console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
       state.ele.style(state.size)   // fisheye element style
       playFisheyeAnimation()
     } else {
@@ -410,7 +411,7 @@ function playFisheyeAnimation() {
   cy.layout({
     name: 'cose-bilkent',
     stop () {
-      console.log('fisheye animation complete')
+      // console.log('fisheye animation complete')
       // state.ele.unlock()
     },
     // animate: 'end',
@@ -534,7 +535,7 @@ function _syncUnselect () {
  */
 function playRestoreAnimation () {
   const promises = []
-  console.log('starting restore animation')
+  // console.log('starting restore animation')
   topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
       promises.push(_syncTopicPosition(viewTopic.id))

@@ -1,8 +1,8 @@
 <template>
-  <div class="dm5-topic-detail" v-if="node" :style="style">
-    <el-button class="menu-button fa fa-bars" type="text" @contextmenu.native.prevent="openMenu"></el-button>
+  <div :class="['dm5-topic-detail', {locked}]" v-if="node" :style="style">
     <h3>{{title}}</h3>
     <dm5-object-renderer></dm5-object-renderer>
+    <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
   </div>
 </template>
 
@@ -15,6 +15,12 @@ export default {
 
   mounted () {
     // console.log('dm5-topic-detail mounted')
+  },
+
+  data () {
+    return {
+      locked: true
+    }
   },
 
   computed: {
@@ -57,14 +63,16 @@ export default {
         console.warn('state "size" for', this.node.id(), 'not yet known')
       }
       return pos
+    },
+
+    lockIcon () {
+      return this.locked ? 'fa-lock' : 'fa-unlock'
     }
   },
 
   methods: {
-    openMenu () {
-      this.node.emit('cxttapstart', {
-        position: {x: 100, y: 100}, renderedPosition: {x: 100, y: 100}, rp: {x: 100, y: 100}  // TODO
-      })
+    toggleLock () {
+      this.locked = !this.locked
     }
   },
 
@@ -83,10 +91,15 @@ export default {
   max-width: 300px;
 }
 
-.dm5-topic-detail .menu-button {
+.dm5-topic-detail.locked {
+  pointer-events: none;
+}
+
+.dm5-topic-detail .lock-button {
   position: absolute;
   top: 1px;
   right: 3px;
   padding: 0;
+  pointer-events: initial;
 }
 </style>
