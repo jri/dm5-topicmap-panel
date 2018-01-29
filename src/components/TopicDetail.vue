@@ -1,12 +1,14 @@
 <template>
   <div :class="['dm5-topic-detail', {locked}]" v-if="node" :style="style">
     <h3>{{title}}</h3>
-    <dm5-object-renderer></dm5-object-renderer>
+    <dm5-object-renderer :object="object"></dm5-object-renderer>
     <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
   </div>
 </template>
 
 <script>
+import dm5 from 'dm5'
+
 export default {
 
   created () {
@@ -15,6 +17,16 @@ export default {
 
   mounted () {
     // console.log('dm5-topic-detail mounted')
+  },
+
+  activated () {
+    // console.log('dm5-topic-detail activated')
+  },
+
+  props: {
+    // The selected Topic/Assoc/TopicType/AssocType.
+    // Undefined if nothing is selected.
+    object: dm5.DeepaMehtaObject
   },
 
   data () {
