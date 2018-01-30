@@ -2,13 +2,11 @@
   <div id="cytoscape-renderer">
     <div id="cytoscape-container"></div>
     <div id="measurement-box"></div>
-    <topic-detail :object="object"></topic-detail>
+    <topic-detail></topic-detail>
   </div>
 </template>
 
 <script>
-import dm5 from 'dm5'
-
 export default {
 
   created () {
@@ -26,12 +24,6 @@ export default {
   destroyed () {
     console.log('CytoscapeRenderer destroyed!')
     this.$store.dispatch('shutdownRenderer')
-  },
-
-  props: {
-    // The selected Topic/Assoc/TopicType/AssocType.
-    // Undefined if nothing is selected.
-    object: dm5.DeepaMehtaObject
   },
 
   components: {
