@@ -2,6 +2,12 @@
 
 ## Version History
 
+**0.8** -- Feb 3, 2018
+
+* In-map topic details with inline edit capability
+* "Semantic Fisheye" layout with animations
+* Composability: access injected context instead of store state
+
 **0.7** -- Jan 13, 2018
 
 * Topic colors customizable via CSS vars
@@ -26,4 +32,4 @@
 
 ------------
 Jörg Richter  
-Jan 13, 2018
+Feb 3, 2018
