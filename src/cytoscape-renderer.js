@@ -59,6 +59,11 @@ const actions = {
     box = document.getElementById('measurement-box')
   },
 
+  resizeTopicmapRenderer () {
+    console.log('Resizing Cytoscape Renderer')
+    cy.resize()
+  },
+
   // sync view with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
@@ -164,7 +169,7 @@ const actions = {
 
   // ---
 
-  shutdownRenderer () {
+  shutdownCytoscape () {
     // console.log('Unregistering cxtmenu extension')
     // TODO
   }

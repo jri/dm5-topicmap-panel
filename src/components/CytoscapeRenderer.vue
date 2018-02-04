@@ -23,7 +23,7 @@ export default {
 
   destroyed () {
     console.log('CytoscapeRenderer destroyed!')
-    this.$store.dispatch('shutdownRenderer')
+    this.$store.dispatch('shutdownCytoscape')
   },
 
   components: {
@@ -35,7 +35,7 @@ export default {
 <style>
 #cytoscape-renderer {
   flex: auto;
-  overflow: hidden;
+  overflow: hidden;     /* adapt canvas width to window size */
 }
 
 #cytoscape-renderer #cytoscape-container {
