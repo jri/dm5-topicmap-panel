@@ -64,7 +64,7 @@ export default {
         pos.x -= this.size.width  / 2
         pos.y -= this.size.height / 2
       } else {
-        console.warn('state "size" for', this.node.id(), 'not yet known')
+        // console.warn('state "size" for', this.node.id(), 'not yet known')
       }
       return pos
     },

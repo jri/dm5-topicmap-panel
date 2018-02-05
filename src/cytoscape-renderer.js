@@ -60,14 +60,14 @@ const actions = {
   },
 
   resizeTopicmapRenderer () {
-    console.log('Resizing Cytoscape Renderer')
+    // console.log('Resizing Cytoscape Renderer')
     cy.resize()
   },
 
   // sync view with view model
 
   syncTopicmap ({dispatch}, _topicmap) {
-    console.log('syncTopicmap', _topicmap.id)
+    // console.log('syncTopicmap', _topicmap.id)
     // lazy initialization
     if (!init) {
       eventListeners(dispatch)
@@ -346,28 +346,19 @@ function initContextMenus (dispatch) {
   cy.cxtmenu({
     selector: 'node',
     commands: [
-      {
-        content: 'Hide Topic',
-        select: hideTopic
-      },
-      {
-        content: 'Delete Topic',
-        select: deleteTopic
-      }
+      {content: 'Hide',             select: hideTopic},
+      {content: 'Delete',           select: deleteTopic},
+      {content: 'Edit',             select: editTopic},
+      {content: 'What\'s related?', select: whatsRelated}
     ],
     atMouse: true
   })
   cy.cxtmenu({
     selector: 'edge',
     commands: [
-      {
-        content: 'Hide Association',
-        select: hideAssoc
-      },
-      {
-        content: 'Delete Association',
-        select: deleteAssoc
-      }
+      {content: 'Hide',   select: hideAssoc},
+      {content: 'Delete', select: deleteAssoc},
+      {content: 'Edit',   select: editAssoc}
     ]
   })
 
@@ -389,6 +380,18 @@ function initContextMenus (dispatch) {
   function deleteAssoc (ele) {
     ele.remove()
     dispatch('deleteAssoc', id(ele))
+  }
+
+  function editTopic (ele) {
+    dispatch('editTopic', id(ele))
+  }
+
+  function editAssoc (ele) {
+    dispatch('editAssoc', id(ele))
+  }
+
+  function whatsRelated (ele) {
+    dispatch('whatsRelated', id(ele))
   }
 }
 
