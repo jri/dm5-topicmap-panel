@@ -64,7 +64,7 @@ const actions = {
     cy.resize()
   },
 
-  // sync view with view model
+  // All "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
 
   syncTopicmap ({dispatch}, _topicmap) {
     // console.log('syncTopicmap', _topicmap.id)
@@ -116,18 +116,32 @@ const actions = {
   },
 
   /**
-   * @param   p   a promise resolved once topic data has arrived and global "object" state is up-to-date.
+   * Renders given topic/assoc as selected.
+   * In case of a topic selection the topic details are rendered as a DOM overlay, and the fisheye animation is played.
+   *
+   * Precondition:
+   * - the topicmap rendering is complete.
+   *
+   * @param   id  id of a topic or an assoc
+   * @param   p   a promise resolved once topic data has arrived (global "object" state is up-to-date).
+   *              Note: the DOM overlay's size can only be measured once "object" details are rendered.
    */
   syncSelect (_, {id, p}) {
     // console.log('syncSelect', id, cyElement(id).length)
-    // Note: programmatic unselect() is required for browser history navigation.
-    // When interactively selecting a node Cytoscape removes the current selection before.
-    // When progrmmatically selecting a node Cytoscape does *not* remove the current selection.
-    _syncUnselect().then(() => p).then(() => {
+    // Note: the fisheye animation can only be started once the restore animation is complete, *and* "object" is
+    // available. The actual order of these 2 occasions doesn't matter.
+    Promise.all([
+      // Note: programmatic unselect() is required for browser history navigation. When *interactively* selecting a node
+      // Cytoscape removes the current selection before. When *programmatically* selecting a node Cytoscape does *not*
+      // remove the current selection.
+      _syncUnselect(),
+      p
+    ]).then(() => {
       // console.log('restore animation complete')
       // update state + sync view
-      // Note: select() is needed to restore selection after switching topicmap.
       state.ele = cyElement(id).select()
+      // Note 1: select() is needed to restore selection after switching topicmap.
+      // Note 2: setting the "ele" state causes the <topic-detail> component to be rendered (at next tick).
       if (state.ele.size() != 1) {
         console.warn('syncSelect:', id, 'not found', state.ele.size())
       }
@@ -395,21 +409,25 @@ function initContextMenus (dispatch) {
   }
 }
 
+/**
+ * Measures size of DOM overlay, adapts ele's size accordingly, and starts fisheye animation.
+ *
+ * Precondition:
+ * - the DOM is not yet updated (so measurement must take place only at next tick).
+ */
 function showTopicDetails() {
-  // Note: we determine the detail size by measuring the DOM, which is only updated in next tick
   Vue.nextTick().then(() => {
-    const box = document.querySelector('.dm5-topic-detail')
-    if (box) {
-      state.size = {
-        width:  box.clientWidth,
-        height: box.clientHeight
-      }
-      // console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
-      state.ele.style(state.size)   // fisheye element style
-      playFisheyeAnimation()
-    } else {
-      console.warn('syncSelect: detail DOM for', id(state.ele), 'not yet ready')
+    const detail = document.querySelector('.dm5-topic-detail')
+    if (!detail) {
+      throw Error('No detail DOM')
     }
+    state.size = {
+      width:  detail.clientWidth,
+      height: detail.clientHeight
+    }
+    // console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
+    state.ele.style(state.size)   // fisheye element style
+    playFisheyeAnimation()
   })
 }
 
