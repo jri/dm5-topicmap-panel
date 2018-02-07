@@ -60,7 +60,7 @@ const actions = {
   },
 
   resizeTopicmapRenderer () {
-    // console.log('Resizing Cytoscape Renderer')
+    // console.log('resizeTopicmapRenderer')
     cy.resize()
   },
 

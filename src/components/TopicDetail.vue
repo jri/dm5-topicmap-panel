@@ -1,7 +1,7 @@
 <template>
   <div :class="['dm5-topic-detail', {locked}]" v-if="node" :style="style">
     <h3>{{title}}</h3>
-    <dm5-object-renderer></dm5-object-renderer>
+    <dm5-object-renderer mode="info"></dm5-object-renderer>
     <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
   </div>
 </template>
@@ -15,10 +15,6 @@ export default {
 
   mounted () {
     // console.log('dm5-topic-detail mounted')
-  },
-
-  activated () {
-    // console.log('dm5-topic-detail activated')
   },
 
   data () {
