@@ -1,7 +1,12 @@
 <template>
   <div :class="['dm5-topic-detail', {locked}]" v-if="node" :style="style">
     <h3>{{title}}</h3>
-    <dm5-object-renderer mode="info"></dm5-object-renderer>
+    <!--
+      Note: even if dm5-topic-detail is not rendered (because an assoc or nothing is selected) dm5-object-renderer
+      still checks the existence of the "object" prop, which would fail then. I don't fully understand why the
+      existence check is still performed. As a workaround we put the v-if in.
+    -->
+    <dm5-object-renderer v-if="object" :object="object" mode="info"></dm5-object-renderer>
     <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
   </div>
 </template>
@@ -17,6 +22,8 @@ export default {
     // console.log('dm5-topic-detail mounted')
   },
 
+  inject: ['context'],
+
   data () {
     return {
       locked: true
@@ -24,6 +31,10 @@ export default {
   },
 
   computed: {
+
+    object () {
+      return this.context.object
+    },
 
     ele () {
       return this.$store.state.cytoscapeRenderer.ele
