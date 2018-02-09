@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar></dm5-toolbar>
-    <component :is="renderer"></component>
+    <component :is="renderer" :object="object" :objectRenderers="objectRenderers"></component>
   </div>
 </template>
 
@@ -12,9 +12,14 @@ export default {
     // console.log('dm5-topicmap-panel created')
   },
 
+  mixins: [
+    require('./mixins/object').default,
+    require('./mixins/object-renderers').default
+  ],
+
   computed: {
     renderer () {
-      // ### TODO: renderer registry
+      // ### TODO: topicmap renderer registry
       return require('./CytoscapeRenderer')
     }
   },

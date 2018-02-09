@@ -2,11 +2,10 @@
   <div :class="['dm5-topic-detail', {locked}]" v-if="node" :style="style">
     <h3>{{title}}</h3>
     <!--
-      Note: even if dm5-topic-detail is not rendered (because an assoc or nothing is selected) dm5-object-renderer
-      still checks the existence of the "object" prop, which would fail then. I don't fully understand why the
-      existence check is still performed. As a workaround we put the v-if in.
+      Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
+      "node" (the visibility predicate in parent comp). So we have to put "v-if" here. TODO: approve this hypothesis.
     -->
-    <dm5-object-renderer v-if="object" :object="object" mode="info"></dm5-object-renderer>
+    <dm5-object-renderer v-if="object" :object="object" mode="info" :renderers="objectRenderers"></dm5-object-renderer>
     <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
   </div>
 </template>
@@ -22,7 +21,10 @@ export default {
     // console.log('dm5-topic-detail mounted')
   },
 
-  inject: ['context'],
+  mixins: [
+    require('./mixins/object').default,
+    require('./mixins/object-renderers').default
+  ],
 
   data () {
     return {
@@ -31,10 +33,6 @@ export default {
   },
 
   computed: {
-
-    object () {
-      return this.context.object
-    },
 
     ele () {
       return this.$store.state.cytoscapeRenderer.ele

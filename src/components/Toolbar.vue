@@ -1,14 +1,14 @@
 <template>
   <div class="dm5-toolbar">
-    <component v-for="comp in components" :is="comp.comp" :key="comp.id"></component>
+    <component v-for="compDef in compDefs" :is="compDef.comp" :key="compDef.id"></component>
   </div>
 </template>
 
 <script>
 export default {
   computed: {
-    components () {
-      return this.$store.state.components.toolbar
+    compDefs () {
+      return this.$store.state.compDefs.toolbar
     }
   }
 }

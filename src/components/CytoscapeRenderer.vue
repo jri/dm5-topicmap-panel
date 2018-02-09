@@ -2,7 +2,7 @@
   <div id="cytoscape-renderer">
     <div id="cytoscape-container"></div>
     <div id="measurement-box"></div>
-    <topic-detail></topic-detail>
+    <topic-detail :object="object" :objectRenderers="objectRenderers"></topic-detail>
   </div>
 </template>
 
@@ -25,6 +25,11 @@ export default {
     console.log('CytoscapeRenderer destroyed!')
     this.$store.dispatch('shutdownCytoscape')
   },
+
+  mixins: [
+    require('./mixins/object').default,
+    require('./mixins/object-renderers').default
+  ],
 
   components: {
     'topic-detail': require('./TopicDetail')
