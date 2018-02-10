@@ -6,7 +6,7 @@
 
 * In-map topic details with inline edit capability
 * "Semantic Fisheye" layout with animations
-* Composability: access injected context instead of store state
+* Composability: inject context instead of accessing host app store
 
 **0.7** -- Jan 13, 2018
 

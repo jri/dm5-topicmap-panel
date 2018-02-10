@@ -2,7 +2,7 @@
   <div id="cytoscape-renderer">
     <div id="cytoscape-container"></div>
     <div id="measurement-box"></div>
-    <topic-detail :object="object" :objectRenderers="objectRenderers"></topic-detail>
+    <topic-detail :object="object" :writable="writable" :objectRenderers="objectRenderers"></topic-detail>
   </div>
 </template>
 
@@ -28,6 +28,7 @@ export default {
 
   mixins: [
     require('./mixins/object').default,
+    require('./mixins/writable').default,
     require('./mixins/object-renderers').default
   ],
 

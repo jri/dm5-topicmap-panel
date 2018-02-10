@@ -5,7 +5,8 @@
       Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
       "node" (the visibility predicate in parent comp). So we have to put "v-if" here. TODO: approve this hypothesis.
     -->
-    <dm5-object-renderer v-if="object" :object="object" mode="info" :renderers="objectRenderers"></dm5-object-renderer>
+    <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers">
+    </dm5-object-renderer>
     <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
   </div>
 </template>
@@ -23,6 +24,7 @@ export default {
 
   mixins: [
     require('./mixins/object').default,
+    require('./mixins/writable').default,
     require('./mixins/object-renderers').default
   ],
 
