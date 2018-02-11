@@ -36,6 +36,8 @@ export default {
 
   computed: {
 
+    // TODO: use Vuex mapState() helper. Requires object spread operator. Currently our Babel is too old.
+
     ele () {
       return this.$store.state.cytoscapeRenderer.ele
     },
@@ -75,7 +77,7 @@ export default {
         pos.x -= this.size.width  / 2
         pos.y -= this.size.height / 2
       } else {
-        // console.warn('state "size" for', this.node.id(), 'not yet known')
+        console.warn('overlay size not yet known', this.node.id())
       }
       return pos
     },

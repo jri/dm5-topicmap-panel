@@ -21,12 +21,12 @@ export default {
   computed: {
     renderer () {
       // ### TODO: topicmap renderer registry
-      return require('./CytoscapeRenderer')
+      return require('./dm5-cytoscape-renderer')
     }
   },
 
   components: {
-    'dm5-toolbar': require('./Toolbar')
+    'dm5-toolbar': require('./dm5-toolbar')
   }
 }
 </script>

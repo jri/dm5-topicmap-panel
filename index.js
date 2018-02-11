@@ -1,1 +1,1 @@
-module.exports = require('./src/components/TopicmapPanel.vue')
+module.exports = require('./src/components/dm5-topicmap-panel')
