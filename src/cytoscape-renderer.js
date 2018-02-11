@@ -45,6 +45,8 @@ const state = {
   ele: undefined,         // Selected Cytoscape element (node or edge).
                           // Undefined if there is no selection.
 
+  auxNode: undefined,     // In case of an edge selection: the auxiliary node that represents the edge.
+
   size: undefined,        // Size of in-map topic detail (object with "width" and "height" properties).
 
   zoom: 1                 // TODO: real init value
@@ -64,7 +66,7 @@ const actions = {
     cy.resize()
   },
 
-  // All "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
+  // The "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
 
   syncTopicmap ({dispatch}, _topicmap) {
     // console.log('syncTopicmap', _topicmap.id)
@@ -117,14 +119,14 @@ const actions = {
 
   /**
    * Renders given topic/assoc as selected.
-   * In case of a topic selection the topic details are rendered as a DOM overlay, and the fisheye animation is played.
+   * The detail overlay is rendered, and the fisheye animation is played.
    *
    * Precondition:
    * - the topicmap rendering is complete.
    *
    * @param   id  id of a topic or an assoc
-   * @param   p   a promise resolved once topic data has arrived (global "object" state is up-to-date).
-   *              Note: the DOM overlay's size can only be measured once "object" details are rendered.
+   * @param   p   a promise resolved once topic/assoc data has arrived (global "object" state is up-to-date).
+   *              Note: the detail overlay's size can only be measured once "object" details are rendered.
    */
   syncSelect (_, {id, p}) {
     // console.log('syncSelect', id, cyElement(id).length)
@@ -141,12 +143,20 @@ const actions = {
       // update state + sync view
       state.ele = cyElement(id).select()
       // Note 1: select() is needed to restore selection after switching topicmap.
-      // Note 2: setting the "ele" state causes the <topic-detail> component to be rendered (at next tick).
+      // Note 2: setting the "ele" state causes the <dm5-detail-overlay> component to be rendered (at next tick).
       if (state.ele.size() != 1) {
-        console.warn('syncSelect:', id, 'not found', state.ele.size())
+        console.warn('syncSelect', id, 'not found', state.ele.size())
       }
-      if (state.ele.isNode() && FISHEYE) {
-        showTopicDetails()
+      if (FISHEYE) {
+        let detailNode
+        if (state.ele.isNode()) {
+          detailNode = state.ele
+        } else {
+          detailNode = state.auxNode = auxNode(state.ele)
+        }
+        Vue.nextTick().then(() => {
+          showDetailOverlay(detailNode)
+        })
       }
     })
   },
@@ -410,25 +420,23 @@ function initContextMenus (dispatch) {
 }
 
 /**
- * Measures size of DOM overlay, adapts ele's size accordingly, and starts fisheye animation.
+ * Measures size of detail overlay, adapts the given node's size accordingly, and starts fisheye animation.
  *
  * Precondition:
- * - the DOM is not yet updated (so measurement must take place only at next tick).
+ * - the DOM is updated already.
  */
-function showTopicDetails() {
-  Vue.nextTick().then(() => {
-    const detail = document.querySelector('.dm5-topic-detail')
-    if (!detail) {
-      throw Error('No detail DOM')
-    }
-    state.size = {
-      width:  detail.clientWidth,
-      height: detail.clientHeight
-    }
-    // console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
-    state.ele.style(state.size)   // fisheye element style
-    playFisheyeAnimation()
-  })
+function showDetailOverlay(node) {
+  const detail = document.querySelector('.dm5-detail-overlay')
+  if (!detail) {
+    throw Error('No detail overlay')
+  }
+  state.size = {
+    width:  detail.clientWidth,
+    height: detail.clientHeight
+  }
+  // console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
+  node.style(state.size)   // fisheye element style
+  playFisheyeAnimation()
 }
 
 function playFisheyeAnimation() {
@@ -548,8 +556,12 @@ function _syncUnselect () {
     // Calling cy.elements(":selected") afterwards would return an empty collection.
     ele.unselect()
     //
-    if (ele.isNode() && FISHEYE) {
-      ele.style({width: '', height: ''})    // restore element style
+    if (FISHEYE) {
+      if (ele.isNode()) {
+        ele.style({width: '', height: ''})    // reset size
+      } else {
+        cy.remove(state.auxNode)
+      }
       return playRestoreAnimation()
     }
   }
@@ -568,6 +580,18 @@ function playRestoreAnimation () {
     }
   })
   return Promise.all(promises)
+}
+
+/**
+ * Creates an auxiliary node to represent the given edge.
+ */
+function auxNode (edge) {
+  return cy.add({
+    data: {
+      icon: '\uf10c'    // model.js DEFAULT_TOPIC_ICON
+    },
+    position: edge.midpoint()
+  })
 }
 
 /**

@@ -1,5 +1,5 @@
 <template>
-  <div :class="['dm5-topic-detail', {locked}]" v-if="node" :style="style">
+  <div :class="['dm5-detail-overlay', {locked}]" v-if="node" :style="style">
     <h3>{{title}}</h3>
     <!--
       Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
@@ -15,11 +15,11 @@
 export default {
 
   created () {
-    // console.log('dm5-topic-detail created')
+    // console.log('dm5-detail-overlay created')
   },
 
   mounted () {
-    // console.log('dm5-topic-detail mounted')
+    // console.log('dm5-detail-overlay mounted')
   },
 
   mixins: [
@@ -40,6 +40,10 @@ export default {
       return this.$store.state.cytoscapeRenderer.ele
     },
 
+    auxNode () {
+      return this.$store.state.cytoscapeRenderer.auxNode
+    },
+
     size () {
       return this.$store.state.cytoscapeRenderer.size
     },
@@ -49,7 +53,7 @@ export default {
     },
 
     node () {
-      return this.ele && this.ele.isNode() && this.ele
+      return this.ele && (this.ele.isNode() ? this.ele : this.auxNode)
     },
 
     title () {
@@ -94,7 +98,7 @@ export default {
 </script>
 
 <style>
-.dm5-topic-detail {
+.dm5-detail-overlay {
   position: absolute;
   padding: 0 12px 12px 12px;
   background-color: var(--background-color);
@@ -102,11 +106,11 @@ export default {
   max-width: 300px;
 }
 
-.dm5-topic-detail.locked {
+.dm5-detail-overlay.locked {
   pointer-events: none;
 }
 
-.dm5-topic-detail .lock-button {
+.dm5-detail-overlay .lock-button {
   position: absolute;
   top: 1px;
   right: 3px;

@@ -2,7 +2,7 @@
   <div id="cytoscape-renderer">
     <div id="cytoscape-container"></div>
     <div id="measurement-box"></div>
-    <topic-detail :object="object" :writable="writable" :objectRenderers="objectRenderers"></topic-detail>
+    <dm5-detail-overlay :object="object" :writable="writable" :objectRenderers="objectRenderers"></dm5-detail-overlay>
   </div>
 </template>
 
@@ -33,7 +33,7 @@ export default {
   ],
 
   components: {
-    'topic-detail': require('./TopicDetail')
+    'dm5-detail-overlay': require('./dm5-detail-overlay')
   }
 }
 </script>
