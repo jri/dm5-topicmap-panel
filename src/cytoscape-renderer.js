@@ -143,7 +143,7 @@ const actions = {
       // update state + sync view
       state.ele = cyElement(id).select()
       // Note 1: select() is needed to restore selection after switching topicmap.
-      // Note 2: setting the "ele" state causes the <dm5-detail-overlay> component to be rendered (at next tick).
+      // Note 2: setting the "ele" state causes the <dm5-detail> component to be rendered (at next tick).
       if (state.ele.size() != 1) {
         console.warn('syncSelect', id, 'not found', state.ele.size())
       }
@@ -367,7 +367,6 @@ function dragHandler (dragState) {
 }
 
 function initContextMenus (dispatch) {
-
   // Note: a node might be an "auxiliary" node, that is a node that represents an edge.
   // In this case the original edge ID is contained in the node's "assocId" data.
   cy.cxtmenu({
@@ -445,7 +444,7 @@ function initContextMenus (dispatch) {
  * - the DOM is updated already.
  */
 function showDetailOverlay(node) {
-  const detail = document.querySelector('.dm5-detail-overlay')
+  const detail = document.querySelector('.dm5-detail')
   if (!detail) {
     throw Error('No detail overlay')
   }

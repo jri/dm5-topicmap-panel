@@ -1,13 +1,15 @@
 <template>
-  <div :class="['dm5-detail-overlay', {locked}]" v-if="node" :style="style">
-    <h3>{{title}}</h3>
-    <!--
-      Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
-      "node" (the visibility predicate in parent comp). So we have to put "v-if" here. TODO: approve this hypothesis.
-    -->
-    <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers">
-    </dm5-object-renderer>
-    <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
+  <div class="dm5-detail-overlay">
+    <div :class="['dm5-detail', {locked}]" v-if="node" :style="style">
+      <h3>{{title}}</h3>
+      <!--
+        Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
+        "node" (the visibility predicate in parent comp). So we have to put "v-if" here. TODO: approve this hypothesis.
+      -->
+      <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers">
+      </dm5-object-renderer>
+      <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
+    </div>
   </div>
 </template>
 
@@ -102,17 +104,23 @@ export default {
 <style>
 .dm5-detail-overlay {
   position: absolute;
+  width: 10000px;     /* avoid early line wrapping */
+  top: 0;
+}
+
+.dm5-detail-overlay .dm5-detail {
+  position: absolute;
   padding: 0 12px 12px 12px;
   background-color: var(--background-color);
   min-width: 100px;
-  max-width: 300px;
+  max-width: 360px;
 }
 
-.dm5-detail-overlay.locked {
+.dm5-detail-overlay .dm5-detail.locked {
   pointer-events: none;
 }
 
-.dm5-detail-overlay .lock-button {
+.dm5-detail-overlay .dm5-detail .lock-button {
   position: absolute;
   top: 1px;
   right: 3px;
