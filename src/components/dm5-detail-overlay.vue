@@ -77,7 +77,7 @@ export default {
         pos.x -= this.size.width  / 2
         pos.y -= this.size.height / 2
       } else {
-        console.warn('overlay size not yet known', this.node.id())
+        // console.warn('overlay size not yet known', this.node.id())
       }
       return pos
     },

@@ -367,33 +367,61 @@ function dragHandler (dragState) {
 }
 
 function initContextMenus (dispatch) {
+
+  // Note: a node might be an "auxiliary" node, that is a node that represents an edge.
+  // In this case the original edge ID is contained in the node's "assocId" data.
   cy.cxtmenu({
     selector: 'node',
-    commands: [
-      {content: 'Hide',             select: hideTopic},
-      {content: 'Delete',           select: deleteTopic},
-      {content: 'Edit',             select: editTopic},
-      {content: 'What\'s related?', select: whatsRelated}
-    ],
+    commands: ele => assocId(ele) ? assocCommands(assocId) : topicCommands,
     atMouse: true
   })
   cy.cxtmenu({
     selector: 'edge',
-    commands: [
+    commands: ele => assocCommands(idMapper)
+  })
+
+  const topicCommands = [
+    {content: 'Hide',             select: hideTopic},
+    {content: 'Delete',           select: deleteTopic},
+    {content: 'Edit',             select: editTopic},
+    {content: 'What\'s related?', select: whatsRelated}
+  ]
+
+  const assocCommands = idMapper => {
+    return [
       {content: 'Hide',   select: hideAssoc},
       {content: 'Delete', select: deleteAssoc},
       {content: 'Edit',   select: editAssoc}
     ]
-  })
+
+    function hideAssoc (ele) {
+      ele.remove()
+      dispatch('hideAssoc', idMapper(ele))
+    }
+
+    function deleteAssoc (ele) {
+      ele.remove()
+      dispatch('deleteAssoc', idMapper(ele))
+    }
+
+    function editAssoc (ele) {
+      dispatch('editAssoc', idMapper(ele))
+    }
+  }
+
+  function idMapper (ele) {
+    return id(ele)
+  }
+
+  function assocId (ele) {
+    return ele.data('assocId')
+  }
+
+  // ---
 
   function hideTopic (ele) {
     ele.remove()
     dispatch('hideTopic', id(ele))
-  }
-
-  function hideAssoc (ele) {
-    ele.remove()
-    dispatch('hideAssoc', id(ele))
   }
 
   function deleteTopic (ele) {
@@ -401,17 +429,8 @@ function initContextMenus (dispatch) {
     dispatch('deleteTopic', id(ele))
   }
 
-  function deleteAssoc (ele) {
-    ele.remove()
-    dispatch('deleteAssoc', id(ele))
-  }
-
   function editTopic (ele) {
     dispatch('editTopic', id(ele))
-  }
-
-  function editAssoc (ele) {
-    dispatch('editAssoc', id(ele))
   }
 
   function whatsRelated (ele) {
@@ -434,7 +453,7 @@ function showDetailOverlay(node) {
     width:  detail.clientWidth,
     height: detail.clientHeight
   }
-  // console.log('starting fisheye animation', id(state.ele), state.size.width, state.size.height)
+  // console.log('showDetailOverlay', node.id(), state.size.width, state.size.height)
   node.style(state.size)   // fisheye element style
   playFisheyeAnimation()
 }
@@ -588,7 +607,8 @@ function playRestoreAnimation () {
 function auxNode (edge) {
   return cy.add({
     data: {
-      icon: '\uf10c'    // model.js DEFAULT_TOPIC_ICON
+      assocId: id(edge),  // hold original edge ID
+      icon: '\uf10c'      // model.js DEFAULT_TOPIC_ICON
     },
     position: edge.midpoint()
   })
