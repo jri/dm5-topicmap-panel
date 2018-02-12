@@ -110,8 +110,9 @@ export default {
 
 .dm5-detail-overlay .dm5-detail {
   position: absolute;
-  padding: 0 12px 12px 12px;
   background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  padding: 0 12px 12px 12px;
   min-width: 100px;
   max-width: 360px;
 }

@@ -15,6 +15,7 @@ const labelFontSize    = style.getPropertyValue('--label-font-size')
 const iconColor        = style.getPropertyValue('--color-topic-icon')
 const hoverBorderColor = style.getPropertyValue('--color-topic-hover')
 const backgroundColor  = style.getPropertyValue('--background-color')
+const borderColor      = style.getPropertyValue('--border-color')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions. ### FIXDOC)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
@@ -218,8 +219,9 @@ function initialize() {
           'background-opacity': 0,
           'width':  ele => renderNode(ele).width,
           'height': ele => renderNode(ele).height,
-          'border-width': 3,
-          'border-opacity': 0
+          'border-width': 1,
+          'border-color': borderColor,
+          'border-opacity': 1
         }
       },
       {
@@ -238,8 +240,7 @@ function initialize() {
       {
         selector: 'node:selected',
         style: {
-          'border-color': 'red',
-          'border-opacity': 1
+          'border-opacity': 0
         }
       },
       {
@@ -251,6 +252,7 @@ function initialize() {
       {
         selector: 'node.hover',
         style: {
+          'border-width': 3,
           'border-color': hoverBorderColor,
           'border-opacity': 1
         }
@@ -394,12 +396,10 @@ function initContextMenus (dispatch) {
     ]
 
     function hideAssoc (ele) {
-      ele.remove()
       dispatch('hideAssoc', idMapper(ele))
     }
 
     function deleteAssoc (ele) {
-      ele.remove()
       dispatch('deleteAssoc', idMapper(ele))
     }
 
@@ -419,12 +419,10 @@ function initContextMenus (dispatch) {
   // ---
 
   function hideTopic (ele) {
-    ele.remove()
     dispatch('hideTopic', id(ele))
   }
 
   function deleteTopic (ele) {
-    ele.remove()
     dispatch('deleteTopic', id(ele))
   }
 
