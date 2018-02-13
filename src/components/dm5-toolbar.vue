@@ -16,11 +16,14 @@ export default {
 
 <style>
 .dm5-toolbar {
-  display: flex;
-  flex: none;
-  position: absolute;
+  display: flex;              /* arrange childs as a row */
+  position: absolute;         /* share space with Cytoscape canvas */
+  z-index: 1;                 /* superimpose Cytoscape canvas */
   width: 100%;
-  z-index: 10;    /* Cytoscape canvases are at 1, 2, 3 */
-  background-color: rgba(0, 0, 0, 0);
+  pointer-events: none;       /* make click-through */
+}
+
+.dm5-toolbar > * {
+  pointer-events: initial;    /* childs still act on clicks */
 }
 </style>
