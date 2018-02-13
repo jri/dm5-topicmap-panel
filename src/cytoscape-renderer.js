@@ -9,13 +9,13 @@ import Vue from 'vue'
 
 // get style from CSS variables
 const style = window.getComputedStyle(document.body)
-const fontFamily       = style.getPropertyValue('--main-font-family')
-const mainFontSize     = style.getPropertyValue('--main-font-size')
-const labelFontSize    = style.getPropertyValue('--label-font-size')
-const iconColor        = style.getPropertyValue('--color-topic-icon')
-const hoverBorderColor = style.getPropertyValue('--color-topic-hover')
-const backgroundColor  = style.getPropertyValue('--background-color')
-const borderColor      = style.getPropertyValue('--border-color')
+const fontFamily         = style.getPropertyValue('--main-font-family')
+const mainFontSize       = style.getPropertyValue('--main-font-size')
+const labelFontSize      = style.getPropertyValue('--label-font-size')
+const iconColor          = style.getPropertyValue('--color-topic-icon')
+const hoverBorderColor   = style.getPropertyValue('--color-topic-hover')
+const backgroundColor    = style.getPropertyValue('--background-color')
+const borderColorLighter = style.getPropertyValue('--border-color-lighter')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions. ### FIXDOC)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
@@ -144,7 +144,7 @@ const actions = {
       // update state + sync view
       state.ele = cyElement(id).select()
       // Note 1: select() is needed to restore selection after switching topicmap.
-      // Note 2: setting the "ele" state causes the <dm5-detail> component to be rendered (at next tick).
+      // Note 2: setting the "ele" state causes the detail overlay to be rendered (at next tick).
       if (state.ele.size() != 1) {
         console.warn('syncSelect', id, 'not found', state.ele.size())
       }
@@ -220,7 +220,7 @@ function initialize() {
           'width':  ele => renderNode(ele).width,
           'height': ele => renderNode(ele).height,
           'border-width': 1,
-          'border-color': borderColor,
+          'border-color': borderColorLighter,
           'border-opacity': 1
         }
       },
@@ -442,7 +442,7 @@ function initContextMenus (dispatch) {
  * - the DOM is updated already.
  */
 function showDetailOverlay(node) {
-  const detail = document.querySelector('.dm5-detail')
+  const detail = document.querySelector('.dm5-detail-overlay .detail')
   if (!detail) {
     throw Error('No detail overlay')
   }

@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-detail-overlay">
-    <div :class="['dm5-detail', {locked}]" v-if="node" :style="style">
+    <div :class="['detail', {locked}]" v-if="node" :style="style">
       <h3>{{title}}</h3>
       <!--
         Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
@@ -108,20 +108,20 @@ export default {
   top: 0;
 }
 
-.dm5-detail-overlay .dm5-detail {
+.dm5-detail-overlay .detail {
   position: absolute;
   background-color: var(--background-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color-lighter);
   padding: 0 12px 12px 12px;
   min-width: 100px;
   max-width: 360px;
 }
 
-.dm5-detail-overlay .dm5-detail.locked {
+.dm5-detail-overlay .detail.locked {
   pointer-events: none;
 }
 
-.dm5-detail-overlay .dm5-detail .lock-button {
+.dm5-detail-overlay .detail .lock-button {
   position: absolute;
   top: 1px;
   right: 3px;
