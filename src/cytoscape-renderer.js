@@ -238,7 +238,7 @@ function initialize() {
         }
       },
       {
-        selector: 'node:selected',
+        selector: 'node:selected, node.aux',
         style: {
           'border-opacity': 0
         }
@@ -607,7 +607,8 @@ function auxNode (edge) {
       assocId: id(edge),  // hold original edge ID
       icon: '\uf10c'      // model.js DEFAULT_TOPIC_ICON
     },
-    position: edge.midpoint()
+    position: edge.midpoint(),
+    classes: 'aux'
   })
 }
 
