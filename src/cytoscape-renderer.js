@@ -383,16 +383,13 @@ function initContextMenus (dispatch) {
 
   const topicCommands = [
     {content: 'Hide',             select: hideTopic},
-    {content: 'Delete',           select: deleteTopic},
-    {content: 'Edit',             select: editTopic},
-    {content: 'What\'s related?', select: whatsRelated}
+    {content: 'Delete',           select: deleteTopic}
   ]
 
   const assocCommands = idMapper => {
     return [
       {content: 'Hide',   select: hideAssoc},
-      {content: 'Delete', select: deleteAssoc},
-      {content: 'Edit',   select: editAssoc}
+      {content: 'Delete', select: deleteAssoc}
     ]
 
     function hideAssoc (ele) {
@@ -401,10 +398,6 @@ function initContextMenus (dispatch) {
 
     function deleteAssoc (ele) {
       dispatch('deleteAssoc', idMapper(ele))
-    }
-
-    function editAssoc (ele) {
-      dispatch('editAssoc', idMapper(ele))
     }
   }
 
@@ -424,14 +417,6 @@ function initContextMenus (dispatch) {
 
   function deleteTopic (ele) {
     dispatch('deleteTopic', id(ele))
-  }
-
-  function editTopic (ele) {
-    dispatch('editTopic', id(ele))
-  }
-
-  function whatsRelated (ele) {
-    dispatch('whatsRelated', id(ele))
   }
 }
 

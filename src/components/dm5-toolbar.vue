@@ -18,7 +18,7 @@ export default {
 .dm5-toolbar {
   display: flex;              /* arrange childs as a row */
   position: absolute;         /* share space with Cytoscape canvas */
-  z-index: 1;                 /* superimpose Cytoscape canvas */
+  z-index: 1;                 /* render on top of Cytoscape canvas */
   width: 100%;
   pointer-events: none;       /* make click-through */
 }

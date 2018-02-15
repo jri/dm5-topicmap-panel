@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar></dm5-toolbar>
-    <component :is="renderer" :object="object" :writable="writable" :objectRenderers="objectRenderers"></component>
+    <component :is="renderer" :object="object" :writable="writable" :object-renderers="objectRenderers"></component>
   </div>
 </template>
 
