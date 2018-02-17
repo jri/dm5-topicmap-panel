@@ -6,10 +6,13 @@
 
 <script>
 export default {
-  computed: {
-    compDefs () {
-      return this.$store.state.compDefs.toolbar
-    }
+
+  created () {
+    // console.log('dm5-toolbar created', this.compDefs)
+  },
+
+  props: {
+    compDefs: Object
   }
 }
 </script>

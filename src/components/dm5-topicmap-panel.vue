@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-topicmap-panel">
-    <dm5-toolbar></dm5-toolbar>
+    <dm5-toolbar :compDefs="toolbarCompDefs"></dm5-toolbar>
     <component :is="renderer" :object="object" :writable="writable" :object-renderers="objectRenderers"></component>
   </div>
 </template>
@@ -9,7 +9,7 @@
 export default {
 
   created () {
-    // console.log('dm5-topicmap-panel created')
+    // console.log('dm5-topicmap-panel created', this.toolbarCompDefs)
   },
 
   mixins: [
@@ -17,6 +17,10 @@ export default {
     require('./mixins/writable').default,
     require('./mixins/object-renderers').default
   ],
+
+  props: {
+    toolbarCompDefs: Object
+  },
 
   computed: {
     renderer () {
