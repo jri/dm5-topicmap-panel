@@ -1,6 +1,11 @@
 <template>
   <div class="dm5-toolbar">
-    <component v-for="compDef in compDefs" :is="compDef.comp" :key="compDef.id"></component>
+    <div class="left">
+      <component v-for="compDef in compDefs.left" :is="compDef.comp" :key="compDef.id"></component>
+    </div>
+    <div class="right">
+      <component v-for="compDef in compDefs.right" :is="compDef.comp" :key="compDef.id"></component>
+    </div>
   </div>
 </template>
 
@@ -23,10 +28,19 @@ export default {
   position: absolute;         /* share space with Cytoscape canvas */
   z-index: 1;                 /* render on top of Cytoscape canvas */
   width: 100%;
-  pointer-events: none;       /* make click-through */
+  pointer-events: none;       /* make toolbar click-through */
 }
 
-.dm5-toolbar > * {
+.dm5-toolbar > div {
+  display: flex;
+}
+
+.dm5-toolbar > div.right {
+  flex: auto;
+  justify-content: flex-end;
+}
+
+.dm5-toolbar > div > * {
   pointer-events: initial;    /* childs still act on clicks */
 }
 </style>
