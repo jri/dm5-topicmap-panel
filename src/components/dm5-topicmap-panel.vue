@@ -36,8 +36,4 @@ export default {
 </script>
 
 <style>
-.dm5-topicmap-panel {
-  display: flex;
-  overflow: hidden;     /* adapt canvas width to window size */
-}
 </style>

@@ -40,8 +40,7 @@ export default {
 
 <style>
 #dm5-cytoscape-renderer {
-  flex: auto;
-  overflow: hidden;     /* adapt canvas width to window size */
+  height: 100%;
 }
 
 #dm5-cytoscape-renderer #cytoscape-container {
