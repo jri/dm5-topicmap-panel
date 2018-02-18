@@ -1,12 +1,14 @@
 <template>
   <div class="dm5-detail-overlay">
-    <div :class="['detail', {locked}]" v-if="node" :style="style">
+    <div :class="['detail', {locked}]" v-if="detailNode" :style="style">
       <h3>{{title}}</h3>
       <!--
-        Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle than
-        "node" (the visibility predicate in parent comp). So we have to put "v-if" here. TODO: approve this hypothesis.
+        Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle
+        than "detailNode" (the visibility predicate in parent comp). So we have to put v-if="object" here.
+        TODO: approve this hypothesis.
       -->
-      <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers">
+      <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
+        @updated="updated">
       </dm5-object-renderer>
       <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
     </div>
@@ -56,12 +58,17 @@ export default {
       return this.$store.state.cytoscapeRenderer.zoom
     },
 
-    node () {
+    /**
+     * The Cytoscape node underlying this detail overlay.
+     * Is either a "real" node, or, in case of an assoc selection, the "aux" node.
+     * Undefined if there is no selection.
+     */
+    detailNode () {
       return this.ele && (this.ele.isNode() ? this.ele : this.auxNode)
     },
 
     title () {
-      return this.node.data('label')
+      return this.detailNode.data('label')
     },
 
     style () {
@@ -73,13 +80,13 @@ export default {
     },
 
     pos () {
-      const p = this.node.renderedPosition()
+      const p = this.detailNode.renderedPosition()
       const pos = {x: p.x, y: p.y}
       if (this.size) {
         pos.x -= this.size.width  / 2
         pos.y -= this.size.height / 2
       } else {
-        // console.warn('overlay size not yet known', this.node.id())
+        // console.warn('overlay size not yet known', this.detailNode.id())
       }
       return pos
     },
@@ -90,8 +97,13 @@ export default {
   },
 
   methods: {
+
     toggleLock () {
       this.locked = !this.locked
+    },
+
+    updated () {
+      this.$store.dispatch('syncDetailSize', this.detailNode)
     }
   },
 
@@ -113,7 +125,7 @@ export default {
   background-color: var(--background-color);
   border: 1px solid var(--border-color-lighter);
   padding: 0 12px 12px 12px;
-  min-width: 100px;
+  min-width: 120px;
   max-width: 360px;
 }
 

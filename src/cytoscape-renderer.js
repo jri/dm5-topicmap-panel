@@ -182,6 +182,11 @@ const actions = {
     }
   },
 
+  syncDetailSize (_, detailNode) {
+    console.log('syncDetailSize', detailNode.id())
+    showDetailOverlay(detailNode)
+  },
+
   syncRemoveTopic (_, id) {
     console.log('syncRemoveTopic', id)
     cyElement(id).remove()
