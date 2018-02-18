@@ -26,6 +26,7 @@ var topicmap              // view model: the rendered topicmap (a dm5.Topicmap o
 
 var cy                    // the Cytoscape instance
 var box                   // the measurement box
+var fisheyeAnimation
 
 var faFont                // Font Awesome SVG <font> element
 var init = false          // tracks Cytoscape event listener registration and context menu initialization, which is lazy
@@ -446,13 +447,11 @@ function showDetailOverlay(node) {
 }
 
 function playFisheyeAnimation() {
-  // Note: node locking diminishes layout quality.
-  // state.ele.lock()
-  cy.layout({
+  fisheyeAnimation && fisheyeAnimation.stop()
+  fisheyeAnimation = cy.layout({
     name: 'cose-bilkent',
     stop () {
       // console.log('fisheye animation complete')
-      // state.ele.unlock()
     },
     // animate: 'end',
     // animationDuration: 3000,
