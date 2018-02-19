@@ -184,7 +184,7 @@ const actions = {
   },
 
   syncDetailSize (_, detailNode) {
-    console.log('syncDetailSize', detailNode.id())
+    // console.log('syncDetailSize', detailNode.id())
     showDetailOverlay(detailNode)
   },
 
@@ -593,8 +593,9 @@ function playRestoreAnimation () {
 function auxNode (edge) {
   return cy.add({
     data: {
-      assocId: id(edge),  // hold original edge ID
-      icon: '\uf10c'      // model.js DEFAULT_TOPIC_ICON
+      assocId: id(edge),            // Holds original edge ID. Needed for context menu.
+      label: edge.data('label'),
+      icon: '\uf10c'                // model.js DEFAULT_TOPIC_ICON
     },
     position: edge.midpoint(),
     classes: 'aux'
