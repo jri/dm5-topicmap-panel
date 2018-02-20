@@ -142,30 +142,26 @@ export default {
         const clicks = e.originalEvent.detail
         // console.log('"tap node" event!', id(e.target), clicks)
         if (clicks === 1) {
-          this.$store.dispatch('selectTopic', id(e.target))
+          this.$parent.$emit('topic-select', id(e.target))
         } else if (clicks === 2) {
-          this.$store.dispatch('onTopicDoubleClick', e.target.data('viewTopic'))
+          this.$parent.$emit('topic-double-click', id(e.target))
         }
-      })
-      .on('tap', 'edge', e => {
+      }).on('tap', 'edge', e => {
         // console.log('"tap edge" event!', id(e.target))
-        this.$store.dispatch('selectAssoc', id(e.target))
-      })
-      .on('tap', e => {
+        this.$parent.$emit('assoc-select', id(e.target))
+      }).on('tap', e => {
         if (e.target === this.cy) {
           // console.log('"tap background" event!')
-          this.$store.dispatch('onBackgroundClick')
+          this.$parent.$emit('topicmap-click')
         }
-      })
-      .on('cxttap', e => {
+      }).on('cxttap', e => {
         if (e.target === this.cy) {
-          this.$store.dispatch('onBackgroundRightClick', {
+          this.$parent.$emit('topicmap-contextmenu', {
             model:  e.position,
             render: e.renderedPosition
           })
         }
-      })
-      .on('tapstart', 'node', e => {
+      }).on('tapstart', 'node', e => {
         const dragState = new DragState(e.target)
         const handler = this.dragHandler(dragState)
         this.cy.on('tapdrag', handler)
@@ -174,19 +170,19 @@ export default {
           if (dragState.hoverNode) {
             dragState.unhover()
             dragState.resetPosition()
-            this.$store.dispatch('onTopicDroppedOntoTopic', {
-              topicId: dragState.node.id(),                   // FIXME: number ID?
-              droppedOntoTopicId: dragState.hoverNode.id()    // FIXME: number ID?
+            this.$parent.$emit('topic-drop-on-topic', {
+              // topic 1 dropped onto topic 2
+              topicId1: id(dragState.node),
+              topicId2: id(dragState.hoverNode)
             })
           } else if (dragState.drag) {
-            this.$store.dispatch('onTopicDragged', {
-              id: Number(dragState.node.id()),                // FIXME: number ID?
+            this.$parent.$emit('topic-drag', {
+              id: id(dragState.node),
               pos: dragState.node.position()
             })
           }
         })
-      })
-      .on('zoom', () => {
+      }).on('zoom', () => {
         this.zoom = this.cy.zoom()
       })
     },

@@ -313,8 +313,7 @@ function cyNode (viewTopic) {
     data: {
       id:    viewTopic.id,
       label: viewTopic.value,
-      icon:  viewTopic.getIcon(),
-      viewTopic
+      icon:  viewTopic.getIcon()
     },
     position: viewTopic.getPosition()
   }
