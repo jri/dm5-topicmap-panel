@@ -10,7 +10,8 @@
       <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
         @updated="updated">
       </dm5-object-renderer>
-      <el-button :class="['lock-button', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
+      <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
+      <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
     </div>
   </div>
 </template>
@@ -87,6 +88,12 @@ export default {
       this.locked = !this.locked
     },
 
+    handle (e) {
+      // e.target.style.pointerEvents = 'none'
+      console.log('handle', e)
+      this.detailNode.emit('taphold', {x: e.x, y: e.y})
+    },
+
     updated () {
       this.$store.dispatch('syncDetailSize')
     }
@@ -118,11 +125,18 @@ export default {
   pointer-events: none;
 }
 
-.dm5-detail-overlay .detail .lock-button {
+.dm5-detail-overlay .detail > button {
   position: absolute;
   top: 1px;
-  right: 3px;
   padding: 0;
   pointer-events: initial;
+}
+
+.dm5-detail-overlay .detail > button.lock {
+  right: 24px;
+}
+
+.dm5-detail-overlay .detail > button.handle {
+  right: 3px;
 }
 </style>
