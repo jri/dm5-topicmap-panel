@@ -32,6 +32,8 @@ export default {
     require('./mixins/object-renderers').default
   ],
 
+  props: ['zoom'],
+
   data () {
     return {
       locked: true
@@ -42,29 +44,12 @@ export default {
 
     // TODO: use Vuex mapState() helper. Requires object spread operator. Currently our Babel is too old.
 
-    ele () {
-      return this.$store.state.cytoscapeRenderer.ele
-    },
-
-    auxNode () {
-      return this.$store.state.cytoscapeRenderer.auxNode
+    detailNode () {
+      return this.$store.state.cytoscapeRenderer.detailNode
     },
 
     size () {
       return this.$store.state.cytoscapeRenderer.size
-    },
-
-    zoom () {
-      return this.$store.state.cytoscapeRenderer.zoom
-    },
-
-    /**
-     * The Cytoscape node underlying this detail overlay.
-     * Is either a "real" node, or, in case of an assoc selection, the "aux" node.
-     * Undefined if there is no selection.
-     */
-    detailNode () {
-      return this.ele && (this.ele.isNode() ? this.ele : this.auxNode)
     },
 
     title () {
@@ -103,7 +88,7 @@ export default {
     },
 
     updated () {
-      this.$store.dispatch('syncDetailSize', this.detailNode)
+      this.$store.dispatch('syncDetailSize')
     }
   },
 

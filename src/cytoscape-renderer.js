@@ -1,107 +1,75 @@
 const FISHEYE = true
 
-import cytoscape from 'cytoscape'
-import coseBilkent from 'cytoscape-cose-bilkent'
-import cxtmenu from 'cytoscape-cxtmenu'
-import fa from 'font-awesome/fonts/fontawesome-webfont.svg'
-import dm5 from 'dm5'
 import Vue from 'vue'
-
-// get style from CSS variables
-const style = window.getComputedStyle(document.body)
-const fontFamily         = style.getPropertyValue('--main-font-family')
-const mainFontSize       = style.getPropertyValue('--main-font-size')
-const labelFontSize      = style.getPropertyValue('--label-font-size')
-const iconColor          = style.getPropertyValue('--color-topic-icon')
-const hoverBorderColor   = style.getPropertyValue('--color-topic-hover')
-const backgroundColor    = style.getPropertyValue('--background-color')
-const borderColorLighter = style.getPropertyValue('--border-color-lighter')
 
 // Note: the topicmap is not vuex state. (This store module provides no state at all, only actions. ### FIXDOC)
 // In conjunction with Cytoscape the topicmap is not considered reactive data.
 // We have to snyc topicmap data with the Cytoscape graph model manually anyways.
 // (This is because Cytoscape deploys a canvas, not a DOM).
 
-var topicmap              // view model: the rendered topicmap (a dm5.Topicmap object)
+var topicmap            // view model: the rendered topicmap (a dm5.Topicmap object)
 
-var cy                    // the Cytoscape instance
-var box                   // the measurement box
+var ele                 // Selected Cytoscape element (node or edge).
+                        // Must only be queried if detailNode is defined.
+
+var auxNode             // in case of an assoc selection: the auxiliary node that represents the assoc
+
 var fisheyeAnimation
-
-var faFont                // Font Awesome SVG <font> element
-var init = false          // tracks Cytoscape event listener registration and context menu initialization, which is lazy
-
-const svgReady = dm5.restClient.getXML(fa).then(svg => {
-  // console.log('### SVG ready!')
-  faFont = svg.querySelector('font')
-})
-
-// register extensions
-cytoscape.use(coseBilkent)
-cytoscape.use(cxtmenu)
 
 //
 
 const state = {
 
-  ele: undefined,         // Selected Cytoscape element (node or edge).
+  cy: undefined,          // the Cytoscape instance
+
+  svgReady: undefined,    // a promise resolved once the FontAwesome SVG is loaded
+
+  detailNode: undefined,  // The Cytoscape node underlying the detail overlay.
+                          // Either a "real" node, or, in case of an assoc selection, the "aux" node.
                           // Undefined if there is no selection.
 
-  auxNode: undefined,     // In case of an edge selection: the auxiliary node that represents the edge.
-
-  size: undefined,        // Size of in-map topic detail (object with "width" and "height" properties).
-
-  zoom: 1                 // TODO: real init value
+  size: undefined         // size of the detail overlay (object with "width" and "height" properties).
 }
 
 const actions = {
 
-  initCytoscape () {
-    cy = initialize().on('zoom', () => {
-      state.zoom = cy.zoom()
-    })
-    box = document.getElementById('measurement-box')
+  initCytoscape (_, {cy, svgReady}) {
+    state.cy = cy
+    state.svgReady = svgReady
   },
 
   resizeTopicmapRenderer () {
     // console.log('resizeTopicmapRenderer')
-    cy.resize()
+    state.cy.resize()
   },
 
   // The "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
 
   syncTopicmap ({dispatch}, _topicmap) {
     // console.log('syncTopicmap', _topicmap.id)
-    // lazy initialization
-    if (!init) {
-      eventListeners(dispatch)
-      initContextMenus(dispatch)
-      init = true
-    }
-    //
     topicmap = _topicmap
     return new Promise(resolve => {
-      svgReady.then(renderTopicmap).then(resolve)
+      state.svgReady.then(renderTopicmap).then(resolve)
     })
   },
 
   syncStyles (_, assocTypeColors) {
     // console.log('syncStyles', assocTypeColors)
     for (const typeUri in assocTypeColors) {
-      cy.style().selector(`edge[typeUri='${typeUri}']`).style({'line-color': assocTypeColors[typeUri]})
+      state.cy.style().selector(`edge[typeUri='${typeUri}']`).style({'line-color': assocTypeColors[typeUri]})
     }
   },
 
   syncAddTopic (_, id) {
     // console.log('syncAddTopic', id)
-    cy.add(cyNode(topicmap.getTopic(id)))
+    state.cy.add(cyNode(topicmap.getTopic(id)))
   },
 
   syncAddAssoc (_, id) {
     // console.log('syncAddAssoc', id)
     const assoc = topicmap.getAssoc(id)
     if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
-      cy.add(cyEdge(assoc))
+      state.cy.add(cyEdge(assoc))
     }
   },
 
@@ -143,21 +111,20 @@ const actions = {
     ]).then(() => {
       // console.log('restore animation complete')
       // update state + sync view
-      state.ele = cyElement(id).select()
+      ele = cyElement(id).select()
       // Note 1: select() is needed to restore selection after switching topicmap.
       // Note 2: setting the "ele" state causes the detail overlay to be rendered (at next tick).
-      if (state.ele.size() != 1) {
-        console.warn('syncSelect', id, 'not found', state.ele.size())
+      if (ele.size() != 1) {
+        console.warn('syncSelect', id, 'not found', ele.size())
       }
       if (FISHEYE) {
-        let detailNode
-        if (state.ele.isNode()) {
-          detailNode = state.ele
+        if (ele.isNode()) {
+          state.detailNode = ele
         } else {
-          detailNode = state.auxNode = auxNode(state.ele)
+          state.detailNode = auxNode = createAuxNode(ele)
         }
         Vue.nextTick().then(() => {
-          showDetailOverlay(detailNode)
+          showDetailOverlay()
         })
       }
     })
@@ -177,15 +144,15 @@ const actions = {
     console.log('syncTopicVisibility', id)
     const viewTopic = topicmap.getTopic(id)
     if (viewTopic.isVisible()) {
-      cy.add(cyNode(viewTopic))
+      state.cy.add(cyNode(viewTopic))
     } else {
       cyElement(id).remove()
     }
   },
 
-  syncDetailSize (_, detailNode) {
+  syncDetailSize () {
     // console.log('syncDetailSize', detailNode.id())
-    showDetailOverlay(detailNode)
+    showDetailOverlay()
   },
 
   syncRemoveTopic (_, id) {
@@ -213,226 +180,13 @@ export default {
 
 // ---
 
-function initialize() {
-  return cytoscape({
-    container: document.getElementById('cytoscape-container'),
-    style: [
-      {
-        selector: 'node',
-        style: {
-          'shape': 'rectangle',
-          'background-image': ele => renderNode(ele).url,
-          'background-opacity': 0,
-          'width':  ele => renderNode(ele).width,
-          'height': ele => renderNode(ele).height,
-          'border-width': 1,
-          'border-color': borderColorLighter,
-          'border-opacity': 1
-        }
-      },
-      {
-        selector: 'edge',
-        style: {
-          'width': 3,
-          'line-color': 'rgb(178, 178, 178)',
-          'curve-style': 'bezier',
-          'label': 'data(label)',
-          'font-family': fontFamily,
-          'font-size': labelFontSize,
-          'text-margin-y': '-10',
-          'text-rotation': 'autorotate'
-        }
-      },
-      {
-        selector: 'node:selected, node.aux',
-        style: {
-          'border-opacity': 0
-        }
-      },
-      {
-        selector: 'edge:selected',
-        style: {
-          'width': 6
-        }
-      },
-      {
-        selector: 'node.hover',
-        style: {
-          'border-width': 3,
-          'border-color': hoverBorderColor,
-          'border-opacity': 1
-        }
-      }
-    ],
-    layout: {
-      name: 'preset'
-    },
-    wheelSensitivity: 0.2
-  })
-}
-
-// lazy registration of Cytoscape event listeners
-function eventListeners (dispatch) {
-  cy.on('tap', 'node', evt => {
-    const clicks = evt.originalEvent.detail
-    // console.log('"tap node" event!', id(evt.target), clicks)
-    if (clicks === 1) {
-      dispatch('selectTopic', id(evt.target))
-    } else if (clicks === 2) {
-      dispatch('onTopicDoubleClick', evt.target.data('viewTopic'))
-    }
-  })
-  cy.on('tap', 'edge', evt => {
-    // console.log('"tap edge" event!', id(evt.target))
-    dispatch('selectAssoc', id(evt.target))
-  })
-  cy.on('tap', evt => {
-    if (evt.target === cy) {
-      // console.log('"tap background" event!')
-      dispatch('onBackgroundClick')
-    }
-  })
-  cy.on('cxttap', evt => {
-    if (evt.target === cy) {
-      dispatch('onBackgroundRightClick', {
-        model:  evt.position,
-        render: evt.renderedPosition
-      })
-    }
-  })
-  cy.on('tapstart', 'node', evt => {
-    const dragState = new DragState(evt.target)
-    const handler = dragHandler(dragState)
-    cy.on('tapdrag', handler)
-    cy.one('tapend', evt => {
-      cy.off('tapdrag', handler)
-      if (dragState.hoverNode) {
-        dragState.unhover()
-        dragState.resetPosition()
-        dispatch('onTopicDroppedOntoTopic', {
-          topicId: dragState.node.id(),                   // FIXME: number ID?
-          droppedOntoTopicId: dragState.hoverNode.id()    // FIXME: number ID?
-        })
-      } else if (dragState.drag) {
-        dispatch('onTopicDragged', {
-          id: Number(dragState.node.id()),                // FIXME: number ID?
-          pos: dragState.node.position()
-        })
-      }
-    })
-  })
-}
-
 /**
- * Maintains state for dragging a node and hovering other nodes.
- */
-class DragState {
-
-  constructor (node) {
-    this.node = node              // the dragged node
-    this.nodePosition = {         // the dragged node's original position. Note: a new pos object must be created.
-      x: node.position('x'),
-      y: node.position('y')
-    }
-    this.hoverNode = undefined    // the node hovered while dragging
-    this.drag = false             // true once dragging starts
-  }
-
-  hover () {
-    this.hoverNode.addClass('hover')
-  }
-
-  unhover () {
-    this.hoverNode.removeClass('hover')
-  }
-
-  resetPosition () {
-    this.node.animate({
-      position: this.nodePosition,
-      easing: 'ease-in-out-cubic',
-      duration: 200
-    })
-  }
-}
-
-function dragHandler (dragState) {
-  return function (evt) {
-    var _node = nodeAt(evt.position, dragState.node)
-    if (_node) {
-      if (_node !== dragState.hoverNode) {
-        dragState.hoverNode && dragState.unhover()
-        dragState.hoverNode = _node
-        dragState.hover()
-      }
-    } else {
-      if (dragState.hoverNode) {
-        dragState.unhover()
-        dragState.hoverNode = undefined
-      }
-    }
-    dragState.drag = true
-  }
-}
-
-function initContextMenus (dispatch) {
-  // Note: a node might be an "auxiliary" node, that is a node that represents an edge.
-  // In this case the original edge ID is contained in the node's "assocId" data.
-  cy.cxtmenu({
-    selector: 'node',
-    commands: ele => assocId(ele) ? assocCommands(assocId) : topicCommands,
-    atMouse: true
-  })
-  cy.cxtmenu({
-    selector: 'edge',
-    commands: ele => assocCommands(idMapper)
-  })
-
-  const topicCommands = [
-    {content: 'Hide',             select: hideTopic},
-    {content: 'Delete',           select: deleteTopic}
-  ]
-
-  const assocCommands = idMapper => {
-    return [
-      {content: 'Hide',   select: hideAssoc},
-      {content: 'Delete', select: deleteAssoc}
-    ]
-
-    function hideAssoc (ele) {
-      dispatch('hideAssoc', idMapper(ele))
-    }
-
-    function deleteAssoc (ele) {
-      dispatch('deleteAssoc', idMapper(ele))
-    }
-  }
-
-  function idMapper (ele) {
-    return id(ele)
-  }
-
-  function assocId (ele) {
-    return ele.data('assocId')
-  }
-
-  // ---
-
-  function hideTopic (ele) {
-    dispatch('hideTopic', id(ele))
-  }
-
-  function deleteTopic (ele) {
-    dispatch('deleteTopic', id(ele))
-  }
-}
-
-/**
- * Measures size of detail overlay, adapts the given node's size accordingly, and starts fisheye animation.
+ * Measures the size of the detail overlay, adapts the detail node's size accordingly, and starts fisheye animation.
  *
  * Precondition:
  * - the DOM is updated already.
  */
-function showDetailOverlay(node) {
+function showDetailOverlay() {
   const detail = document.querySelector('.dm5-detail-overlay .detail')
   if (!detail) {
     throw Error('No detail overlay')
@@ -442,13 +196,13 @@ function showDetailOverlay(node) {
     height: detail.clientHeight
   }
   // console.log('showDetailOverlay', node.id(), state.size.width, state.size.height)
-  node.style(state.size)   // fisheye element style
+  state.detailNode.style(state.size)   // fisheye element style
   playFisheyeAnimation()
 }
 
 function playFisheyeAnimation() {
   fisheyeAnimation && fisheyeAnimation.stop()
-  fisheyeAnimation = cy.layout({
+  fisheyeAnimation = state.cy.layout({
     name: 'cose-bilkent',
     stop () {
       // console.log('fisheye animation complete')
@@ -464,72 +218,20 @@ function playFisheyeAnimation() {
   }).run()
 }
 
-// TODO: memoization
-function renderNode (ele) {
-  const label = ele.data('label')
-  const iconPath = faGlyphPath(ele.data('icon'))
-  const size = measureText(label)
-  const width = size.width + 32
-  const height = size.height + 8
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-      <rect x="0" y="0" width="${width}" height="${height}" fill="${backgroundColor}"></rect>
-      <text x="26" y="${height - 7}" font-family="${fontFamily}" font-size="${mainFontSize}">${label}</text>
-      <path d="${iconPath}" fill="${iconColor}" transform="scale(0.009 -0.009) translate(600 -2000)"></path>
-    </svg>`
-  return {
-    url: 'data:image/svg+xml,' + encodeURIComponent(svg),
-    width, height
-  }
-}
-
-function measureText (text) {
-  box.textContent = text
-  return {
-    width: box.clientWidth,
-    height: box.clientHeight
-  }
-}
-
-function nodeAt (pos, excludeNode) {
-  var foundNode
-  cy.nodes().forEach(node => {
-    if (node !== excludeNode && isInside(pos, node)) {
-      foundNode = node
-      return false    // abort iteration
-    }
-  })
-  return foundNode
-}
-
-function isInside (pos, node) {
-  var x = pos.x
-  var y = pos.y
-  var box = node.boundingBox()
-  return x > box.x1 && x < box.x2 && y > box.y1 && y < box.y2
-}
-
-function faGlyphPath (unicode) {
-  try {
-    return faFont.querySelector(`glyph[unicode="${unicode}"]`).getAttribute('d')
-  } catch (e) {
-    throw Error(`FA glyph "${unicode}" not available (${e})`)
-  }
-}
-
 function renderTopicmap () {
-  const elems = []
+  const eles = []
   topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
-      elems.push(cyNode(viewTopic))
+      eles.push(cyNode(viewTopic))
     }
   })
   topicmap.forEachAssoc(assoc => {
     if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
-      elems.push(cyEdge(assoc))
+      eles.push(cyEdge(assoc))
     }
   })
-  cy.remove("*")  // "*" is the group selector "all"
-  cy.add(elems)
+  state.cy.remove("*")  // "*" is the group selector "all"
+  state.cy.add(eles)
   // console.log('### Topicmap rendering complete!')
 }
 
@@ -548,11 +250,10 @@ function _syncTopicPosition (id) {
  * @return  a promise that is resolved once the restore animation is complete.
  */
 function _syncUnselect () {
-  const ele = state.ele
   // console.log('_syncUnselect', ele)
-  if (ele) {
+  if (state.detailNode) {
     // update state
-    state.ele = undefined
+    state.detailNode = undefined
     //
     // sync view
     // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
@@ -565,7 +266,7 @@ function _syncUnselect () {
       if (ele.isNode()) {
         ele.style({width: '', height: ''})    // reset size
       } else {
-        cy.remove(state.auxNode)
+        state.cy.remove(auxNode)
       }
       return playRestoreAnimation()
     }
@@ -590,8 +291,8 @@ function playRestoreAnimation () {
 /**
  * Creates an auxiliary node to represent the given edge.
  */
-function auxNode (edge) {
-  return cy.add({
+function createAuxNode (edge) {
+  return state.cy.add({
     data: {
       assocId: id(edge),            // Holds original edge ID. Needed for context menu.
       label: edge.data('label'),
@@ -644,9 +345,10 @@ function cyEdge (assoc) {
  * @return  A collection of 1 or 0 elements.
  */
 function cyElement (id) {
-  return cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
+  return state.cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
 }
 
+// copy in dm5.cytoscape-renderer.vue
 function id (ele) {
   // Note: cytoscape element IDs are strings
   return Number(ele.id())
