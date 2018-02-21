@@ -2,6 +2,18 @@
 
 ## Version History
 
+**0.9** -- Feb 21, 2018
+
+* In-map *assoc* details.
+* Better composability:
+    * Component relies on explicit props (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Props have reasonable defaults.
+    * Component emits events (instead of dispatching actions): `topic-select`, `topic-double-click`, `topic-drag`, `topic-drop-on-topic`, `assoc-select`, `topicmap-click`, `topicmap-contextmenu`.
+    * Toolbar provides separate `left` and `right` mount points.
+    * Canvas resize can be triggered from outside.
+* Fixes:
+    * Click events on toolbar background bubble to canvas.
+    * In-map details do not line wrap at canvas edge.
+
 **0.8** -- Feb 3, 2018
 
 * In-map topic details with inline edit capability
@@ -32,4 +44,4 @@
 
 ------------
 Jörg Richter  
-Feb 3, 2018
+Feb 21, 2018
