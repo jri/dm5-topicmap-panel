@@ -11,6 +11,9 @@
         @updated="updated">
       </dm5-object-renderer>
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
+      <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
+      <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" type="text" @click="togglePin">
+      </el-button>
       <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
     </div>
   </div>
@@ -37,7 +40,8 @@ export default {
 
   data () {
     return {
-      locked: true
+      locked: true,
+      pinned: false
     }
   },
 
@@ -88,6 +92,14 @@ export default {
       this.locked = !this.locked
     },
 
+    togglePin () {
+      this.pinned = !this.pinned
+    },
+
+    collapse () {
+      // TODO
+    },
+
     handle (e) {
       // e.target.style.pointerEvents = 'none'
       console.log('handle', e)
@@ -128,12 +140,28 @@ export default {
 .dm5-detail-overlay .detail > button {
   position: absolute;
   top: 1px;
+  font-size: 16px !important;
   padding: 0;
   pointer-events: initial;
 }
 
 .dm5-detail-overlay .detail > button.lock {
-  right: 24px;
+  right: 71px;
+}
+
+.dm5-detail-overlay .detail > button.collapse {
+  right: 47px;
+}
+
+.dm5-detail-overlay .detail > button.pin {
+  top: 2px;
+  right: 27px;
+}
+
+.dm5-detail-overlay .detail > button.pin.unpinned {
+  color: transparent;
+  font-size: 15px !important;
+  -webkit-text-stroke: 1px var(--highlight-color);
 }
 
 .dm5-detail-overlay .detail > button.handle {
