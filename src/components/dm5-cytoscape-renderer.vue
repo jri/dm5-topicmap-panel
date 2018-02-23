@@ -180,6 +180,7 @@ export default {
               id: id(dragState.node),
               pos: dragState.node.position()
             })
+            this.$store.dispatch('playFisheyeAnimation')  // TODO: play only if detail overlay
           }
         })
       }).on('zoom', () => {

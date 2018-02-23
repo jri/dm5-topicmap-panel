@@ -12,6 +12,7 @@
       </dm5-object-renderer>
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
       <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
+      <!-- TODO: move pin button to dm5-pinning module -->
       <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" type="text" @click="togglePin">
       </el-button>
       <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
@@ -97,7 +98,7 @@ export default {
     },
 
     collapse () {
-      // TODO
+      // TODO: drop it?
     },
 
     handle (e) {

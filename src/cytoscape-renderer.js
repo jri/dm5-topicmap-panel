@@ -150,11 +150,6 @@ const actions = {
     }
   },
 
-  syncDetailSize () {
-    // console.log('syncDetailSize', detailNode.id())
-    showDetailOverlay()
-  },
-
   syncRemoveTopic (_, id) {
     console.log('syncRemoveTopic', id)
     cyElement(id).remove()
@@ -163,6 +158,15 @@ const actions = {
   syncRemoveAssoc (_, id) {
     console.log('syncRemoveAssoc', id)
     cyElement(id).remove()
+  },
+
+  syncDetailSize () {
+    // console.log('syncDetailSize', detailNode.id())
+    showDetailOverlay()
+  },
+
+  playFisheyeAnimation () {
+    playFisheyeAnimation()
   },
 
   // ---
