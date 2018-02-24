@@ -325,7 +325,7 @@ function isInside (pos, node) {
   return x > box.x1 && x < box.x2 && y > box.y1 && y < box.y2
 }
 
-// copy in cytoscape-renderer.js
+// copy in cytoscape-renderer.js and dm5-detail-overlay
 function id (ele) {
   // Note: cytoscape element IDs are strings
   return Number(ele.id())

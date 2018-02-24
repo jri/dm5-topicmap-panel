@@ -2,27 +2,19 @@ const FISHEYE = true
 
 import Vue from 'vue'
 
-// Note: the topicmap is not vuex state. (This store module provides no state at all, only actions. ### FIXDOC)
-// In conjunction with Cytoscape the topicmap is not considered reactive data.
-// We have to snyc topicmap data with the Cytoscape graph model manually anyways.
-// (This is because Cytoscape deploys a canvas, not a DOM).
-
-var topicmap            // view model: the rendered topicmap (a dm5.Topicmap object)
-
-var ele                 // Selected Cytoscape element (node or edge).
-                        // Must only be queried if detailNode is defined.
-
 var auxNode             // in case of an assoc selection: the auxiliary node that represents the assoc
-
 var fisheyeAnimation
 
-//
-
 const state = {
+
+  topicmap: undefined,    // view model: the rendered topicmap (a dm5.Topicmap object)
 
   cy: undefined,          // the Cytoscape instance
 
   svgReady: undefined,    // a promise resolved once the FontAwesome SVG is loaded
+
+  ele: undefined,         // Selected Cytoscape element (node or edge).
+                          // Must only be queried if detailNode is defined.
 
   detailNode: undefined,  // The Cytoscape node underlying the detail overlay.
                           // Either a "real" node, or, in case of an assoc selection, the "aux" node.
@@ -45,9 +37,9 @@ const actions = {
 
   // The "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
 
-  syncTopicmap ({dispatch}, _topicmap) {
-    // console.log('syncTopicmap', _topicmap.id)
-    topicmap = _topicmap
+  syncTopicmap ({dispatch}, topicmap) {
+    // console.log('syncTopicmap', topicmap.id)
+    state.topicmap = topicmap
     return new Promise(resolve => {
       state.svgReady.then(renderTopicmap).then(resolve)
     })
@@ -62,12 +54,12 @@ const actions = {
 
   syncAddTopic (_, id) {
     // console.log('syncAddTopic', id)
-    state.cy.add(cyNode(topicmap.getTopic(id)))
+    state.cy.add(cyNode(state.topicmap.getTopic(id)))
   },
 
   syncAddAssoc (_, id) {
     // console.log('syncAddAssoc', id)
-    const assoc = topicmap.getAssoc(id)
+    const assoc = state.topicmap.getAssoc(id)
     if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
       state.cy.add(cyEdge(assoc))
     }
@@ -75,12 +67,12 @@ const actions = {
 
   syncTopic (_, id) {
     // console.log('syncTopic', id)
-    cyElement(id).data('label', topicmap.getTopic(id).value)
+    cyElement(id).data('label', state.topicmap.getTopic(id).value)
   },
 
   syncAssoc (_, id) {
     // console.log('syncAssoc', id)
-    const assoc = topicmap.getAssoc(id)
+    const assoc = state.topicmap.getAssoc(id)
     cyElement(id).data({
       typeUri: assoc.typeUri,
       label:   assoc.value
@@ -111,17 +103,17 @@ const actions = {
     ]).then(() => {
       // console.log('restore animation complete')
       // update state + sync view
-      ele = cyElement(id).select()
+      state.ele = cyElement(id).select()
       // Note 1: select() is needed to restore selection after switching topicmap.
       // Note 2: setting the "ele" state causes the detail overlay to be rendered (at next tick).
-      if (ele.size() != 1) {
-        console.warn('syncSelect', id, 'not found', ele.size())
+      if (state.ele.size() != 1) {
+        console.warn('syncSelect', id, 'not found', state.ele.size())
       }
       if (FISHEYE) {
-        if (ele.isNode()) {
-          state.detailNode = ele
+        if (state.ele.isNode()) {
+          state.detailNode = state.ele
         } else {
-          state.detailNode = auxNode = createAuxNode(ele)
+          state.detailNode = auxNode = createAuxNode(state.ele)
         }
         Vue.nextTick().then(() => {
           showDetailOverlay()
@@ -142,7 +134,7 @@ const actions = {
 
   syncTopicVisibility (_, id) {
     console.log('syncTopicVisibility', id)
-    const viewTopic = topicmap.getTopic(id)
+    const viewTopic = state.topicmap.getTopic(id)
     if (viewTopic.isVisible()) {
       state.cy.add(cyNode(viewTopic))
     } else {
@@ -224,12 +216,12 @@ function playFisheyeAnimation() {
 
 function renderTopicmap () {
   const eles = []
-  topicmap.forEachTopic(viewTopic => {
+  state.topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
       eles.push(cyNode(viewTopic))
     }
   })
-  topicmap.forEachAssoc(assoc => {
+  state.topicmap.forEachAssoc(assoc => {
     if (!assoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
       eles.push(cyEdge(assoc))
     }
@@ -245,7 +237,7 @@ function renderTopicmap () {
 function _syncTopicPosition (id) {
   return cyElement(id).animation({
     // duration: 3000,
-    position: topicmap.getTopic(id).getPosition(),
+    position: state.topicmap.getTopic(id).getPosition(),
     easing: 'ease-in-out-cubic'
   }).play().promise()
 }
@@ -254,7 +246,7 @@ function _syncTopicPosition (id) {
  * @return  a promise that is resolved once the restore animation is complete.
  */
 function _syncUnselect () {
-  // console.log('_syncUnselect', ele)
+  // console.log('_syncUnselect', state.ele)
   if (state.detailNode) {
     // update state
     state.detailNode = undefined
@@ -264,11 +256,11 @@ function _syncUnselect () {
     // In this situation cy.elements(":selected") would return a non-empty collection.
     // Note: when the user clicks on the background Cytoscape unselects the selected element by default.
     // Calling cy.elements(":selected") afterwards would return an empty collection.
-    ele.unselect()
+    state.ele.unselect()
     //
     if (FISHEYE) {
-      if (ele.isNode()) {
-        ele.style({width: '', height: ''})    // reset size
+      if (state.ele.isNode()) {
+        state.ele.style({width: '', height: ''})    // reset size
       } else {
         state.cy.remove(auxNode)
       }
@@ -284,7 +276,7 @@ function _syncUnselect () {
 function playRestoreAnimation () {
   const promises = []
   // console.log('starting restore animation')
-  topicmap.forEachTopic(viewTopic => {
+  state.topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
       promises.push(_syncTopicPosition(viewTopic.id))
     }
@@ -351,7 +343,7 @@ function cyElement (id) {
   return state.cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
 }
 
-// copy in dm5.cytoscape-renderer.vue
+// copy in dm5.cytoscape-renderer.vue and dm5-detail-overlay
 function id (ele) {
   // Note: cytoscape element IDs are strings
   return Number(ele.id())

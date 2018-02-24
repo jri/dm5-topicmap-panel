@@ -10,10 +10,10 @@
       <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
         @updated="updated">
       </dm5-object-renderer>
-      <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLock"></el-button>
+      <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
       <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
       <!-- TODO: move pin button to dm5-pinning module -->
-      <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" type="text" @click="togglePin">
+      <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" type="text" @click="togglePinned">
       </el-button>
       <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
     </div>
@@ -41,14 +41,21 @@ export default {
 
   data () {
     return {
-      locked: true,
-      pinned: false
+      locked: true
     }
   },
 
   computed: {
 
     // TODO: use Vuex mapState() helper. Requires object spread operator. Currently our Babel is too old.
+
+    topicmap () {
+      return this.$store.state.cytoscapeRenderer.topicmap
+    },
+
+    ele () {
+      return this.$store.state.cytoscapeRenderer.ele
+    },
 
     detailNode () {
       return this.$store.state.cytoscapeRenderer.detailNode
@@ -84,16 +91,40 @@ export default {
 
     lockIcon () {
       return this.locked ? 'fa-lock' : 'fa-unlock'
+    },
+
+    // TODO: move to dm5-pinning
+    viewTopic () {
+      if (this.ele.isNode()) {  // FIXME: is accessing ele OK? See state comment.
+        return this.topicmap.getTopic(id(this.ele))
+      } else {
+        // TODO: at server side add view props also to assocs
+      }
+    },
+
+    // TODO: move to dm5-pinning
+    pinned: {
+      get () {
+        return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
+      },
+      set (pinned) {
+        // console.log('pinned', this.pinned, pinned)
+        this.$store.dispatch('setPinned', {
+          topicmap: this.topicmap,
+          topicId: this.viewTopic.id,
+          pinned
+        })
+      }
     }
   },
 
   methods: {
 
-    toggleLock () {
+    toggleLocked () {
       this.locked = !this.locked
     },
 
-    togglePin () {
+    togglePinned () {
       this.pinned = !this.pinned
     },
 
@@ -115,6 +146,12 @@ export default {
   components: {
     'dm5-object-renderer': require('dm5-object-renderer')
   }
+}
+
+// copy in cytoscape-renderer.js and dm5.cytoscape-renderer.vue
+function id (ele) {
+  // Note: cytoscape element IDs are strings
+  return Number(ele.id())
 }
 </script>
 
