@@ -1,6 +1,6 @@
 <template>
   <div :class="['dm5-detail', {locked}]" :data-detail-id="object.id" :style="style">
-    <h3>{{title}}</h3>
+    <h3>{{object.value}}</h3>
     <!--
       Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle
       than "detailNode" (the visibility predicate in parent comp). So we have to put v-if="object" here.
@@ -67,10 +67,6 @@ export default {
       return this.detail.writable
     },
 
-    title () {
-      return this.detail.node.data('label')
-    },
-
     style () {
       return {
         top:  this.pos.y + 'px',
@@ -99,8 +95,7 @@ export default {
     // TODO: move to dm5-pinning
     pinned: {
       get () {
-        return this.detail.viewTopic && this.detail.viewTopic.getViewProp('dm5.pinning.pinned')
-        // return this.detail.pinned
+        return this.detail.pinned
       },
       set (pinned) {
         // console.log('pinned', this.pinned, pinned)

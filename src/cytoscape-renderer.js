@@ -136,9 +136,12 @@ const actions = {
         writable: state.writable,   // FIXME: not reactive
         node: state.ele.isNode() ? state.ele : createAuxNode(state.ele),
         size: undefined,
-        viewTopic: state.ele.isNode() && state.topicmap.getTopic(id)
+        viewTopic: state.ele.isNode() && state.topicmap.getTopic(id),
         // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
         // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
+        get pinned () {
+          return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
+        }
       }
       Vue.set(state.details, id, detail)      // Vue.set() triggers dm5-detail-layer rendering
       // sync view
@@ -258,28 +261,30 @@ function _syncTopicPosition (id) {
  */
 function _syncUnselect () {
   // console.log('_syncUnselect', state.cy.elements(":selected").size(), state.object)
+  let animate = false
   if (state.ele) {
     const _id = id(state.ele)
     const detail = state.details[_id]
-    // update state
-    Vue.delete(state.details, _id)      // Vue.delete() triggers dm5-detail-layer rendering
-    //
-    // sync view
+    if (!detail.pinned) {
+      // remove detail DOM
+      Vue.delete(state.details, _id)      // Vue.delete() triggers dm5-detail-layer rendering
+      // adjust Cytoscape view
+      if (state.ele.isNode()) {
+        state.ele.style({width: '', height: ''})    // reset size
+      } else {
+        state.cy.remove(detail.node)
+      }
+      //
+      animate = true
+    }
     // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
     // In this situation cy.elements(":selected") would return a non-empty collection.
     // Note: when the user clicks on the background Cytoscape unselects the selected element by default.
     // Calling cy.elements(":selected") afterwards would return an empty collection.
     state.ele.unselect()
-    //
-    if (state.ele.isNode()) {
-      state.ele.style({width: '', height: ''})    // reset size
-    } else {
-      state.cy.remove(detail.node)
-    }
     state.ele = undefined
-    return playRestoreAnimation()
   }
-  return Promise.resolve()
+  return animate ? playRestoreAnimation() : Promise.resolve()
 }
 
 /**
@@ -302,8 +307,7 @@ function playRestoreAnimation () {
 function createAuxNode (edge) {
   return state.cy.add({
     data: {
-      assocId: id(edge),            // Holds original edge ID. Needed for context menu.
-      label: edge.data('label'),
+      assocId: id(edge),            // Holds original edge ID. Needed by context menu.
       icon: '\uf10c'                // model.js DEFAULT_TOPIC_ICON
     },
     position: edge.midpoint(),
