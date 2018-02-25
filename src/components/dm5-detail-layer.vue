@@ -1,0 +1,37 @@
+<template>
+  <div class="dm5-detail-layer">
+    <dm5-detail v-for="detail in details" :detail="detail" :zoom="zoom" :objectRenderers="objectRenderers"
+      :key="detail.node.id()">
+    </dm5-detail>
+  </div>
+</template>
+
+<script>
+export default {
+
+  mixins: [
+    require('./mixins/object-renderers').default
+  ],
+
+  props: ['zoom'],
+
+  computed: {
+    details () {
+      return this.$store.state.cytoscapeRenderer.details
+    }
+  },
+
+  components: {
+    'dm5-detail': require('./dm5-detail')
+  }
+}
+
+</script>
+
+<style>
+.dm5-detail-layer {
+  position: absolute;
+  width: 10000px;     /* avoid early line wrapping */
+  top: 0;
+}
+</style>

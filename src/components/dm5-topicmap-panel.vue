@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :compDefs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="renderer" :object="object" :writable="writable" :object-renderers="objectRenderers"></component>
+    <component :is="renderer" :object-renderers="objectRenderers"></component>
   </div>
 </template>
 
@@ -26,6 +26,17 @@ export default {
     renderer () {
       // ### TODO: topicmap renderer registry
       return require('./dm5-cytoscape-renderer')
+    }
+  },
+
+  watch: {
+
+    object () {
+      this.$store.dispatch('syncObject', this.object)
+    },
+
+    writable () {
+      this.$store.dispatch('syncWritable', this.writable)
     }
   },
 

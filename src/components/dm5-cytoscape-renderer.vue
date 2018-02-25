@@ -2,8 +2,7 @@
   <div class="dm5-cytoscape-renderer">
     <div class="cytoscape-container" ref="cytoscape-container"></div>
     <div class="measurement-box" ref="measurement-box"></div>
-    <dm5-detail-overlay :object="object" :writable="writable" :objectRenderers="objectRenderers" :zoom="zoom">
-    </dm5-detail-overlay>
+    <dm5-detail-layer :objectRenderers="objectRenderers" :zoom="zoom"></dm5-detail-layer>
   </div>
 </template>
 
@@ -61,8 +60,6 @@ export default {
   },
 
   mixins: [
-    require('./mixins/object').default,
-    require('./mixins/writable').default,
     require('./mixins/object-renderers').default
   ],
 
@@ -248,7 +245,7 @@ export default {
   },
 
   components: {
-    'dm5-detail-overlay': require('./dm5-detail-overlay')
+    'dm5-detail-layer': require('./dm5-detail-layer')
   }
 }
 
@@ -325,7 +322,7 @@ function isInside (pos, node) {
   return x > box.x1 && x < box.x2 && y > box.y1 && y < box.y2
 }
 
-// copy in cytoscape-renderer.js and dm5-detail-overlay
+// copy in cytoscape-renderer.js and dm5-detail-layer.vue
 function id (ele) {
   // Note: cytoscape element IDs are strings
   return Number(ele.id())

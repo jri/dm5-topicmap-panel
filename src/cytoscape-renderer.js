@@ -1,33 +1,38 @@
-const FISHEYE = true
-
 import Vue from 'vue'
 
-var auxNode             // in case of an assoc selection: the auxiliary node that represents the assoc
 var fisheyeAnimation
 
 const state = {
 
-  topicmap: undefined,    // view model: the rendered topicmap (a dm5.Topicmap object)
-
   cy: undefined,          // the Cytoscape instance
+
+  topicmap: undefined,    // view model: the rendered topicmap (dm5.Topicmap)
+  object: undefined,      // view model: the selected object (dm5.DeepaMehtaObject)
+  writable: undefined,    // True if the current user has WRITE permission for the selected object
 
   svgReady: undefined,    // a promise resolved once the FontAwesome SVG is loaded
 
+  details: {},            // In-map details
+
   ele: undefined,         // Selected Cytoscape element (node or edge).
-                          // Must only be queried if detailNode is defined.
-
-  detailNode: undefined,  // The Cytoscape node underlying the detail overlay.
-                          // Either a "real" node, or, in case of an assoc selection, the "aux" node.
                           // Undefined if there is no selection.
-
-  size: undefined         // size of the detail overlay (object with "width" and "height" properties).
 }
 
 const actions = {
 
+  // Module internal
+
   initCytoscape (_, {cy, svgReady}) {
     state.cy = cy
     state.svgReady = svgReady
+  },
+
+  syncObject (_, object) {
+    state.object = object
+  },
+
+  syncWritable (_, writable) {
+    state.writable = writable
   },
 
   resizeTopicmapRenderer () {
@@ -35,6 +40,22 @@ const actions = {
     state.cy.resize()
   },
 
+  syncDetailSize () {
+    // console.log('syncDetailSize', detailNode.id())
+    // TODO: resize detail DOMs which are not selected?
+    showDetailOverlay(state.details[id(state.ele)])
+  },
+
+  playFisheyeAnimation () {
+    playFisheyeAnimation()
+  },
+
+  shutdownCytoscape () {
+    // console.log('Unregistering cxtmenu extension')
+    // TODO
+  },
+
+  // Cross-Module
   // The "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
 
   syncTopicmap ({dispatch}, topicmap) {
@@ -102,23 +123,28 @@ const actions = {
       p
     ]).then(() => {
       // console.log('restore animation complete')
-      // update state + sync view
+      // update state
       state.ele = cyElement(id).select()
       // Note 1: select() is needed to restore selection after switching topicmap.
-      // Note 2: setting the "ele" state causes the detail overlay to be rendered (at next tick).
+      // Note 2: setting the "ele" state causes the detail overlay to be rendered (at next tick). ### FIXDOC
       if (state.ele.size() != 1) {
         console.warn('syncSelect', id, 'not found', state.ele.size())
       }
-      if (FISHEYE) {
-        if (state.ele.isNode()) {
-          state.detailNode = state.ele
-        } else {
-          state.detailNode = auxNode = createAuxNode(state.ele)
-        }
-        Vue.nextTick().then(() => {
-          showDetailOverlay()
-        })
+      // console.log('syncSelect pinned', ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned'))
+      const detail = {
+        object: state.object,
+        writable: state.writable,   // FIXME: not reactive
+        node: state.ele.isNode() ? state.ele : createAuxNode(state.ele),
+        size: undefined,
+        viewTopic: state.ele.isNode() && state.topicmap.getTopic(id)
+        // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
+        // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
       }
+      Vue.set(state.details, id, detail)      // Vue.set() triggers dm5-detail-layer rendering
+      // sync view
+      Vue.nextTick().then(() => {
+        showDetailOverlay(detail)
+      })
     })
   },
 
@@ -150,22 +176,6 @@ const actions = {
   syncRemoveAssoc (_, id) {
     console.log('syncRemoveAssoc', id)
     cyElement(id).remove()
-  },
-
-  syncDetailSize () {
-    // console.log('syncDetailSize', detailNode.id())
-    showDetailOverlay()
-  },
-
-  playFisheyeAnimation () {
-    playFisheyeAnimation()
-  },
-
-  // ---
-
-  shutdownCytoscape () {
-    // console.log('Unregistering cxtmenu extension')
-    // TODO
   }
 }
 
@@ -182,17 +192,18 @@ export default {
  * Precondition:
  * - the DOM is updated already.
  */
-function showDetailOverlay() {
-  const detail = document.querySelector('.dm5-detail-overlay .detail')
-  if (!detail) {
-    throw Error('No detail overlay')
+function showDetailOverlay(detail) {
+  const detailDOM = document.querySelector('.dm5-detail-layer .dm5-detail')
+  if (!detailDOM) {
+    throw Error('No detail DOM')
   }
-  state.size = {
-    width:  detail.clientWidth,
-    height: detail.clientHeight
+  const size = {
+    width:  detailDOM.clientWidth,
+    height: detailDOM.clientHeight
   }
+  detail.size = size        // FIXME: use Vue.set()?
   // console.log('showDetailOverlay', node.id(), state.size.width, state.size.height)
-  state.detailNode.style(state.size)   // fisheye element style
+  detail.node.style(size)
   playFisheyeAnimation()
 }
 
@@ -232,7 +243,7 @@ function renderTopicmap () {
 }
 
 /**
- * @return  a promise that is resolved once the animation is complete.
+ * @return  a promise resolved once the animation is complete.
  */
 function _syncTopicPosition (id) {
   return cyElement(id).animation({
@@ -243,13 +254,15 @@ function _syncTopicPosition (id) {
 }
 
 /**
- * @return  a promise that is resolved once the restore animation is complete.
+ * @return  a promise resolved once the restore animation is complete.
  */
 function _syncUnselect () {
-  // console.log('_syncUnselect', state.ele)
-  if (state.detailNode) {
+  // console.log('_syncUnselect', state.cy.elements(":selected").size(), state.object)
+  if (state.ele) {
+    const _id = id(state.ele)
+    const detail = state.details[_id]
     // update state
-    state.detailNode = undefined
+    Vue.delete(state.details, _id)      // Vue.delete() triggers dm5-detail-layer rendering
     //
     // sync view
     // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
@@ -258,20 +271,19 @@ function _syncUnselect () {
     // Calling cy.elements(":selected") afterwards would return an empty collection.
     state.ele.unselect()
     //
-    if (FISHEYE) {
-      if (state.ele.isNode()) {
-        state.ele.style({width: '', height: ''})    // reset size
-      } else {
-        state.cy.remove(auxNode)
-      }
-      return playRestoreAnimation()
+    if (state.ele.isNode()) {
+      state.ele.style({width: '', height: ''})    // reset size
+    } else {
+      state.cy.remove(detail.node)
     }
+    state.ele = undefined
+    return playRestoreAnimation()
   }
   return Promise.resolve()
 }
 
 /**
- * @return  a promise that is resolved once the animation is complete.
+ * @return  a promise resolved once the animation is complete.
  */
 function playRestoreAnimation () {
   const promises = []
@@ -343,7 +355,7 @@ function cyElement (id) {
   return state.cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
 }
 
-// copy in dm5.cytoscape-renderer.vue and dm5-detail-overlay
+// copy in dm5.cytoscape-renderer.vue and dm5-detail-layer.vue
 function id (ele) {
   // Note: cytoscape element IDs are strings
   return Number(ele.id())
