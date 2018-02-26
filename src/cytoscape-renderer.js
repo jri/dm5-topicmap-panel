@@ -1,21 +1,21 @@
 import Vue from 'vue'
+import dm5 from 'dm5'
 
 var fisheyeAnimation
 
 const state = {
 
   cy: undefined,          // the Cytoscape instance
+  ele: undefined,         // Selected Cytoscape element (node or edge).
+                          // Undefined if there is no selection.
 
   topicmap: undefined,    // view model: the rendered topicmap (dm5.Topicmap)
   object: undefined,      // view model: the selected object (dm5.DeepaMehtaObject)
   writable: undefined,    // True if the current user has WRITE permission for the selected object
 
-  svgReady: undefined,    // a promise resolved once the FontAwesome SVG is loaded
-
   details: {},            // In-map details
 
-  ele: undefined,         // Selected Cytoscape element (node or edge).
-                          // Undefined if there is no selection.
+  svgReady: undefined     // a promise resolved once the FontAwesome SVG is loaded
 }
 
 const actions = {
@@ -35,14 +35,29 @@ const actions = {
     state.writable = writable
   },
 
-  resizeTopicmapRenderer () {
-    // console.log('resizeTopicmapRenderer')
-    state.cy.resize()
+  setPinned (_, {topicmap, topicId, pinned}) {
+    // update state
+    topicmap.setTopicViewProp(topicId, 'dm5.pinning.pinned', pinned)
+    // sync view
+    if (!pinned) {
+      if (!state.ele || id(state.ele) !== topicId) {
+        console.log('unpinning non-selection', topicId)
+        const detail = state.details[topicId]
+        collapseDetail(detail)
+        playRestoreAnimation()
+      } else {
+        console.log('unpinning selection', topicId)
+      }
+    }
+    // update server
+    dm5.restClient.setViewProps(topicmap.id, topicId, {
+      'dm5.pinning.pinned': pinned
+    })
   },
 
   syncDetailSize () {
     // console.log('syncDetailSize', detailNode.id())
-    // TODO: resize detail DOMs which are not selected?
+    // ### FIXME: resize detail DOMs which are not selected?
     showDetailOverlay(state.details[id(state.ele)])
   },
 
@@ -50,9 +65,14 @@ const actions = {
     playFisheyeAnimation()
   },
 
+  resizeTopicmapRenderer () {
+    // console.log('resizeTopicmapRenderer')
+    state.cy.resize()
+  },
+
   shutdownCytoscape () {
     // console.log('Unregistering cxtmenu extension')
-    // TODO
+    // TODO: not supported by Cytoscape
   },
 
   // Cross-Module
@@ -131,18 +151,7 @@ const actions = {
         console.warn('syncSelect', id, 'not found', state.ele.size())
       }
       // console.log('syncSelect pinned', ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned'))
-      const detail = {
-        object: state.object,
-        writable: state.writable,   // FIXME: not reactive
-        node: state.ele.isNode() ? state.ele : createAuxNode(state.ele),
-        size: undefined,
-        viewTopic: state.ele.isNode() && state.topicmap.getTopic(id),
-        // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
-        // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
-        get pinned () {
-          return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
-        }
-      }
+      const detail = createDetail()
       Vue.set(state.details, id, detail)      // Vue.set() triggers dm5-detail-layer rendering
       // sync view
       Vue.nextTick().then(() => {
@@ -190,13 +199,35 @@ export default {
 // ---
 
 /**
+ * Builds a detail data structure for the current selection.
+ */
+function createDetail () {
+  return {
+    object: state.object,
+    writable: state.writable,   // FIXME: not reactive
+    ele: state.ele,
+    node: state.ele.isNode() ? state.ele : createAuxNode(state.ele),
+    size: undefined,
+    viewTopic: state.ele.isNode() && state.topicmap.getTopic(id(state.ele)),
+    // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
+    // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
+    get id () {
+      return id(this.ele)
+    },
+    get pinned () {
+      return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
+    }
+  }
+}
+
+/**
  * Measures the size of the detail overlay, adapts the detail node's size accordingly, and starts fisheye animation.
  *
  * Precondition:
  * - the DOM is updated already.
  */
 function showDetailOverlay(detail) {
-  const detailDOM = document.querySelector('.dm5-detail-layer .dm5-detail')
+  const detailDOM = document.querySelector(`.dm5-detail-layer .dm5-detail[data-detail-id="${detail.id}"]`)
   if (!detailDOM) {
     throw Error('No detail DOM')
   }
@@ -263,18 +294,9 @@ function _syncUnselect () {
   // console.log('_syncUnselect', state.cy.elements(":selected").size(), state.object)
   let animate = false
   if (state.ele) {
-    const _id = id(state.ele)
-    const detail = state.details[_id]
+    const detail = state.details[id(state.ele)]
     if (!detail.pinned) {
-      // remove detail DOM
-      Vue.delete(state.details, _id)      // Vue.delete() triggers dm5-detail-layer rendering
-      // adjust Cytoscape view
-      if (state.ele.isNode()) {
-        state.ele.style({width: '', height: ''})    // reset size
-      } else {
-        state.cy.remove(detail.node)
-      }
-      //
+      collapseDetail(detail)
       animate = true
     }
     // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
@@ -285,6 +307,17 @@ function _syncUnselect () {
     state.ele = undefined
   }
   return animate ? playRestoreAnimation() : Promise.resolve()
+}
+
+function collapseDetail (detail) {
+  // remove detail DOM
+  Vue.delete(state.details, detail.id)          // Vue.delete() triggers dm5-detail-layer rendering
+  // adjust Cytoscape view
+  if (detail.ele.isNode()) {
+    detail.ele.style({width: '', height: ''})   // reset size
+  } else {
+    state.cy.remove(detail.node)                // remove aux node
+  }
 }
 
 /**

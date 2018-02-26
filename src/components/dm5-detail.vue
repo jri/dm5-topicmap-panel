@@ -1,5 +1,5 @@
 <template>
-  <div :class="['dm5-detail', {locked}]" :data-detail-id="object.id" :style="style">
+  <div :class="['dm5-detail', {locked}]" :data-detail-id="detail.id" :style="style">
     <h3>{{object.value}}</h3>
     <!--
       Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle
@@ -11,7 +11,6 @@
     </dm5-object-renderer>
     <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
     <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
-    <!-- TODO: move pin button to dm5-pinning module -->
     <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" :disabled="!detail.viewTopic" type="text"
       @click="togglePinned">
     </el-button>
@@ -35,21 +34,13 @@ export default {
   ],
 
   props: {
-    detail: {
-      type: Object,
-      required: true
-    },
-    zoom: {
-      type: Number,
-      required: true
-    }
+    detail: {type: Object, required: true},
+    zoom:   {type: Number, required: true}
   },
 
-  data () {
-    return {
-      locked: true
-    }
-  },
+  data: () => ({
+    locked: true
+  }),
 
   computed: {
 
@@ -92,7 +83,6 @@ export default {
       return this.locked ? 'fa-lock' : 'fa-unlock'
     },
 
-    // TODO: move to dm5-pinning
     pinned: {
       get () {
         return this.detail.pinned
