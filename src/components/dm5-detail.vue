@@ -9,12 +9,14 @@
     <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
       @updated="updated">
     </dm5-object-renderer>
-    <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
-    <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
-    <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" :disabled="!detail.viewTopic" type="text"
-      @click="togglePinned">
-    </el-button>
-    <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
+    <div class="button-panel">
+      <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
+      <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
+      <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" :disabled="!detail.viewTopic" type="text"
+        @click="togglePinned">
+      </el-button>
+      <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
+    </div>
   </div>
 </template>
 
@@ -149,34 +151,46 @@ function id (ele) {
   pointer-events: none;
 }
 
-.dm5-detail > button {
+.dm5-detail .button-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 98px;
+  height: 30px;
+  pointer-events: initial;
+}
+
+.dm5-detail .button-panel button {
+  visibility: hidden;
   position: absolute;
   top: 1px;
   font-size: 16px !important;
   padding: 0;
-  pointer-events: initial;
 }
 
-.dm5-detail > button.lock {
+.dm5-detail .button-panel:hover button {
+  visibility: visible;
+}
+
+.dm5-detail .button-panel button.lock {
   right: 71px;
 }
 
-.dm5-detail > button.collapse {
+.dm5-detail .button-panel button.collapse {
   right: 47px;
 }
 
-.dm5-detail > button.pin {
-  top: 2px;
+.dm5-detail .button-panel button.pin {
   right: 27px;
 }
 
-.dm5-detail > button.pin.unpinned {
+.dm5-detail .button-panel button.pin.unpinned {
   color: transparent;
   font-size: 15px !important;
   -webkit-text-stroke: 1px var(--highlight-color);
 }
 
-.dm5-detail > button.handle {
+.dm5-detail .button-panel button.handle {
   right: 3px;
 }
 </style>
