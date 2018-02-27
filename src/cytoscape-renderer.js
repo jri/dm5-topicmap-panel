@@ -128,16 +128,13 @@ const actions = {
    *              Note: the detail overlay's size can only be measured once "object" details are rendered.
    */
   syncSelect (_, {id, p}) {
-    // console.log('syncSelect', id, cyElement(id).length)
-    // Note: the fisheye animation can only be started once the restore animation is complete, *and* "object" is
+    console.log('syncSelect', id)
+    // Note 1: programmatic unselect() is required for browser history navigation. When *interactively* selecting a node
+    // Cytoscape removes the current selection before. When *programmatically* selecting a node Cytoscape does *not*
+    // remove the current selection.
+    // Note 2: the fisheye animation can only be started once the restore animation is complete, *and* "object" is
     // available. The actual order of these 2 occasions doesn't matter.
-    Promise.all([
-      // Note: programmatic unselect() is required for browser history navigation. When *interactively* selecting a node
-      // Cytoscape removes the current selection before. When *programmatically* selecting a node Cytoscape does *not*
-      // remove the current selection.
-      _syncUnselect(),
-      p
-    ]).then(() => {
+    Promise.all([p, ...state.ele ? [unselectElement()] : []]).then(() => {
       // console.log('restore animation complete')
       // update state
       state.ele = cyElement(id).select()
@@ -157,8 +154,9 @@ const actions = {
   },
 
   syncUnselect () {
-    // console.log('syncUnselect')
-    _syncUnselect().then(playFisheyeAnimationIfDetailsOnscreen)
+    console.log('syncUnselect')
+    unselectElement().then(playFisheyeAnimationIfDetailsOnscreen)
+    state.ele = undefined
   },
 
   syncTopicPosition (_, id) {
@@ -290,25 +288,26 @@ function _syncTopicPosition (id) {
 }
 
 /**
- * Unsets the selection (state + view), removes the detail from screen, and plays the restore animation.
+ * Unselects the selected element, removes the corresponding detail (if not pinned), and plays the restore animation.
+ *
+ * Precondition:
+ * - an element is selected
  *
  * @return  a promise resolved once the restore animation is complete.
  */
-function _syncUnselect () {
-  // console.log('_syncUnselect', state.cy.elements(":selected").size(), state.object)
-  if (state.ele) {    // ### TODO: check required?
-    const detail = state.details[id(state.ele)]
-    // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
-    // In this situation cy.elements(":selected") would return a non-empty collection.
-    // Note: when the user clicks on the background Cytoscape unselects the selected element by default.
-    // Calling cy.elements(":selected") afterwards would return an empty collection.
-    state.ele.unselect()    // view
-    state.ele = undefined   // state
-    if (!detail.pinned) {
-      return removeDetail(detail)
-    }
+function unselectElement () {
+  // console.log('unselectElement', state.cy.elements(":selected").size(), state.ele)
+  if (!state.ele) {
+    throw Error('unselectElement when no element is selected')
   }
-  return Promise.resolve()
+  // Note 1: when the user clicks on the background Cytoscape unselects the selected element on its own.
+  // Calling cy.elements(":selected") afterwards would return an empty collection.
+  // This is why we maintain an explicit "ele" state.
+  // Note 2: unselect() removes the element's selection style when manually stripping topic/assoc from
+  // browser URL. In this situation cy.elements(":selected") would return a non-empty collection.
+  state.ele.unselect()
+  const detail = state.details[id(state.ele)]
+  return !detail.pinned ? removeDetail(detail) : Promise.resolve()
 }
 
 /**

@@ -1,5 +1,5 @@
 <template>
-  <div :class="['dm5-detail', {locked}]" :data-detail-id="detail.id" :style="style">
+  <div :class="['dm5-detail', {selected}, {locked}]" :data-detail-id="detail.id" :style="style">
     <h3>{{object.value}}</h3>
     <!--
       Note: apparently "object" (a required "object" prop in child comp) can go away in an earlier update cycle
@@ -52,12 +52,20 @@ export default {
       return this.$store.state.cytoscapeRenderer.topicmap
     },
 
+    ele () {
+      return this.$store.state.cytoscapeRenderer.ele
+    },
+
     object () {
       return this.detail.object
     },
 
     writable () {
       return this.detail.writable
+    },
+
+    selected () {
+      return this.ele && id(this.ele) === this.detail.id
     },
 
     style () {
@@ -145,6 +153,10 @@ function id (ele) {
   padding: 0 12px 12px 12px;
   min-width: 120px;
   max-width: 360px;
+}
+
+.dm5-detail.selected {
+  border-color: var(--color-danger);
 }
 
 .dm5-detail.locked {
