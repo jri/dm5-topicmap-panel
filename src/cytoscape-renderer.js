@@ -41,12 +41,8 @@ const actions = {
     // sync view
     if (!pinned) {
       if (!state.ele || id(state.ele) !== topicId) {
-        console.log('unpinning non-selection', topicId)
-        const detail = state.details[topicId]
-        collapseDetail(detail)
-        playRestoreAnimation()
-      } else {
-        console.log('unpinning selection', topicId)
+        // console.log('unpinning non-selection', topicId)
+        removeDetail(state.details[topicId]).then(playFisheyeAnimationIfDetailsOnscreen)
       }
     }
     // update server
@@ -58,7 +54,7 @@ const actions = {
   syncDetailSize () {
     // console.log('syncDetailSize', detailNode.id())
     // ### FIXME: resize detail DOMs which are not selected?
-    showDetailOverlay(state.details[id(state.ele)])
+    showDetail(state.details[id(state.ele)])
   },
 
   playFisheyeAnimation () {
@@ -151,18 +147,18 @@ const actions = {
         console.warn('syncSelect', id, 'not found', state.ele.size())
       }
       // console.log('syncSelect pinned', ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned'))
-      const detail = createDetail()
+      const detail = createSelectionDetail()
       Vue.set(state.details, id, detail)      // Vue.set() triggers dm5-detail-layer rendering
       // sync view
       Vue.nextTick().then(() => {
-        showDetailOverlay(detail)
+        showDetail(detail)
       })
     })
   },
 
   syncUnselect () {
     // console.log('syncUnselect')
-    _syncUnselect()
+    _syncUnselect().then(playFisheyeAnimationIfDetailsOnscreen)
   },
 
   syncTopicPosition (_, id) {
@@ -199,9 +195,9 @@ export default {
 // ---
 
 /**
- * Builds a detail data structure for the current selection.
+ * Builds a detail record for the current selection.
  */
-function createDetail () {
+function createSelectionDetail () {
   return {
     object: state.object,
     writable: state.writable,   // FIXME: not reactive
@@ -226,7 +222,7 @@ function createDetail () {
  * Precondition:
  * - the DOM is updated already.
  */
-function showDetailOverlay(detail) {
+function showDetail(detail) {
   const detailDOM = document.querySelector(`.dm5-detail-layer .dm5-detail[data-detail-id="${detail.id}"]`)
   if (!detailDOM) {
     throw Error('No detail DOM')
@@ -236,7 +232,7 @@ function showDetailOverlay(detail) {
     height: detailDOM.clientHeight
   }
   detail.size = size        // FIXME: use Vue.set()?
-  // console.log('showDetailOverlay', node.id(), state.size.width, state.size.height)
+  // console.log('showDetail', node.id(), state.size.width, state.size.height)
   detail.node.style(size)
   playFisheyeAnimation()
 }
@@ -257,6 +253,12 @@ function playFisheyeAnimation() {
     edgeElasticity: 0,
     tile: false
   }).run()
+}
+
+function playFisheyeAnimationIfDetailsOnscreen () {
+  if (!dm5.utils.isEmpty(state.details)) {
+    playFisheyeAnimation()
+  }
 }
 
 function renderTopicmap () {
@@ -288,28 +290,33 @@ function _syncTopicPosition (id) {
 }
 
 /**
+ * Unsets the selection (state + view), removes the detail from screen, and plays the restore animation.
+ *
  * @return  a promise resolved once the restore animation is complete.
  */
 function _syncUnselect () {
   // console.log('_syncUnselect', state.cy.elements(":selected").size(), state.object)
-  let animate = false
-  if (state.ele) {
+  if (state.ele) {    // ### TODO: check required?
     const detail = state.details[id(state.ele)]
-    if (!detail.pinned) {
-      collapseDetail(detail)
-      animate = true
-    }
     // Note: unselect() removes visual selection when manually stripping topic/assoc from browser URL.
     // In this situation cy.elements(":selected") would return a non-empty collection.
     // Note: when the user clicks on the background Cytoscape unselects the selected element by default.
     // Calling cy.elements(":selected") afterwards would return an empty collection.
-    state.ele.unselect()
-    state.ele = undefined
+    state.ele.unselect()    // view
+    state.ele = undefined   // state
+    if (!detail.pinned) {
+      return removeDetail(detail)
+    }
   }
-  return animate ? playRestoreAnimation() : Promise.resolve()
+  return Promise.resolve()
 }
 
-function collapseDetail (detail) {
+/**
+ * Removes the given detail from screen and plays the restore animation.
+ *
+ * @return  a promise resolved once the restore animation is complete.
+ */
+function removeDetail (detail) {
   // remove detail DOM
   Vue.delete(state.details, detail.id)          // Vue.delete() triggers dm5-detail-layer rendering
   // adjust Cytoscape view
@@ -318,6 +325,7 @@ function collapseDetail (detail) {
   } else {
     state.cy.remove(detail.node)                // remove aux node
   }
+  return playRestoreAnimation()
 }
 
 /**
