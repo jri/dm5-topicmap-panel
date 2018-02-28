@@ -42,7 +42,7 @@ const actions = {
     if (!pinned) {
       if (!state.ele || id(state.ele) !== topicId) {
         // console.log('unpinning non-selection', topicId)
-        removeDetail(state.details[topicId]).then(playFisheyeAnimationIfDetailsOnscreen)
+        removeDetail(detail(topicId)).then(playFisheyeAnimationIfDetailsOnscreen)
       }
     }
     // update server
@@ -51,10 +51,9 @@ const actions = {
     })
   },
 
-  syncDetailSize () {
-    // console.log('syncDetailSize', detailNode.id())
-    // ### FIXME: resize detail DOMs which are not selected?
-    showDetail(state.details[id(state.ele)])
+  syncDetailSize (_, id) {
+    // console.log('syncDetailSize', id)
+    measureDetail(detail(id))
   },
 
   playFisheyeAnimation () {
@@ -72,13 +71,17 @@ const actions = {
   },
 
   // Cross-Module
+
   // The "sync" actions adapt (Cytoscape) view to ("topicmap") model changes
 
+  /**
+   * @returns   a promise resolved once topicmap rendering is complete.
+   */
   syncTopicmap ({dispatch}, topicmap) {
     // console.log('syncTopicmap', topicmap.id)
     state.topicmap = topicmap
     return new Promise(resolve => {
-      state.svgReady.then(renderTopicmap).then(resolve)
+      state.svgReady.then(renderTopicmap).then(showPinnedDetails).then(resolve)
     })
   },
 
@@ -118,7 +121,7 @@ const actions = {
 
   /**
    * Renders given topic/assoc as selected.
-   * The detail overlay is rendered, and the fisheye animation is played.
+   * Shows the detail DOM and plays the fisheye animation.
    *
    * Precondition:
    * - the topicmap rendering is complete.
@@ -136,20 +139,11 @@ const actions = {
     // available. The actual order of these 2 occasions doesn't matter.
     Promise.all([p, ...state.ele ? [unselectElement()] : []]).then(() => {
       // console.log('restore animation complete')
-      // update state
-      state.ele = cyElement(id).select()
-      // Note 1: select() is needed to restore selection after switching topicmap.
-      // Note 2: setting the "ele" state causes the detail overlay to be rendered (at next tick). ### FIXDOC
+      state.ele = cyElement(id).select()    // select() restores selection after switching topicmap
       if (state.ele.size() != 1) {
-        console.warn('syncSelect', id, 'not found', state.ele.size())
+        throw Error(`Element ${id} not found (${state.ele.size()})`)
       }
-      // console.log('syncSelect pinned', ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned'))
-      const detail = createSelectionDetail()
-      Vue.set(state.details, id, detail)      // Vue.set() triggers dm5-detail-layer rendering
-      // sync view
-      Vue.nextTick().then(() => {
-        showDetail(detail)
-      })
+      showDetail(createSelectionDetail())
     })
   },
 
@@ -192,6 +186,47 @@ export default {
 
 // ---
 
+function showPinnedDetails () {
+  state.topicmap.forEachTopic(viewTopic => {
+    if (viewTopic.isVisible()) {
+      if (viewTopic.getViewProp('dm5.pinning.pinned')) {
+        createDetail(viewTopic, cyElement(viewTopic.id)).then(detail => {
+          showDetail(detail)
+        })
+      }
+    }
+  })
+  // TODO: pinned assoc details
+}
+
+function createDetail (viewObject, _ele) {
+  return new Promise(resolve => {
+    const detail = {
+      object: undefined,
+      writable: undefined,    // FIXME: not reactive
+      ele: _ele,
+      node: _ele.isNode() ? _ele : createAuxNode(_ele),
+      size: undefined,
+      viewTopic: viewObject,
+      // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
+      // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
+      get id () {
+        return id(this.ele)
+      },
+      get pinned () {
+        return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
+      }
+    }
+    viewObject.fetchObject().then(object => {
+      detail.object = object
+      resolve(detail)
+    })
+    viewObject.isWritable().then(writable => {
+      detail.writable = writable
+    })
+  })
+}
+
 /**
  * Builds a detail record for the current selection.
  */
@@ -215,23 +250,24 @@ function createSelectionDetail () {
 }
 
 /**
- * Measures the size of the detail overlay, adapts the detail node's size accordingly, and starts fisheye animation.
+ * Measures the size of the given detail, adapts the detail node's size accordingly, and plays the fisheye animation.
  *
  * Precondition:
  * - the DOM is updated already.
+ *
+ * @param   detail    a detail record
  */
-function showDetail(detail) {
+function measureDetail(detail) {
   const detailDOM = document.querySelector(`.dm5-detail-layer .dm5-detail[data-detail-id="${detail.id}"]`)
   if (!detailDOM) {
-    throw Error('No detail DOM')
+    throw Error(`Detail DOM ${detail.id} not found`)
   }
-  const size = {
+  detail.size = {   // FIXME: use Vue.set()?
     width:  detailDOM.clientWidth,
     height: detailDOM.clientHeight
   }
-  detail.size = size        // FIXME: use Vue.set()?
-  // console.log('showDetail', node.id(), state.size.width, state.size.height)
-  detail.node.style(size)
+  // console.log('measureDetail', node.id(), state.size.width, state.size.height)
+  detail.node.style(detail.size)
   playFisheyeAnimation()
 }
 
@@ -306,8 +342,15 @@ function unselectElement () {
   // Note 2: unselect() removes the element's selection style when manually stripping topic/assoc from
   // browser URL. In this situation cy.elements(":selected") would return a non-empty collection.
   state.ele.unselect()
-  const detail = state.details[id(state.ele)]
+  const detail = selectionDetail()
   return !detail.pinned ? removeDetail(detail) : Promise.resolve()
+}
+
+function showDetail (detail) {
+  Vue.set(state.details, detail.id, detail)     // Vue.set() triggers dm5-detail-layer rendering
+  Vue.nextTick().then(() => {
+    measureDetail(detail)
+  })
 }
 
 /**
@@ -339,6 +382,21 @@ function playRestoreAnimation () {
     }
   })
   return Promise.all(promises)
+}
+
+function selectionDetail () {
+  if (!state.ele) {
+    throw Error('selectionDetail() when nothing is selected')
+  }
+  return detail(id(state.ele))
+}
+
+function detail (id) {
+  const detail = state.details[id]
+  if (!detail) {
+    throw Error(`Detail record ${id} not found`)
+  }
+  return detail
 }
 
 /**
