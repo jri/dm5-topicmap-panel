@@ -201,7 +201,7 @@ function showPinnedDetails () {
 function createDetail (viewObject, ele) {
   return new Promise(resolve => {
     const detail = {
-      id: id(ele),
+      id: eleId(ele),
       object: undefined,
       writable: undefined,    // FIXME: not reactive
       ele,
@@ -227,11 +227,11 @@ function createDetail (viewObject, ele) {
  * Builds a detail record for the current selection.
  */
 function createSelectionDetail () {
-  const _id = id(state.ele)
-  const viewObject = state.ele.isNode() ? state.topicmap.getTopic(_id) :
-                                          state.topicmap.getAssoc(_id)
+  const id = eleId(state.ele)
+  const viewObject = state.ele.isNode() ? state.topicmap.getTopic(id) :
+                                          state.topicmap.getAssoc(id)
   return {
-    id: _id,
+    id,
     object: state.object,
     writable: state.writable,   // FIXME: not reactive
     ele: state.ele,
@@ -384,7 +384,7 @@ function selectionDetail () {
   if (!state.ele) {
     throw Error('selectionDetail() when nothing is selected')
   }
-  return detail(id(state.ele))
+  return detail(eleId(state.ele))
 }
 
 function detail (id) {
@@ -401,7 +401,7 @@ function detail (id) {
 function createAuxNode (edge) {
   return state.cy.add({
     data: {
-      assocId: id(edge),            // Holds original edge ID. Needed by context menu.
+      assocId: eleId(edge),            // Holds original edge ID. Needed by context menu.
       icon: '\uf10c'                // model.js DEFAULT_TOPIC_ICON
     },
     position: edge.midpoint(),
@@ -454,11 +454,11 @@ function cyElement (id) {
 }
 
 function isSelected (objectId) {
-  return state.ele && id(state.ele) === objectId
+  return state.ele && eleId(state.ele) === objectId
 }
 
 // copy in dm5.cytoscape-renderer.vue and dm5-detail-layer.vue
-function id (ele) {
+function eleId (ele) {
   // Note: cytoscape element IDs are strings
   return Number(ele.id())
 }
