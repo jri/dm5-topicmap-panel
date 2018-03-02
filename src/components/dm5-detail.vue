@@ -12,8 +12,7 @@
     <div class="button-panel">
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
       <el-button class="collapse fa fa-compress" type="text" @click="collapse"></el-button>
-      <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" :disabled="!detail.viewTopic" type="text"
-        @click="togglePinned">
+      <el-button :class="['pin', {unpinned: !pinned}, 'fa', 'fa-thumb-tack']" type="text" @click="togglePinned">
       </el-button>
       <el-button class="handle fa fa-bars" type="text" @contextmenu.native.prevent="handle"></el-button>
     </div>
@@ -98,12 +97,11 @@ export default {
         return this.detail.pinned
       },
       set (pinned) {
-        // console.log('pinned', this.pinned, pinned)
-        this.$store.dispatch('setPinned', {
-          topicmap: this.topicmap,
-          topicId: this.object.id,
-          pinned
-        })
+        if (this.detail.ele.isNode()) {
+          this.$store.dispatch('setTopicPinned', {topicId: this.object.id, pinned})
+        } else {
+          this.$store.dispatch('setAssocPinned', {assocId: this.object.id, pinned})
+        }
       }
     }
   },

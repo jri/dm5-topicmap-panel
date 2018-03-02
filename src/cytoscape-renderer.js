@@ -35,22 +35,6 @@ const actions = {
     state.writable = writable
   },
 
-  setPinned (_, {topicmap, topicId, pinned}) {
-    // update state
-    topicmap.setTopicViewProp(topicId, 'dm5.pinning.pinned', pinned)
-    // sync view
-    if (!pinned) {
-      if (!state.ele || id(state.ele) !== topicId) {
-        // console.log('unpinning non-selection', topicId)
-        removeDetail(detail(topicId)).then(playFisheyeAnimationIfDetailsOnscreen)
-      }
-    }
-    // update server
-    dm5.restClient.setViewProps(topicmap.id, topicId, {
-      'dm5.pinning.pinned': pinned
-    })
-  },
-
   syncDetailSize (_, id) {
     // console.log('syncDetailSize', id)
     measureDetail(detail(id))
@@ -58,11 +42,6 @@ const actions = {
 
   playFisheyeAnimation () {
     playFisheyeAnimation()
-  },
-
-  resizeTopicmapRenderer () {
-    // console.log('resizeTopicmapRenderer')
-    state.cy.resize()
   },
 
   shutdownCytoscape () {
@@ -168,6 +147,13 @@ const actions = {
     }
   },
 
+  syncPinned (_, {objectId, pinned}) {
+    // console.log('syncPinned', objectId, pinned)
+    if (!pinned && !isSelected(objectId)) {
+      removeDetail(detail(objectId)).then(playFisheyeAnimationIfDetailsOnscreen)
+    }
+  },
+
   syncRemoveTopic (_, id) {
     console.log('syncRemoveTopic', id)
     cyElement(id).remove()
@@ -176,6 +162,11 @@ const actions = {
   syncRemoveAssoc (_, id) {
     console.log('syncRemoveAssoc', id)
     cyElement(id).remove()
+  },
+
+  resizeTopicmapRenderer () {
+    // console.log('resizeTopicmapRenderer')
+    state.cy.resize()
   }
 }
 
@@ -189,32 +180,37 @@ export default {
 function showPinnedDetails () {
   state.topicmap.forEachTopic(viewTopic => {
     if (viewTopic.isVisible()) {
-      if (viewTopic.getViewProp('dm5.pinning.pinned')) {
+      if (viewTopic.getViewProp('dm4.topicmaps.pinned')) {
         createDetail(viewTopic, cyElement(viewTopic.id)).then(detail => {
           showDetail(detail)
         })
       }
     }
   })
-  // TODO: pinned assoc details
+  state.topicmap.forEachAssoc(viewAssoc => {
+    if (!viewAssoc.hasAssocPlayer()) {    // this renderer doesn't support assoc-connected assocs
+      if (viewAssoc.getViewProp('dm4.topicmaps.pinned')) {
+        createDetail(viewAssoc, cyElement(viewAssoc.id)).then(detail => {
+          showDetail(detail)
+        })
+      }
+    }
+  })
 }
 
-function createDetail (viewObject, _ele) {
+function createDetail (viewObject, ele) {
   return new Promise(resolve => {
     const detail = {
+      id: id(ele),
       object: undefined,
       writable: undefined,    // FIXME: not reactive
-      ele: _ele,
-      node: _ele.isNode() ? _ele : createAuxNode(_ele),
+      ele,
+      node: ele.isNode() ? ele : createAuxNode(ele),
       size: undefined,
-      viewTopic: viewObject,
-      // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
-      // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
-      get id () {
-        return id(this.ele)
-      },
+      // pinned: viewObject.getViewProp('dm4.topicmaps.pinned')
+      // Note: a sole "pinned" value is not reactive. Access through "viewObject" works.
       get pinned () {
-        return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
+        return viewObject.getViewProp('dm4.topicmaps.pinned')
       }
     }
     viewObject.fetchObject().then(object => {
@@ -231,20 +227,20 @@ function createDetail (viewObject, _ele) {
  * Builds a detail record for the current selection.
  */
 function createSelectionDetail () {
+  const _id = id(state.ele)
+  const viewObject = state.ele.isNode() ? state.topicmap.getTopic(_id) :
+                                          state.topicmap.getAssoc(_id)
   return {
+    id: _id,
     object: state.object,
     writable: state.writable,   // FIXME: not reactive
     ele: state.ele,
     node: state.ele.isNode() ? state.ele : createAuxNode(state.ele),
     size: undefined,
-    viewTopic: state.ele.isNode() && state.topicmap.getTopic(id(state.ele)),
-    // pinned: state.ele.isNode() && state.topicmap.getTopicViewProp(id, 'dm5.pinning.pinned')
-    // Note: a sole "pinned" value is not reactive. With the "viewTopic" wrapper object it works.
-    get id () {
-      return id(this.ele)
-    },
+    // pinned: viewObject.getViewProp('dm4.topicmaps.pinned')
+    // Note: a sole "pinned" value is not reactive. Access through "viewObject" works.
     get pinned () {
-      return this.viewTopic && this.viewTopic.getViewProp('dm5.pinning.pinned')
+      return viewObject.getViewProp('dm4.topicmaps.pinned')
     }
   }
 }
@@ -348,7 +344,7 @@ function unselectElement () {
 
 function showDetail (detail) {
   Vue.set(state.details, detail.id, detail)     // Vue.set() triggers dm5-detail-layer rendering
-  Vue.nextTick().then(() => {
+  Vue.nextTick(() => {
     measureDetail(detail)
   })
 }
@@ -455,6 +451,10 @@ function cyEdge (assoc) {
  */
 function cyElement (id) {
   return state.cy.getElementById(id.toString())   // Note: a Cytoscape element ID is a string
+}
+
+function isSelected (objectId) {
+  return state.ele && id(state.ele) === objectId
 }
 
 // copy in dm5.cytoscape-renderer.vue and dm5-detail-layer.vue
