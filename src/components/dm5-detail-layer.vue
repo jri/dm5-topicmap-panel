@@ -22,7 +22,7 @@ export default {
   },
 
   components: {
-    'dm5-detail': require('./dm5-detail')
+    'dm5-detail': require('./dm5-detail').default
   }
 }
 

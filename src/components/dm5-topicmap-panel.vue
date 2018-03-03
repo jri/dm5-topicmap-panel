@@ -25,7 +25,7 @@ export default {
   computed: {
     renderer () {
       // ### TODO: topicmap renderer registry
-      return require('./dm5-cytoscape-renderer')
+      return require('./dm5-cytoscape-renderer').default
     }
   },
 
@@ -41,7 +41,7 @@ export default {
   },
 
   components: {
-    'dm5-toolbar': require('./dm5-toolbar')
+    'dm5-toolbar': require('./dm5-toolbar').default
   }
 }
 </script>

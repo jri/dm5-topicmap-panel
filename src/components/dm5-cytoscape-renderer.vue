@@ -245,7 +245,7 @@ export default {
   },
 
   components: {
-    'dm5-detail-layer': require('./dm5-detail-layer')
+    'dm5-detail-layer': require('./dm5-detail-layer').default
   }
 }
 

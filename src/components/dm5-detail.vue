@@ -132,7 +132,7 @@ export default {
   },
 
   components: {
-    'dm5-object-renderer': require('dm5-object-renderer')
+    'dm5-object-renderer': require('dm5-object-renderer').default
   }
 }
 
