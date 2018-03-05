@@ -198,17 +198,19 @@ function showPinnedDetails () {
   })
 }
 
+/**
+ * Creates a detail record for the given element.
+ */
 function createDetail (viewObject, ele) {
   return new Promise(resolve => {
     const detail = {
       id: eleId(ele),
       object: undefined,
-      writable: undefined,    // FIXME: not reactive
       ele,
       node: ele.isNode() ? ele : createAuxNode(ele),
       size: undefined,
-      // pinned: viewObject.getViewProp('dm4.topicmaps.pinned')
-      // Note: a sole "pinned" value is not reactive. Access through "viewObject" works.
+      writable: undefined,
+      // Note: a property would not be reactive. With a getter it works.
       get pinned () {
         return viewObject.getViewProp('dm4.topicmaps.pinned')
       }
@@ -224,7 +226,7 @@ function createDetail (viewObject, ele) {
 }
 
 /**
- * Builds a detail record for the current selection.
+ * Creates a detail record for the current selection.
  */
 function createSelectionDetail () {
   const id = eleId(state.ele)
@@ -233,12 +235,13 @@ function createSelectionDetail () {
   return {
     id,
     object: state.object,
-    writable: state.writable,   // FIXME: not reactive
     ele: state.ele,
     node: state.ele.isNode() ? state.ele : createAuxNode(state.ele),
     size: undefined,
-    // pinned: viewObject.getViewProp('dm4.topicmaps.pinned')
-    // Note: a sole "pinned" value is not reactive. Access through "viewObject" works.
+    // Note: properties would not be reactive. With getters it works.
+    get writable () {
+      return state.writable
+    },
     get pinned () {
       return viewObject.getViewProp('dm4.topicmaps.pinned')
     }
@@ -246,7 +249,7 @@ function createSelectionDetail () {
 }
 
 /**
- * Measures the size of the given detail, adapts the detail node's size accordingly, and plays the fisheye animation.
+ * Measures the size of the given detail, resizes the detail node, and plays the fisheye animation.
  *
  * Precondition:
  * - the DOM is updated already.
