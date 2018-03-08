@@ -13,7 +13,17 @@ const state = {
   object: undefined,      // view model: the selected object (dm5.DeepaMehtaObject)
   writable: undefined,    // True if the current user has WRITE permission for the selected object
 
-  details: {},            // In-map details
+  details: {},            // In-map details. Detail records keyed by object ID:
+                          //  {
+                          //    id        ID of "object" (Number). May be set before "object" is available.
+                          //    object    The object whose details to be shown (dm5.Topic, dm5.Assoc)
+                          //    ele       The original Cytoscape element (node or edge) representing the object
+                          //    node      The "detail node": either "ele" (if "ele" is a node),
+                          //              or the "aux node" (if "ele" is an edge)
+                          //    size      The size (in pixel) of the detail DOM (object with "width" and "height" props)
+                          //    writable  True if the current user has WRITE permission for "object" (boolean)
+                          //    pinned    Whether the detail is pinned or not (boolean)
+                          //  }
 
   svgReady: undefined     // a promise resolved once the FontAwesome SVG is loaded
 }
@@ -167,6 +177,28 @@ const actions = {
   resizeTopicmapRenderer () {
     // console.log('resizeTopicmapRenderer')
     state.cy.resize()
+  },
+
+  // WebSocket messages
+
+  _processDirectives (_, directives) {
+    console.log(`Topicmap Panel: processing ${directives.length} directives`)
+    directives.forEach(dir => {
+      switch (dir.type) {
+      case "UPDATE_TOPIC":
+        updateDetail(new dm5.Topic(dir.arg))
+        break
+      case "DELETE_TOPIC":
+        // TODO?
+        break
+      case "UPDATE_ASSOCIATION":
+        updateDetail(new dm5.Assoc(dir.arg))
+        break
+      case "DELETE_ASSOCIATION":
+        // TODO?
+        break
+      }
+    })
   }
 }
 
@@ -367,6 +399,13 @@ function removeDetail (detail) {
     state.cy.remove(detail.node)                // remove aux node
   }
   return playRestoreAnimation()
+}
+
+function updateDetail (object) {
+  const detail = Object.values(state.details).find(detail => detail.id === object.id)
+  if (detail) {
+    detail.object = object
+  }
 }
 
 /**
