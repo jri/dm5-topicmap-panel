@@ -2,7 +2,7 @@
   <div class="dm5-cytoscape-renderer">
     <div class="cytoscape-container" ref="cytoscape-container"></div>
     <div class="measurement-box" ref="measurement-box"></div>
-    <dm5-detail-layer :objectRenderers="objectRenderers" :zoom="zoom"></dm5-detail-layer>
+    <dm5-detail-layer :objectRenderers="objectRenderers" :zoom="zoom" @object-submit="submitObject"></dm5-detail-layer>
   </div>
 </template>
 
@@ -198,11 +198,13 @@ export default {
         commands: ele => assocCommands(id)
       })
 
+      // TODO: decoupling. Let the host application provide the commands.
       const topicCommands = [
         {content: 'Hide',   select: ele => this.$store.dispatch('hideTopic',   id(ele))},
         {content: 'Delete', select: ele => this.$store.dispatch('deleteTopic', id(ele))}
       ]
 
+      // TODO: decoupling. Let the host application provide the commands.
       const assocCommands = idMapper => [
         {content: 'Hide',   select: ele => this.$store.dispatch('hideAssoc',   idMapper(ele))},
         {content: 'Delete', select: ele => this.$store.dispatch('deleteAssoc', idMapper(ele))}
@@ -241,6 +243,10 @@ export default {
         }
       })
       return foundNode
+    },
+
+    submitObject (object) {
+      this.$parent.$emit('object-submit', object)
     }
   },
 

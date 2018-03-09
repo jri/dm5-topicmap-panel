@@ -7,7 +7,7 @@
       TODO: approve this hypothesis. ### FIXDOC
     -->
     <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
-      @updated="updated">
+      @inline="setInlineId" @updated="updated">
     </dm5-object-renderer>
     <div class="button-panel">
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
@@ -98,8 +98,10 @@ export default {
       },
       set (pinned) {
         if (this.detail.ele.isNode()) {
+          // TODO: decoupling. Emit events instead of dispatching actions.
           this.$store.dispatch('setTopicPinned', {topicId: this.object.id, pinned})
         } else {
+          // TODO: decoupling. Emit events instead of dispatching actions.
           this.$store.dispatch('setAssocPinned', {assocId: this.object.id, pinned})
         }
       }
@@ -124,6 +126,12 @@ export default {
       // e.target.style.pointerEvents = 'none'
       console.log('handle', e)
       this.detail.node.emit('taphold', {x: e.x, y: e.y})
+    },
+
+    setInlineId (id) {
+      if (!id) {
+        this.$emit('object-submit', this.object)
+      }
     },
 
     updated () {

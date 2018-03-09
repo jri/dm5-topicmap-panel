@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-detail-layer">
     <dm5-detail v-for="detail in details" :detail="detail" :zoom="zoom" :objectRenderers="objectRenderers"
-      :key="detail.node.id()">
+      :key="detail.node.id()" @object-submit="submitObject">
     </dm5-detail>
   </div>
 </template>
@@ -18,6 +18,12 @@ export default {
   computed: {
     details () {
       return this.$store.state.cytoscapeRenderer.details
+    }
+  },
+
+  methods: {
+    submitObject (object) {
+      this.$emit('object-submit', object)
     }
   },
 
