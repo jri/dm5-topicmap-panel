@@ -2,17 +2,26 @@
 
 ## Version History
 
+**0.10** -- Mar 10, 2018
+
+* Feature: Pinning. If pinned topic/assoc details remain visible when topic/assoc is not selected.
+    * Pinning states are persistent per-topicmap
+* Improved composability:
+    * Component prop `context-command` allows host application to provide the context menu commands
+    * Component emits `object-submit` event when inline edit has completed
+* Detail buttons appear only on mouse hover
+
 **0.9** -- Feb 21, 2018
 
-* In-map *assoc* details.
-* Better composability:
-    * Component relies on explicit props (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Props have reasonable defaults.
-    * Component emits events (instead of dispatching actions): `topic-select`, `topic-double-click`, `topic-drag`, `topic-drop-on-topic`, `assoc-select`, `topicmap-click`, `topicmap-contextmenu`.
-    * Toolbar provides separate `left` and `right` mount points.
-    * Canvas resize can be triggered from outside.
+* In-map *assoc* details
+* Improved composability:
+    * Component relies on explicit props (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Props have reasonable defaults
+    * Component emits events (instead of dispatching actions): `topic-select`, `topic-double-click`, `topic-drag`, `topic-drop-on-topic`, `assoc-select`, `topicmap-click`, `topicmap-contextmenu`
+    * Toolbar provides separate `left` and `right` mount points
+    * Canvas resize can be triggered from outside
 * Fixes:
-    * Click events on toolbar background bubble to canvas.
-    * In-map details do not line wrap at canvas edge.
+    * Click events on toolbar background bubble to canvas
+    * In-map details do not line wrap at canvas edge
 
 **0.8** -- Feb 3, 2018
 
@@ -44,4 +53,4 @@
 
 ------------
 Jörg Richter  
-Feb 21, 2018
+Mar 10, 2018
