@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
-    <dm5-toolbar :compDefs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="renderer" :object-renderers="objectRenderers"></component>
+    <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
+    <component :is="renderer" :object-renderers="objectRenderers" :context-commands="contextCommands"></component>
   </div>
 </template>
 
@@ -19,12 +19,13 @@ export default {
   ],
 
   props: {
+    contextCommands: Object,
     toolbarCompDefs: Object
   },
 
   computed: {
     renderer () {
-      // ### TODO: topicmap renderer registry
+      // TODO: topicmap renderer registry
       return require('./dm5-cytoscape-renderer').default
     }
   },
@@ -32,11 +33,11 @@ export default {
   watch: {
 
     object () {
-      this.$store.dispatch('syncObject', this.object)
+      this.$store.dispatch('_syncObject', this.object)
     },
 
     writable () {
-      this.$store.dispatch('syncWritable', this.writable)
+      this.$store.dispatch('_syncWritable', this.writable)
     }
   },
 

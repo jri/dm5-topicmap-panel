@@ -32,29 +32,29 @@ const actions = {
 
   // Module internal
 
-  initCytoscape (_, {cy, svgReady}) {
+  _initCytoscape (_, {cy, svgReady}) {
     state.cy = cy
     state.svgReady = svgReady
   },
 
-  syncObject (_, object) {
+  _syncObject (_, object) {
     state.object = object
   },
 
-  syncWritable (_, writable) {
+  _syncWritable (_, writable) {
     state.writable = writable
   },
 
-  syncDetailSize (_, id) {
-    // console.log('syncDetailSize', id)
+  _syncDetailSize (_, id) {
+    // console.log('_syncDetailSize', id)
     measureDetail(detail(id))
   },
 
-  playFisheyeAnimation () {
+  _playFisheyeAnimation () {
     playFisheyeAnimation()
   },
 
-  shutdownCytoscape () {
+  _shutdownCytoscape () {
     // console.log('Unregistering cxtmenu extension')
     // TODO: not supported by Cytoscape
   },
@@ -66,7 +66,7 @@ const actions = {
   /**
    * @returns   a promise resolved once topicmap rendering is complete.
    */
-  syncTopicmap ({dispatch}, topicmap) {
+  syncTopicmap (_, topicmap) {
     // console.log('syncTopicmap', topicmap.id)
     state.topicmap = topicmap
     return new Promise(resolve => {

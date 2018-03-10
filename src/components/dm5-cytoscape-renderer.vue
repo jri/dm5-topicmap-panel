@@ -2,7 +2,7 @@
   <div class="dm5-cytoscape-renderer">
     <div class="cytoscape-container" ref="cytoscape-container"></div>
     <div class="measurement-box" ref="measurement-box"></div>
-    <dm5-detail-layer :objectRenderers="objectRenderers" :zoom="zoom" @object-submit="submitObject"></dm5-detail-layer>
+    <dm5-detail-layer :object-renderers="objectRenderers" :zoom="zoom" @object-submit="submitObject"></dm5-detail-layer>
   </div>
 </template>
 
@@ -45,27 +45,33 @@ export default {
   // Note: when the Cytoscape instance is created the DOM must be ready.
   mounted () {
     // console.log('dm5-cytoscape-renderer mounted')
-    this.$store.dispatch('initCytoscape', {
+    this.$store.dispatch('_initCytoscape', {
       cy: this.initialize(),
       svgReady
     })
-    this.eventListeners()
+    this.eventHandlers()
     this.contextMenus()
     box = this.$refs['measurement-box']
   },
 
   destroyed () {
     console.log('dm5-cytoscape-renderer destroyed!')
-    this.$store.dispatch('shutdownCytoscape')
+    this.$store.dispatch('_shutdownCytoscape')
   },
 
   mixins: [
     require('./mixins/object-renderers').default
   ],
 
-  data: () => ({
-    zoom: 1         // TODO: real init value
-  }),
+  props: {
+    contextCommands: Object
+  },
+
+  data () {
+    return {
+      zoom: 1         // TODO: real init value
+    }
+  },
 
   computed: {
     cy () {
@@ -133,8 +139,10 @@ export default {
       })
     },
 
-    // register Cytoscape event listeners
-    eventListeners () {
+    /**
+     * Registers Cytoscape event handlers.
+     */
+    eventHandlers () {
       this.cy.on('tap', 'node', e => {
         const clicks = e.originalEvent.detail
         // console.log('"tap node" event!', id(e.target), clicks)
@@ -177,7 +185,7 @@ export default {
               id: id(dragState.node),
               pos: dragState.node.position()
             })
-            this.$store.dispatch('playFisheyeAnimation')  // TODO: play only if detail overlay
+            this.$store.dispatch('_playFisheyeAnimation')  // TODO: play only if detail overlay
           }
         })
       }).on('zoom', () => {
@@ -190,7 +198,7 @@ export default {
       // In this case the original edge ID is contained in the node's "assocId" data.
       this.cy.cxtmenu({
         selector: 'node',
-        commands: ele => assocId(ele) ? assocCommands(assocId) : topicCommands,
+        commands: ele => assocId(ele) ? assocCommands(assocId) : topicCommands(),
         atMouse: true
       })
       this.cy.cxtmenu({
@@ -198,21 +206,17 @@ export default {
         commands: ele => assocCommands(id)
       })
 
-      // TODO: decoupling. Let the host application provide the commands.
-      const topicCommands = [
-        {content: 'Hide',   select: ele => this.$store.dispatch('hideTopic',   id(ele))},
-        {content: 'Delete', select: ele => this.$store.dispatch('deleteTopic', id(ele))}
-      ]
+      const topicCommands = () => this.contextCommands.topic.map(cmd => ({
+        content: cmd.label,
+        select: ele => cmd.handler(id(ele))
+      }))
 
-      // TODO: decoupling. Let the host application provide the commands.
-      const assocCommands = idMapper => [
-        {content: 'Hide',   select: ele => this.$store.dispatch('hideAssoc',   idMapper(ele))},
-        {content: 'Delete', select: ele => this.$store.dispatch('deleteAssoc', idMapper(ele))}
-      ]
+      const assocCommands = idMapper => this.contextCommands.assoc.map(cmd => ({
+        content: cmd.label,
+        select: ele => cmd.handler(idMapper(ele))
+      }))
 
-      function assocId (ele) {
-        return ele.data('assocId')
-      }
+      const assocId = ele => ele.data('assocId')
     },
 
     dragHandler (dragState) {

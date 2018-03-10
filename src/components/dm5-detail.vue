@@ -135,7 +135,7 @@ export default {
     },
 
     updated () {
-      this.$store.dispatch('syncDetailSize', this.detail.id)
+      this.$store.dispatch('_syncDetailSize', this.detail.id)
     }
   },
 
