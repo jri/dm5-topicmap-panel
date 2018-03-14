@@ -1,7 +1,9 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="renderer" :object-renderers="objectRenderers" :context-commands="contextCommands"></component>
+    <component :is="renderer" :object-renderers="objectRenderers" :context-commands="contextCommands"
+      :quill-config="quillConfig">
+    </component>
   </div>
 </template>
 
@@ -19,8 +21,9 @@ export default {
   ],
 
   props: {
+    toolbarCompDefs: Object,
     contextCommands: Object,
-    toolbarCompDefs: Object
+    quillConfig: Object
   },
 
   computed: {

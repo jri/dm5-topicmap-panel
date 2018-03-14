@@ -2,7 +2,9 @@
   <div class="dm5-cytoscape-renderer">
     <div class="cytoscape-container" ref="cytoscape-container"></div>
     <div class="measurement-box" ref="measurement-box"></div>
-    <dm5-detail-layer :object-renderers="objectRenderers" :zoom="zoom" @object-submit="submitObject"></dm5-detail-layer>
+    <dm5-detail-layer :object-renderers="objectRenderers" :quill-config="quillConfig" :zoom="zoom"
+      @object-submit="submitObject">
+    </dm5-detail-layer>
   </div>
 </template>
 
@@ -64,7 +66,8 @@ export default {
   ],
 
   props: {
-    contextCommands: Object
+    contextCommands: Object,
+    quillConfig: Object
   },
 
   data () {

@@ -120,7 +120,7 @@ const actions = {
    *              Note: the detail overlay's size can only be measured once "object" details are rendered.
    */
   syncSelect (_, {id, p}) {
-    console.log('syncSelect', id)
+    // console.log('syncSelect', id)
     // Note 1: programmatic unselect() is required for browser history navigation. When *interactively* selecting a node
     // Cytoscape removes the current selection before. When *programmatically* selecting a node Cytoscape does *not*
     // remove the current selection.
@@ -137,13 +137,13 @@ const actions = {
   },
 
   syncUnselect () {
-    console.log('syncUnselect')
+    // console.log('syncUnselect')
     unselectElement().then(playFisheyeAnimationIfDetailsOnscreen)
     state.ele = undefined
   },
 
   syncTopicPosition (_, id) {
-    console.log('syncTopicPosition', id)
+    // console.log('syncTopicPosition', id)
     _syncTopicPosition(id)
   },
 
@@ -165,12 +165,12 @@ const actions = {
   },
 
   syncRemoveTopic (_, id) {
-    console.log('syncRemoveTopic', id)
+    // console.log('syncRemoveTopic', id)
     cyElement(id).remove()
   },
 
   syncRemoveAssoc (_, id) {
-    console.log('syncRemoveAssoc', id)
+    // console.log('syncRemoveAssoc', id)
     cyElement(id).remove()
   },
 
@@ -182,7 +182,7 @@ const actions = {
   // WebSocket messages
 
   _processDirectives (_, directives) {
-    console.log(`Topicmap Panel: processing ${directives.length} directives`)
+    // console.log(`Topicmap Panel: processing ${directives.length} directives`)
     directives.forEach(dir => {
       switch (dir.type) {
       case "UPDATE_TOPIC":

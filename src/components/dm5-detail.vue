@@ -7,7 +7,7 @@
       TODO: approve this hypothesis. ### FIXDOC
     -->
     <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
-      @inline="setInlineId" @updated="updated">
+      :quill-config="quillConfig" @inline="setInlineId" @updated="updated">
     </dm5-object-renderer>
     <div class="button-panel">
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
@@ -36,7 +36,8 @@ export default {
 
   props: {
     detail: {type: Object, required: true},
-    zoom:   {type: Number, required: true}
+    zoom:   {type: Number, required: true},
+    quillConfig: Object
   },
 
   data: () => ({

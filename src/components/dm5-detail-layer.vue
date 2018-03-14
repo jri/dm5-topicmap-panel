@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-detail-layer">
     <dm5-detail v-for="detail in details" :detail="detail" :zoom="zoom" :object-renderers="objectRenderers"
-      :key="detail.node.id()" @object-submit="submitObject">
+      :quill-config="quillConfig" :key="detail.node.id()" @object-submit="submitObject">
     </dm5-detail>
   </div>
 </template>
@@ -13,7 +13,10 @@ export default {
     require('./mixins/object-renderers').default
   ],
 
-  props: ['zoom'],
+  props: {
+    quillConfig: Object,
+    zoom: Number
+  },
 
   computed: {
     details () {

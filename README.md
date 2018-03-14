@@ -7,7 +7,7 @@
 * Feature: Pinning. If pinned topic/assoc details remain visible when topic/assoc is not selected.
     * Pinning states are persistent per-topicmap
 * Improved composability:
-    * Component prop `context-command` allows host application to provide the context menu commands
+    * Component prop `context-commands` allows host application to provide the context menu commands
     * Component emits `object-submit` event when inline edit has completed
 * Detail buttons appear only on mouse hover
 
