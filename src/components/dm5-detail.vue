@@ -7,7 +7,7 @@
       TODO: approve this hypothesis. ### FIXDOC
     -->
     <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
-      :quill-config="quillConfig" @inline="setInlineId" @updated="updated">
+      :quill-config="_quillConfig" @inline="setInlineId" @updated="updated">
     </dm5-object-renderer>
     <div class="button-panel">
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import dm5 from 'dm5'
+
 export default {
 
   created () {
@@ -106,6 +108,12 @@ export default {
           this.$store.dispatch('setAssocPinned', {assocId: this.object.id, pinned})
         }
       }
+    },
+
+    _quillConfig () {
+      const _quillConfig = dm5.utils.clone(this.quillConfig)
+      _quillConfig.options.bounds = '.dm5-topicmap-panel'
+      return _quillConfig
     }
   },
 
