@@ -248,7 +248,7 @@ function createDetail (viewObject, ele) {
       }
     }
     viewObject.fetchObject().then(object => {
-      detail.object = object
+      detail.object = object.isType() ? object.asType() : object    // logical copy in displayObject() (webclient.js)
       resolve(detail)
     })
     viewObject.isWritable().then(writable => {
