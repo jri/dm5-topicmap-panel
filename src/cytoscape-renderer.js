@@ -1,6 +1,9 @@
+import CytoscapeHelper from './cytoscape-helper'
 import Vue from 'vue'
 import dm5 from 'dm5'
 
+var cyHelper
+var svgReady              // a promise resolved once the FontAwesome SVG is loaded
 var fisheyeAnimation
 
 const state = {
@@ -24,17 +27,16 @@ const state = {
                           //    writable  True if the current user has WRITE permission for "object" (boolean)
                           //    pinned    Whether the detail is pinned or not (boolean)
                           //  }
-
-  svgReady: undefined     // a promise resolved once the FontAwesome SVG is loaded
 }
 
 const actions = {
 
   // Module internal
 
-  _initCytoscape (_, {cy, svgReady}) {
-    state.cy = cy
-    state.svgReady = svgReady
+  _initCytoscape (_, {container, box}) {
+    cyHelper = new CytoscapeHelper(container, box)
+    state.cy = cyHelper.cy
+    svgReady = cyHelper.svgReady
   },
 
   _syncObject (_, object) {
@@ -70,7 +72,7 @@ const actions = {
     // console.log('syncTopicmap', topicmap.id)
     state.topicmap = topicmap
     return new Promise(resolve => {
-      state.svgReady.then(renderTopicmap).then(showPinnedDetails).then(resolve)
+      svgReady.then(renderTopicmap).then(showPinnedDetails).then(resolve)
     })
   },
 
