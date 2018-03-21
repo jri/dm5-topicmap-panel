@@ -85,7 +85,9 @@ const actions = {
 
   syncAddTopic (_, id) {
     // console.log('syncAddTopic', id)
-    state.cy.add(cyNode(state.topicmap.getTopic(id)))
+    const viewTopic = state.topicmap.getTopic(id)
+    initPos(viewTopic)
+    state.cy.add(cyNode(viewTopic))
   },
 
   syncAddAssoc (_, id) {
@@ -451,6 +453,27 @@ function createAuxNode (edge) {
     position: edge.midpoint(),
     classes: 'aux'
   })
+}
+
+function initPos (viewTopic) {
+  console.log('initPos', viewTopic.id, viewTopic.getViewProp('dm4.topicmaps.x') !== undefined,
+    state.object && state.object.id)
+  // If no position is given it's up to the topicmap renderer to position the topic
+  if (viewTopic.getViewProp('dm4.topicmaps.x') === undefined) {
+    const pos = {}
+    if (state.object) {
+      // If there is a topic selection: place lower/right to the selected topic
+      // TODO: more elaborated placement, e.g. at near free position?
+      // FIXME: check for *topic* selection
+      const p = state.topicmap.getTopic(state.object.id).getPosition()
+      pos.x = p.x + 50
+      pos.y = p.y + 50
+    } else {
+      pos.x = 100
+      pos.y = 100
+    }
+    viewTopic.setPosition(pos)
+  }
 }
 
 /**
