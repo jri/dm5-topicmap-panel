@@ -3,7 +3,7 @@
     <div class="cytoscape-container" ref="cytoscape-container"></div>
     <div class="measurement-box" ref="measurement-box"></div>
     <dm5-detail-layer :object-renderers="objectRenderers" :quill-config="quillConfig" :zoom="zoom"
-      @object-submit="submitObject">
+      @object-submit="submitObject" @child-topic-reveal="revealChildTopic">
     </dm5-detail-layer>
   </div>
 </template>
@@ -167,6 +167,10 @@ export default {
 
     submitObject (object) {
       this.$parent.$emit('object-submit', object)
+    },
+
+    revealChildTopic (relTopic) {
+      this.$parent.$emit('child-topic-reveal', relTopic)
     }
   },
 

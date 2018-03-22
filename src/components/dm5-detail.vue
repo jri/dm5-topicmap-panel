@@ -7,7 +7,7 @@
       TODO: approve this hypothesis. ### FIXDOC
     -->
     <dm5-object-renderer v-if="object" :object="object" :writable="writable" mode="info" :renderers="objectRenderers"
-      :quill-config="_quillConfig" @inline="setInlineId" @updated="updated">
+      :quill-config="_quillConfig" @inline="setInlineId" @child-topic-reveal="revealChildTopic" @updated="updated">
     </dm5-object-renderer>
     <div class="button-panel">
       <el-button :class="['lock', 'fa', lockIcon]" type="text" @click="toggleLocked"></el-button>
@@ -142,6 +142,10 @@ export default {
       if (!id) {
         this.$emit('object-submit', this.object)
       }
+    },
+
+    revealChildTopic (relTopic) {
+      this.$emit('child-topic-reveal', relTopic)
     },
 
     updated () {

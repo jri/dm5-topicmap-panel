@@ -455,10 +455,12 @@ function createAuxNode (edge) {
   })
 }
 
+/**
+ * Auto-position topic if no position is set.
+ */
 function initPos (viewTopic) {
   console.log('initPos', viewTopic.id, viewTopic.getViewProp('dm4.topicmaps.x') !== undefined,
     state.object && state.object.id)
-  // If no position is given it's up to the topicmap renderer to position the topic
   if (viewTopic.getViewProp('dm4.topicmaps.x') === undefined) {
     const pos = {}
     if (state.object) {

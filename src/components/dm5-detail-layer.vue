@@ -1,7 +1,8 @@
 <template>
   <div class="dm5-detail-layer">
     <dm5-detail v-for="detail in details" :detail="detail" :zoom="zoom" :object-renderers="objectRenderers"
-      :quill-config="quillConfig" :key="detail.node.id()" @object-submit="submitObject">
+      :quill-config="quillConfig" :key="detail.node.id()" @object-submit="submitObject"
+      @child-topic-reveal="revealChildTopic">
     </dm5-detail>
   </div>
 </template>
@@ -25,8 +26,13 @@ export default {
   },
 
   methods: {
+
     submitObject (object) {
       this.$emit('object-submit', object)
+    },
+
+    revealChildTopic (relTopic) {
+      this.$emit('child-topic-reveal', relTopic)
     }
   },
 
