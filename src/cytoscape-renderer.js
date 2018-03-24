@@ -317,7 +317,7 @@ function playFisheyeAnimation() {
     // animationDuration: 3000,
     fit: false,
     randomize: false,
-    nodeRepulsion: 1000,
+    nodeRepulsion: 0,
     idealEdgeLength: 0,
     edgeElasticity: 0,
     tile: false
