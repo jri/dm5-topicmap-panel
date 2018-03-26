@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="renderer" :object-renderers="objectRenderers" :context-commands="contextCommands"
+    <component :is="topicmapRenderer" :object-renderers="objectRenderers" :context-commands="contextCommands"
       :quill-config="quillConfig">
     </component>
   </div>
@@ -22,14 +22,19 @@ export default {
 
   props: {
     toolbarCompDefs: Object,
+    topicmapTypes: Object,
     contextCommands: Object,
     quillConfig: Object
   },
 
   computed: {
-    renderer () {
-      // TODO: topicmap renderer registry
-      return require('./dm5-cytoscape-renderer').default
+    topicmapRenderer () {
+      const topicmapTypeUri = 'dm4.webclient.default_topicmap_renderer'     // TODO
+      const comp = this.topicmapTypes[topicmapTypeUri].comp
+      if (!comp) {
+        throw Error(`No renderer known for topicmap type ${topicmapTypeUri}`)
+      }
+      return comp
     }
   },
 
