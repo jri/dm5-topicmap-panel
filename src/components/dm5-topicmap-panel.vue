@@ -1,8 +1,8 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="topicmapRenderer" :object-renderers="objectRenderers" :context-commands="contextCommands"
-      :quill-config="quillConfig">
+    <component :is="topicmapRenderer" :object="object" :writable="writable" :object-renderers="objectRenderers"
+      :context-commands="contextCommands" :quill-config="quillConfig">
     </component>
   </div>
 </template>
@@ -11,7 +11,9 @@
 export default {
 
   created () {
-    // console.log('dm5-topicmap-panel created', this.toolbarCompDefs)
+    // console.log('dm5-topicmap-panel created', this.topicmapTypes)
+    this.$store.registerModule('topicmapPanel', require('../topicmap-panel').default)
+    this.$store.dispatch('_syncTopicmapTypes', this.topicmapTypes)
   },
 
   mixins: [
@@ -28,24 +30,25 @@ export default {
   },
 
   computed: {
-    topicmapRenderer () {
-      const topicmapTypeUri = 'dm4.webclient.default_topicmap_renderer'     // TODO
-      const comp = this.topicmapTypes[topicmapTypeUri].comp
-      if (!comp) {
-        throw Error(`No renderer known for topicmap type ${topicmapTypeUri}`)
-      }
-      return comp
-    }
-  },
 
-  watch: {
-
-    object () {
-      this.$store.dispatch('_syncObject', this.object)
+    topicmap () {
+      return this.$store.state.topicmapPanel.topicmap
     },
 
-    writable () {
-      this.$store.dispatch('_syncWritable', this.writable)
+    topicmapRenderer () {
+      console.log('topicmapRenderer', this.topicmap)
+      if (this.topicmap) {
+        const topicmapTypeUri = this.topicmap.getTopicmapTypeUri()
+        const topicmapType = this.topicmapTypes[topicmapTypeUri]
+        if (!topicmapType) {
+          throw Error(`'Topicmap type ${topicmapTypeUri}' is not registered`)
+        }
+        const comp = topicmapType.comp
+        if (!comp) {
+          throw Error(`No renderer component set for topicmap type '${topicmapTypeUri}'`)
+        }
+        return comp
+      }
     }
   },
 
