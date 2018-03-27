@@ -11,7 +11,7 @@ const actions = {
    * @returns   a promise resolved once topicmap rendering is complete.
    */
   renderTopicmap ({dispatch}, topicmap) {
-    console.log('renderTopicmap', topicmap)
+    // console.log('renderTopicmap', topicmap)
     state.topicmap = topicmap
     return new Promise(resolve => {
       // Note: setting the "topicmap" state triggers instantiation of the renderer component.
