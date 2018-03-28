@@ -1,7 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <div ref="topicmapRenderer"></div><!-- mount point -->
+    <div ref="mountElement"></div><!-- topicmap renderer mount element -->
   </div>
 </template>
 
@@ -17,7 +17,7 @@ export default {
     // console.log('dm5-topicmap-panel mounted')
     this.$store.dispatch('_initTopicmapPanel', {
       topicmapTypes: this.topicmapTypes,
-      topicmapRenderer: this.$refs.topicmapRenderer,
+      mountElement: this.$refs.mountElement,
       parent: this
     })
   },

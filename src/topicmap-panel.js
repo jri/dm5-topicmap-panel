@@ -3,7 +3,7 @@ import Vue from 'vue'
 let _topicmap           // The displayed topicmap
 
 let _topicmapTypes      // Registered topicmap types
-let _topicmapRenderer   // The element where to mount the topicmap renderers
+let _mountElement       // The DOM element where to mount the topicmap renderers
 let _parent
 
 const actions = {
@@ -23,7 +23,7 @@ const actions = {
         _topicmapTypes[newTypeUri].comp().then(module => {
           // console.log('module', module)
           const propsData = {}
-          const comp = new Vue({parent: _parent, propsData, ...module.default}).$mount(_topicmapRenderer)
+          _mountElement = new Vue({parent: _parent, propsData, ...module.default}).$mount(_mountElement).$el
           dispatch('syncTopicmap', topicmap).then(resolve)
         })
       }
@@ -33,10 +33,10 @@ const actions = {
 
   // Module internal
 
-  _initTopicmapPanel (_, {topicmapTypes, topicmapRenderer, parent, store}) {
+  _initTopicmapPanel (_, {topicmapTypes, mountElement, parent}) {
     console.log('_initTopicmapPanel', parent)
     _topicmapTypes = topicmapTypes
-    _topicmapRenderer = topicmapRenderer
+    _mountElement = mountElement
     _parent = parent
   }
 }
