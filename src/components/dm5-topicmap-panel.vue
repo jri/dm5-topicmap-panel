@@ -35,37 +35,6 @@ export default {
     quillConfig: Object
   },
 
-  computed: {
-
-    topicmap () {
-      return this.$store.state.topicmapPanel.topicmap
-    },
-
-    topicmapRenderer () {
-      // console.log('topicmapRenderer', this.topicmap)
-      if (this.topicmap) {
-        const topicmapTypeUri = this.topicmap.getTopicmapTypeUri()
-        const topicmapType = this.topicmapTypes[topicmapTypeUri]
-        if (!topicmapType) {
-          throw Error(`Topicmap type '${topicmapTypeUri}' is not registered`)
-        }
-        const comp = topicmapType.comp
-        if (!comp) {
-          throw Error(`No renderer component set for topicmap type '${topicmapTypeUri}'`)
-        }
-        return comp
-      }
-    }
-  },
-
-  methods: {
-    rendererMounted (topicmapTypeUri) {
-      // console.log('rendererMounted', topicmapTypeUri)
-      const mounted = this.topicmapTypes[topicmapTypeUri].mounted
-      mounted && mounted()
-    }
-  },
-
   components: {
     'dm5-toolbar': require('./dm5-toolbar').default
   }

@@ -18,14 +18,29 @@ const actions = {
       const newTypeUri = topicmap.getTopicmapTypeUri()
       if (oldTypeUri !== newTypeUri) {
         // console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
-        // const viewModule = state.topicmapTypes[newTypeUri].storeModules.view
-        // _store.registerModule('cytoscapeRenderer', viewModule)    // FIXME: dynamic name needed
-        _topicmapTypes[newTypeUri].comp().then(module => {
-          // console.log('module', module)
+        const topicmapType = _topicmapTypes[newTypeUri]
+        if (!topicmapType) {
+          throw Error(`Topicmap type '${newTypeUri}' is not registered`)
+        }
+        const comp = topicmapType.comp
+        if (!comp) {
+          throw Error(`No renderer component set for topicmap type '${newTypeUri}'`)
+        }
+        // TODO: support actual component too (besides factory function)
+        comp().then(module => {
           const propsData = {}
           _mountElement = new Vue({parent: _parent, propsData, ...module.default}).$mount(_mountElement).$el
+          //
+          // call mounted() callback
+          topicmapType.mounted && topicmapType.mounted()
+          //
+          // const viewModule = state.topicmapTypes[newTypeUri].storeModules.view
+          // _store.registerModule('cytoscapeRenderer', viewModule)    // FIXME: dynamic name needed
+          //
           dispatch('syncTopicmap', topicmap).then(resolve)
         })
+      } else {
+        dispatch('syncTopicmap', topicmap).then(resolve)
       }
       _topicmap = topicmap
     })
@@ -34,7 +49,7 @@ const actions = {
   // Module internal
 
   _initTopicmapPanel (_, {topicmapTypes, mountElement, parent}) {
-    console.log('_initTopicmapPanel', parent)
+    // console.log('_initTopicmapPanel', parent)
     _topicmapTypes = topicmapTypes
     _mountElement = mountElement
     _parent = parent
