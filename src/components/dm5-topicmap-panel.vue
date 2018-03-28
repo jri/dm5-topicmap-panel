@@ -1,9 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="topicmapRenderer" :object="object" :writable="writable" :object-renderers="objectRenderers"
-      :context-commands="contextCommands" :quill-config="quillConfig" @renderer-mounted="rendererMounted">
-    </component>
+    <div ref="topicmapRenderer"></div><!-- mount point -->
   </div>
 </template>
 
@@ -13,11 +11,15 @@ export default {
   created () {
     // console.log('dm5-topicmap-panel created', this.topicmapTypes)
     this.$store.registerModule('topicmapPanel', require('../topicmap-panel').default)
-    this.$store.dispatch('_syncTopicmapTypes', this.topicmapTypes)
   },
 
   mounted () {
     // console.log('dm5-topicmap-panel mounted')
+    this.$store.dispatch('_initTopicmapPanel', {
+      topicmapTypes: this.topicmapTypes,
+      topicmapRenderer: this.$refs.topicmapRenderer,
+      parent: this
+    })
   },
 
   mixins: [
@@ -45,7 +47,7 @@ export default {
         const topicmapTypeUri = this.topicmap.getTopicmapTypeUri()
         const topicmapType = this.topicmapTypes[topicmapTypeUri]
         if (!topicmapType) {
-          throw Error(`'Topicmap type ${topicmapTypeUri}' is not registered`)
+          throw Error(`Topicmap type '${topicmapTypeUri}' is not registered`)
         }
         const comp = topicmapType.comp
         if (!comp) {
