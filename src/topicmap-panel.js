@@ -2,9 +2,14 @@ import Vue from 'vue'
 
 let _topicmap           // The displayed topicmap
 
+let _props
 let _topicmapTypes      // Registered topicmap types
 let _mountElement       // The DOM element where to mount the topicmap renderers
 let _parent
+
+const state = {
+  topicmapRenderer: undefined
+}
 
 const actions = {
 
@@ -17,6 +22,7 @@ const actions = {
       const oldTypeUri = _topicmap && _topicmap.getTopicmapTypeUri()
       const newTypeUri = topicmap.getTopicmapTypeUri()
       if (oldTypeUri !== newTypeUri) {
+        // 1) lookup topicmap type
         // console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
         const topicmapType = _topicmapTypes[newTypeUri]
         if (!topicmapType) {
@@ -26,14 +32,18 @@ const actions = {
         if (!comp) {
           throw Error(`No renderer component set for topicmap type '${newTypeUri}'`)
         }
+        // 2) instantiate topicmap renderer
         // TODO: support actual component too (besides factory function)
         comp().then(module => {
-          const propsData = {}
-          _mountElement = new Vue({parent: _parent, propsData, ...module.default}).$mount(_mountElement).$el
+          // TODO: don't pass *all* props ("toolbarCompDefs" and "topicmapTypes" are not meaningful to
+          // the topicmap renderer, only to the topicmap panel). But it doesn't hurt.
+          state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...module.default})
+          _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
           //
           // call mounted() callback
           topicmapType.mounted && topicmapType.mounted()
           //
+          // TODO: store modules
           // const viewModule = state.topicmapTypes[newTypeUri].storeModules.view
           // _store.registerModule('cytoscapeRenderer', viewModule)    // FIXME: dynamic name needed
           //
@@ -48,14 +58,16 @@ const actions = {
 
   // Module internal
 
-  _initTopicmapPanel (_, {topicmapTypes, mountElement, parent}) {
+  _initTopicmapPanel (_, {props, mountElement, parent}) {
     // console.log('_initTopicmapPanel', parent)
-    _topicmapTypes = topicmapTypes
+    _props = props
+    _topicmapTypes = props.topicmapTypes
     _mountElement = mountElement
     _parent = parent
   }
 }
 
 export default {
+  state,
   actions
 }

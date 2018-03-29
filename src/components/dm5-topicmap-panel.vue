@@ -16,9 +16,9 @@ export default {
   mounted () {
     // console.log('dm5-topicmap-panel mounted')
     this.$store.dispatch('_initTopicmapPanel', {
-      topicmapTypes: this.topicmapTypes,
+      props:        this.$props,
       mountElement: this.$refs.mountElement,
-      parent: this
+      parent:       this
     })
   },
 
@@ -33,6 +33,25 @@ export default {
     topicmapTypes: Object,
     contextCommands: Object,
     quillConfig: Object
+  },
+
+  computed: {
+    topicmapRenderer () {
+      return this.$store.state.topicmapPanel.topicmapRenderer
+    }
+  },
+
+  watch: {
+
+    object () {
+      console.log('object watcher', this.object)
+      this.topicmapRenderer.object = this.object
+    },
+
+    writable () {
+      console.log('writable watcher')
+      // TODO?
+    }
   },
 
   components: {
