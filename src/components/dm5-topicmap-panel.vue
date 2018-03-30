@@ -1,9 +1,7 @@
 <template>
   <div class="dm5-topicmap-panel">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="topicmapRenderer" :object="object" :writable="writable" :object-renderers="objectRenderers"
-      :context-commands="contextCommands" :quill-config="quillConfig" @renderer-mounted="rendererMounted">
-    </component>
+    <div ref="mountElement"></div><!-- topicmap renderer mount element -->
   </div>
 </template>
 
@@ -13,11 +11,15 @@ export default {
   created () {
     // console.log('dm5-topicmap-panel created', this.topicmapTypes)
     this.$store.registerModule('topicmapPanel', require('../topicmap-panel').default)
-    this.$store.dispatch('_syncTopicmapTypes', this.topicmapTypes)
   },
 
   mounted () {
     // console.log('dm5-topicmap-panel mounted')
+    this.$store.dispatch('_initTopicmapPanel', {
+      props:        this.$props,
+      mountElement: this.$refs.mountElement,
+      parent:       this
+    })
   },
 
   mixins: [
@@ -34,33 +36,21 @@ export default {
   },
 
   computed: {
-
-    topicmap () {
-      return this.$store.state.topicmapPanel.topicmap
-    },
-
     topicmapRenderer () {
-      // console.log('topicmapRenderer', this.topicmap)
-      if (this.topicmap) {
-        const topicmapTypeUri = this.topicmap.getTopicmapTypeUri()
-        const topicmapType = this.topicmapTypes[topicmapTypeUri]
-        if (!topicmapType) {
-          throw Error(`'Topicmap type ${topicmapTypeUri}' is not registered`)
-        }
-        const comp = topicmapType.comp
-        if (!comp) {
-          throw Error(`No renderer component set for topicmap type '${topicmapTypeUri}'`)
-        }
-        return comp
-      }
+      return this.$store.state.topicmapPanel.topicmapRenderer
     }
   },
 
-  methods: {
-    rendererMounted (topicmapTypeUri) {
-      // console.log('rendererMounted', topicmapTypeUri)
-      const mounted = this.topicmapTypes[topicmapTypeUri].mounted
-      mounted && mounted()
+  watch: {
+
+    object () {
+      console.log('object watcher', this.object)
+      this.topicmapRenderer.object = this.object
+    },
+
+    writable () {
+      console.log('writable watcher')
+      // TODO?
     }
   },
 
