@@ -44,12 +44,15 @@ export default {
   watch: {
 
     object () {
-      console.log('object watcher', this.object)
+      // console.log('object watcher', this.object)
+      if (!this.topicmapRenderer) {
+        throw Error('Topicmap renderer not yet instantiated')
+      }
       this.topicmapRenderer.object = this.object
     },
 
     writable () {
-      console.log('writable watcher')
+      // console.log('writable watcher')
       // TODO?
     }
   },

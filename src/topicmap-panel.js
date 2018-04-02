@@ -1,11 +1,16 @@
 import Vue from 'vue'
 
-let _topicmap           // The displayed topicmap
+let _topicmapTopic             // The displayed topicmap
 
 let _props
-let _topicmapTypes      // Registered topicmap types
-let _mountElement       // The DOM element where to mount the topicmap renderers
+let _topicmapTypes        // Registered topicmap types
+let _mountElement         // The DOM element where to mount the topicmap renderers
 let _parent
+
+let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
+                          //   {
+                          //     topicmapId: Topicmap         # a dm5.Topicmap
+                          //   }
 
 const state = {
   topicmapRenderer: undefined
@@ -16,14 +21,19 @@ const actions = {
   /**
    * @returns   a promise resolved once topicmap rendering is complete.
    */
-  renderTopicmap ({dispatch}, topicmap) {
-    console.log('renderTopicmap', topicmap)
+  renderTopicmap ({dispatch}, topicmapTopic) {
+    console.log('renderTopicmap', topicmapTopic)
     return new Promise(resolve => {
-      switchTopicmapRenderer(topicmap)
-        .then(() => dispatch('syncTopicmap', topicmap))
-        .then(resolve)
-      _topicmap = topicmap
+      switchTopicmapRenderer(topicmapTopic)
+        .then(() => getTopicmap(topicmapTopic.id, dispatch))
+        .then(topicmap => dispatch('syncTopicmap', topicmap))
+        .then(topicmap => resolve(topicmap))
+      _topicmapTopic = topicmapTopic
     })
+  },
+
+  clearTopicmapCache () {
+    topicmapCache = {}
   },
 
   // Module internal
@@ -42,16 +52,18 @@ export default {
   actions
 }
 
+// Topicmap Renderer Switching
+
 /**
  * Switches to the topicmap renderer needed for the given topicmap.
  * If no renderer switch is needed nothing is performed and the returned promise is resolved immediately.
  *
  * @return  A promise resolved once the topicmap renderer is ready.
  */
-function switchTopicmapRenderer (topicmap) {
+function switchTopicmapRenderer (topicmapTopic) {
   return new Promise(resolve => {
-    const oldTypeUri = _topicmap && _topicmap.getTopicmapTypeUri()
-    const newTypeUri = topicmap.getTopicmapTypeUri()
+    const oldTypeUri = _topicmapTopic && getTopicmapTypeUri(_topicmapTopic)
+    const newTypeUri = getTopicmapTypeUri(topicmapTopic)
     if (oldTypeUri !== newTypeUri) {
       console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
       const topicmapType = getTopicmapType(newTypeUri)
@@ -76,6 +88,14 @@ function switchTopicmapRenderer (topicmap) {
   })
 }
 
+function getTopicmapTypeUri (topicmapTopic) {
+  const child = topicmapTopic.getChildTopic('dm4.topicmaps.topicmap_renderer_uri')
+  if (!child) {
+    throw Error(`Topicmap topic ${topicmapTopic.id} has no dm4.topicmaps.topicmap_renderer_uri child topic`)
+  }
+  return child.value
+}
+
 function getTopicmapType (topicmapTypeUri) {
   if (!_topicmapTypes) {
     throw Error(`No topicmap types passed to dm5-topicmap-panel`)
@@ -98,4 +118,24 @@ function getRendererComponent (topicmapType) {
   }
   // TODO: support actual component too (besides factory function)
   return comp
+}
+
+// Topicmap Loading
+
+// TODO: store promises in topicmap cache
+function getTopicmap (id, dispatch) {
+  var p   // a promise for a dm5.Topicmap
+  const topicmap = topicmapCache[id]
+  if (topicmap) {
+    p = Promise.resolve(topicmap)
+  } else {
+    // console.log('Fetching topicmap', id)
+    p = dispatch('fetchTopicmap', id).then(topicmap => {
+      topicmapCache[topicmap.id] = topicmap
+      return topicmap
+    }).catch(error => {
+      console.error(error)
+    })
+  }
+  return p
 }
