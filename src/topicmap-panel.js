@@ -20,14 +20,16 @@ const actions = {
 
   /**
    * @returns   a promise resolved once topicmap rendering is complete.
+   *            The promise's value is the topicmap.
    */
-  renderTopicmap ({dispatch}, topicmapTopic) {
-    console.log('renderTopicmap', topicmapTopic)
+  showTopicmap ({dispatch}, topicmapTopic) {
+    console.log('showTopicmap', topicmapTopic)
     return new Promise(resolve => {
       switchTopicmapRenderer(topicmapTopic)
         .then(() => getTopicmap(topicmapTopic.id, dispatch))
-        .then(topicmap => dispatch('syncTopicmap', topicmap))
-        .then(topicmap => resolve(topicmap))
+        .then(topicmap => dispatch('renderTopicmap', topicmap)
+          .then(() => resolve(topicmap))
+        )
       _topicmapTopic = topicmapTopic
     })
   },
