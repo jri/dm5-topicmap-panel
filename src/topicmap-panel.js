@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-let _topicmapTopic             // The displayed topicmap
+let _topicmapTopic        // The displayed topicmap
 
 let _props
 let _topicmapTypes        // Registered topicmap types
@@ -22,12 +22,12 @@ const actions = {
    * @returns   a promise resolved once topicmap rendering is complete.
    *            The promise's value is the topicmap.
    */
-  showTopicmap ({dispatch}, topicmapTopic) {
+  showTopicmap ({dispatch}, {topicmapTopic, writable}) {
     console.log('showTopicmap', topicmapTopic)
     return new Promise(resolve => {
       switchTopicmapRenderer(topicmapTopic)
         .then(() => getTopicmap(topicmapTopic.id, dispatch))
-        .then(topicmap => dispatch('renderTopicmap', topicmap)
+        .then(topicmap => dispatch('renderTopicmap', {topicmap, writable})
           .then(() => resolve(topicmap))
         )
       _topicmapTopic = topicmapTopic
