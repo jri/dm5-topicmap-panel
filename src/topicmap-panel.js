@@ -1,6 +1,6 @@
 import Vue from 'vue'
 
-let _topicmapTopic        // The displayed topicmap
+let _topicmapTopic        // Topicmap topic of the displayed topicmap
 
 let _props
 let _topicmapTypes        // Registered topicmap types
@@ -20,18 +20,12 @@ const actions = {
 
   /**
    * @returns   a promise resolved once topicmap rendering is complete.
-   *            The promise's value is the topicmap.
    */
   showTopicmap ({dispatch}, {topicmapTopic, writable}) {
-    console.log('showTopicmap', topicmapTopic)
-    return new Promise(resolve => {
-      switchTopicmapRenderer(topicmapTopic)
-        .then(() => getTopicmap(topicmapTopic.id, dispatch))
-        .then(topicmap => dispatch('renderTopicmap', {topicmap, writable})
-          .then(() => resolve(topicmap))
-        )
-      _topicmapTopic = topicmapTopic
-    })
+    console.log('showTopicmap', topicmapTopic.id)
+    return switchTopicmapRenderer(topicmapTopic)
+      .then(() => getTopicmap(topicmapTopic.id, dispatch))
+      .then(topicmap => dispatch('renderTopicmap', {topicmap, writable}))
   },
 
   clearTopicmapCache () {
@@ -83,10 +77,12 @@ function switchTopicmapRenderer (topicmapTopic) {
         // TODO: store modules
         // const viewModule = state.topicmapTypes[newTypeUri].storeModules.view
         // _store.registerModule('cytoscapeRenderer', viewModule)    // FIXME: dynamic name needed
-      }).then(resolve)
+        resolve()
+      })
     } else {
       resolve()
     }
+    _topicmapTopic = topicmapTopic
   })
 }
 
@@ -133,6 +129,9 @@ function getTopicmap (id, dispatch) {
   } else {
     // console.log('Fetching topicmap', id)
     p = dispatch('fetchTopicmap', id).then(topicmap => {
+      if (Array.isArray(topicmap)) {
+        throw Error(`${topicmap.length} renderers competed for fetching topicmap ${id}`)
+      }
       topicmapCache[topicmap.id] = topicmap
       return topicmap
     }).catch(error => {
