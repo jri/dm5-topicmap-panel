@@ -16,6 +16,7 @@ export default {
   mounted () {
     // console.log('dm5-topicmap-panel mounted')
     this.$store.dispatch('_initTopicmapPanel', {
+      store:        this.$store,
       props:        this.$props,
       mountElement: this.$refs.mountElement,
       parent:       this

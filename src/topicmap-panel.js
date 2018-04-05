@@ -2,6 +2,7 @@ import Vue from 'vue'
 
 let _topicmapTopic        // Topicmap topic of the displayed topicmap
 
+let _store
 let _props
 let _topicmapTypes        // Registered topicmap types
 let _mountElement         // The DOM element where to mount the topicmap renderers
@@ -34,8 +35,9 @@ const actions = {
 
   // Module internal
 
-  _initTopicmapPanel (_, {props, mountElement, parent}) {
+  _initTopicmapPanel (_, {store, props, mountElement, parent}) {
     // console.log('_initTopicmapPanel', parent)
+    _store = store
     _props = props
     _topicmapTypes = props.topicmapTypes
     _mountElement = mountElement
@@ -63,19 +65,18 @@ function switchTopicmapRenderer (topicmapTopic) {
     if (oldTypeUri !== newTypeUri) {
       console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
       const topicmapType = getTopicmapType(newTypeUri)
-      getRendererComponent(topicmapType).then(comp => {
-        // instantiate topicmap renderer
+      getRenderer(topicmapType).then(renderer => {
+        // register store module
+        oldTypeUri && _store.unregisterModule(oldTypeUri)
+        _store.registerModule(newTypeUri, renderer.storeModule)
+        // instantiate renderer component
         // TODO: don't pass *all* props ("toolbarCompDefs" and "topicmapTypes" are not meaningful to
-        // the topicmap renderer, only to the topicmap panel). But it doesn't hurt.
-        state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...comp})
+        // the topicmap renderer, only to the topicmap panel)? But it doesn't hurt.
+        state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...renderer.comp})
         _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
-        //
         // call mounted() callback
         topicmapType.mounted && topicmapType.mounted()
         //
-        // TODO: store modules
-        // const viewModule = state.topicmapTypes[newTypeUri].storeModules.view
-        // _store.registerModule('cytoscapeRenderer', viewModule)    // FIXME: dynamic name needed
         resolve()
       })
     } else {
@@ -104,24 +105,27 @@ function getTopicmapType (topicmapTypeUri) {
   return topicmapType
 }
 
-function getRendererComponent (topicmapType) {
+function getRenderer (topicmapType) {
   return new Promise(resolve => {
-    const renderer = topicmapType.renderer
-    if (typeof renderer !== 'function') {
-      throw Error(`Topicmap renderer is expected to be a function, got ${typeof renderer}
+    const rendererFunc = topicmapType.renderer
+    if (typeof rendererFunc !== 'function') {
+      throw Error(`Topicmap renderer is expected to be a function, got ${typeof rendererFunc}
         (topicmap type '${topicmapType.uri}')`)
     }
-    const p = renderer()
+    const p = rendererFunc()
     if (!(p instanceof Promise)) {
       throw Error(`Topicmap renderer function is expected to return a Promise, got ${p.constructor.name} (${p})
         (topicmap type '${topicmapType.uri}')`)
     }
     p.then(module => {
-      const comp = module.default.comp
-      if (!comp) {
+      const renderer = module.default
+      if (!renderer.storeModule) {
+        throw Error(`No store module set for topicmap type '${topicmapType.uri}'`)
+      }
+      if (!renderer.comp) {
         throw Error(`No renderer component set for topicmap type '${topicmapType.uri}'`)
       }
-      resolve(comp)
+      resolve(renderer)
     })
     // TODO: support actual component too (besides factory function)
   })
