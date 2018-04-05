@@ -63,12 +63,11 @@ function switchTopicmapRenderer (topicmapTopic) {
     if (oldTypeUri !== newTypeUri) {
       console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
       const topicmapType = getTopicmapType(newTypeUri)
-      const comp = getRendererComponent(topicmapType)
-      comp().then(module => {
+      getRendererComponent(topicmapType).then(comp => {
         // instantiate topicmap renderer
         // TODO: don't pass *all* props ("toolbarCompDefs" and "topicmapTypes" are not meaningful to
         // the topicmap renderer, only to the topicmap panel). But it doesn't hurt.
-        state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...module.default})
+        state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...comp})
         _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
         //
         // call mounted() callback
@@ -106,16 +105,26 @@ function getTopicmapType (topicmapTypeUri) {
 }
 
 function getRendererComponent (topicmapType) {
-  const comp = topicmapType.comp
-  if (!comp) {
-    throw Error(`No renderer component set for topicmap type '${topicmapType.uri}'`)
-  }
-  if (typeof comp !== 'function') {
-    throw Error(`Renderer component is expected to be a function, got ${typeof comp}
-      (topicmap type '${topicmapType.uri}')`)
-  }
-  // TODO: support actual component too (besides factory function)
-  return comp
+  return new Promise(resolve => {
+    const renderer = topicmapType.renderer
+    if (typeof renderer !== 'function') {
+      throw Error(`Topicmap renderer is expected to be a function, got ${typeof renderer}
+        (topicmap type '${topicmapType.uri}')`)
+    }
+    const p = renderer()
+    if (!(p instanceof Promise)) {
+      throw Error(`Topicmap renderer function is expected to return a Promise, got ${p.constructor.name} (${p})
+        (topicmap type '${topicmapType.uri}')`)
+    }
+    p.then(module => {
+      const comp = module.default.comp
+      if (!comp) {
+        throw Error(`No renderer component set for topicmap type '${topicmapType.uri}'`)
+      }
+      resolve(comp)
+    })
+    // TODO: support actual component too (besides factory function)
+  })
 }
 
 // Topicmap Loading
