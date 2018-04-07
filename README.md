@@ -2,12 +2,21 @@
 
 ## Version History
 
+**0.12** -- Apr 7, 2018
+
+* Feature: custom topicmap renderers. The host application can provide custom topicmap models (e.g. geomap) and accompanying renderers (e.g. Leaflet based).
+    * New component property `topicmapTypes` to inject custom topicmap models and renderers.
+    * Dynamic topicmap renderer switching: when the user switches between topicmaps the needed renderer is mounted dynamically.
+    * Lazy loading: e.g. the Leaflet package is loaded only in the moment the first geomap is shown.
+* The default topicmap renderer is available as standalone component:
+  https://github.com/jri/dm5-cytoscape-renderer
+
 **0.11** -- Mar 25, 2018
 
 * Auto-positioning new topic when no position is given
 * Fix: pinning types
 * Improved composability:
-    * New `quill-config` property allows parent component to customize the Quill editor in both ways, setting options, and providing extensions (e.g. formats)
+    * New component property `quillConfig` allows the host application to customize the Quill editor in both ways, setting options, and providing extensions (e.g. formats)
     * Emit `child-topic-reveal` event to signalize "user clicked 'Reveal' button in an in-map detail"
 
 **0.10** -- Mar 10, 2018
@@ -15,7 +24,7 @@
 * Feature: "Pinning". If pinned topic/assoc details remain visible when topic/assoc is not selected.
     * Pinning states are persistent per-topicmap
 * Improved composability:
-    * New prop `context-commands` allows parent component to provide the context menu commands
+    * New component property `contextCommands` allows the host application to provide the context menu commands
     * Component emits `object-submit` event to signalize "inline edit has completed"
 * Detail buttons appear only on mouse hover
 
@@ -23,7 +32,7 @@
 
 * In-map *assoc* details
 * Improved composability:
-    * Component relies on explicit props (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Props have reasonable defaults
+    * Component relies on explicit properties (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Properties have reasonable defaults
     * Component emits events (instead of dispatching into host app): `topic-select`, `topic-double-click`, `topic-drag`, `topic-drop-on-topic`, `assoc-select`, `topicmap-click`, `topicmap-contextmenu`
     * Toolbar provides separate `left` and `right` mount points
     * Canvas resize can be triggered from outside
@@ -61,4 +70,4 @@
 
 ------------
 Jörg Richter  
-Mar 25, 2018
+Apr 7, 2018

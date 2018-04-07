@@ -66,15 +66,15 @@ function switchTopicmapRenderer (topicmapTopic) {
       console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
       const topicmapType = getTopicmapType(newTypeUri)
       getRenderer(topicmapType).then(renderer => {
-        // register store module
+        // 1) switch store module
         oldTypeUri && _store.unregisterModule(oldTypeUri)
         _store.registerModule(newTypeUri, renderer.storeModule)
-        // instantiate renderer component
+        // 2) instantiate renderer component
         // TODO: don't pass *all* props ("toolbarCompDefs" and "topicmapTypes" are not meaningful to
         // the topicmap renderer, only to the topicmap panel)? But it doesn't hurt.
         state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...renderer.comp})
         _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
-        // call mounted() callback
+        // 3) call mounted() callback
         topicmapType.mounted && topicmapType.mounted()
         //
         resolve()
