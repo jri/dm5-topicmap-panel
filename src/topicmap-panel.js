@@ -14,7 +14,8 @@ let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
                           //   }
 
 const state = {
-  topicmapRenderer: undefined
+  topicmapRenderer: undefined,
+  loading: false
 }
 
 const actions = {
@@ -24,9 +25,11 @@ const actions = {
    */
   showTopicmap ({dispatch}, {topicmapTopic, writable}) {
     console.log('showTopicmap', topicmapTopic.id)
+    state.loading = true
     return switchTopicmapRenderer(topicmapTopic)
       .then(() => getTopicmap(topicmapTopic.id, dispatch))
       .then(topicmap => dispatch('renderTopicmap', {topicmap, writable}))
+      .then(() => state.loading = false)
   },
 
   clearTopicmapCache () {
@@ -147,8 +150,6 @@ function getTopicmap (id, dispatch) {
       }
       topicmapCache[topicmap.id] = topicmap
       return topicmap
-    }).catch(error => {
-      console.error(error)
     })
   }
   return p

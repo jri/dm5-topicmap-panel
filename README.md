@@ -32,7 +32,7 @@
 
 * In-map *assoc* details
 * Improved composability:
-    * Component relies on explicit properties (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Properties have reasonable defaults
+    * For configuration the component relies on explicit properties (instead of context injection): `object`, `writable`, `objectRenderers`, `toolbarCompDefs`. Properties have reasonable defaults.
     * Component emits events (instead of dispatching into host app): `topic-select`, `topic-double-click`, `topic-drag`, `topic-drop-on-topic`, `assoc-select`, `topicmap-click`, `topicmap-contextmenu`
     * Toolbar provides separate `left` and `right` mount points
     * Canvas resize can be triggered from outside

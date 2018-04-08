@@ -1,11 +1,13 @@
 <template>
-  <div class="dm5-topicmap-panel">
+  <div class="dm5-topicmap-panel" v-loading="loading">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
     <div ref="mountElement"></div><!-- topicmap renderer mount element -->
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
 
   created () {
@@ -36,11 +38,10 @@ export default {
     quillConfig: Object
   },
 
-  computed: {
-    topicmapRenderer () {
-      return this.$store.state.topicmapPanel.topicmapRenderer
-    }
-  },
+  computed: mapState({
+    topicmapRenderer: state => state.topicmapPanel.topicmapRenderer,
+    loading:          state => state.topicmapPanel.loading
+  }),
 
   watch: {
 
