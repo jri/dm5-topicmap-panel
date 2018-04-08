@@ -47,15 +47,22 @@ export default {
 
     object () {
       // console.log('object watcher', this.object)
-      if (!this.topicmapRenderer) {
-        throw Error('Topicmap renderer not yet instantiated')
-      }
+      this.checkTopicmapRenderer()
       this.topicmapRenderer.object = this.object
     },
 
     writable () {
-      // console.log('writable watcher')
-      // TODO?
+      // console.log('writable watcher', this.writable)
+      this.checkTopicmapRenderer()
+      this.topicmapRenderer.writable = this.writable
+    }
+  },
+
+  methods: {
+    checkTopicmapRenderer () {
+      if (!this.topicmapRenderer) {
+        throw Error('Topicmap renderer not yet instantiated')
+      }
     }
   },
 
