@@ -15,7 +15,7 @@ let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
 
 const state = {
   topicmapRenderer: undefined,
-  loading: false
+  loading: true
 }
 
 const actions = {
@@ -34,6 +34,10 @@ const actions = {
 
   clearTopicmapCache () {
     topicmapCache = {}
+  },
+
+  resizeTopicmapRenderer () {
+    // empty dummy action to catch a "resize" request when no renderer is mounted yet
   },
 
   // Module internal
