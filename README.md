@@ -2,6 +2,12 @@
 
 ## Version History
 
+**0.13** -- Apr 10, 2018
+
+* Feature: show spinner when topicmap/renderer loads
+* Fix: sync `writable` flag with topicmap renderer
+* Fix: catch "resize" request when no renderer is mounted
+
 **0.12** -- Apr 7, 2018
 
 * Feature: custom topicmap renderers. The host application can provide custom topicmap models (e.g. geomap) and accompanying renderers (e.g. Leaflet based).
@@ -70,4 +76,4 @@
 
 ------------
 Jörg Richter  
-Apr 7, 2018
+Apr 10, 2018
