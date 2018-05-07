@@ -24,7 +24,7 @@ const actions = {
    * @returns   a promise resolved once topicmap rendering is complete.
    */
   showTopicmap ({dispatch}, {topicmapTopic, writable}) {
-    console.log('showTopicmap', topicmapTopic.id)
+    // console.log('showTopicmap', topicmapTopic.id)
     state.loading = true
     return switchTopicmapRenderer(topicmapTopic)
       .then(() => getTopicmap(topicmapTopic.id, dispatch))
@@ -70,7 +70,7 @@ function switchTopicmapRenderer (topicmapTopic) {
     const oldTypeUri = _topicmapTopic && getTopicmapTypeUri(_topicmapTopic)
     const newTypeUri = getTopicmapTypeUri(topicmapTopic)
     if (oldTypeUri !== newTypeUri) {
-      console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
+      // console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
       const topicmapType = getTopicmapType(newTypeUri)
       getRenderer(topicmapType).then(renderer => {
         // 1) switch store module
