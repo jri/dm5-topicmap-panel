@@ -2,11 +2,16 @@
 
 ## Version History
 
+**0.14** -- Jun 20, 2018
+
+* Feature: multi-selection
+
 **0.13** -- Apr 10, 2018
 
 * Feature: show spinner when topicmap/renderer loads
-* Fix: sync `writable` flag with topicmap renderer
-* Fix: catch "resize" request when no renderer is mounted
+* Fixes:
+    * Sync `writable` flag with topicmap renderer
+    * Catch "resize" request when no renderer is mounted
 
 **0.12** -- Apr 7, 2018
 
@@ -76,4 +81,4 @@
 
 ------------
 Jörg Richter  
-Apr 10, 2018
+Jun 20, 2018
