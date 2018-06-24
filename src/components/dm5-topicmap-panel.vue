@@ -32,7 +32,6 @@ export default {
   ],
 
   props: {
-    selection: Object,
     toolbarCompDefs: Object,
     topicmapTypes: Object,
     contextCommands: Object,

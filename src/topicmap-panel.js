@@ -23,12 +23,12 @@ const actions = {
   /**
    * @returns   a promise resolved once topicmap rendering is complete.
    */
-  showTopicmap ({dispatch}, {topicmapTopic, writable}) {
+  showTopicmap ({dispatch}, {topicmapTopic, writable, selection}) {
     // console.log('showTopicmap', topicmapTopic.id)
     state.loading = true
     return switchTopicmapRenderer(topicmapTopic)
       .then(() => getTopicmap(topicmapTopic.id, dispatch))
-      .then(topicmap => dispatch('renderTopicmap', {topicmap, writable}))
+      .then(topicmap => dispatch('renderTopicmap', {topicmap, writable, selection}))
       .then(() => state.loading = false)
   },
 
