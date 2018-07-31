@@ -2,6 +2,13 @@
 
 ## Version History
 
+**0.15** -- Jul 31, 2018
+
+* Component property `selection` is removed.
+  Instead the `showTopicmap` action expects a `selection` parameter.
+* Change type URI prefixes `dm4` -> `dmx`
+* Add GitLab CI/CD
+
 **0.14** -- Jun 20, 2018
 
 * Feature: multi-selection
@@ -81,4 +88,4 @@
 
 ------------
 Jörg Richter  
-Jun 20, 2018
+Jul 31, 2018
