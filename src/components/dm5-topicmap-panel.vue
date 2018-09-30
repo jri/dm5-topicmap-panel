@@ -38,6 +38,14 @@ export default {
     quillConfig: Object
   },
 
+  data () {
+    return {
+      // mirror props ### FIXME: add remaining props?
+      object_:   this.object,
+      writable_: this.writable
+    }
+  },
+
   computed: mapState({
     topicmapRenderer: state => state.topicmapPanel.topicmapRenderer,
     loading:          state => state.topicmapPanel.loading
@@ -45,16 +53,16 @@ export default {
 
   watch: {
 
-    object () {
-      // console.log('object watcher', this.object)
+    object_ () {
+      // console.log('object_ watcher', this.object_)
       this.checkTopicmapRenderer()
-      this.topicmapRenderer.object = this.object
+      this.topicmapRenderer.object = this.object_
     },
 
-    writable () {
-      // console.log('writable watcher', this.writable)
+    writable_ () {
+      // console.log('writable_ watcher', this.writable_)
       this.checkTopicmapRenderer()
-      this.topicmapRenderer.writable = this.writable
+      this.topicmapRenderer.writable = this.writable_
     }
   },
 
