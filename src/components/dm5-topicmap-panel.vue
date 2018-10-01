@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
-    <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
+    <dm5-toolbar :comp-defs="toolbarCompDefs_"></dm5-toolbar>
     <div ref="mountElement"></div><!-- topicmap renderer mount element -->
   </div>
 </template>
@@ -41,8 +41,9 @@ export default {
   data () {
     return {
       // mirror props ### FIXME: add remaining props?
-      object_:   this.object,
-      writable_: this.writable
+      object_:          this.object,
+      writable_:        this.writable,
+      toolbarCompDefs_: this.toolbarCompDefs
     }
   },
 
