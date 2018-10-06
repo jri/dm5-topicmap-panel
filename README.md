@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.16** -- Oct 6, 2018
+
+* Component supports manual mounting in conjunction with manual data update ("props" are mirrored as "data")
+
 **0.15** -- Jul 31, 2018
 
 * Component property `selection` is removed.
@@ -88,4 +92,4 @@
 
 ------------
 Jörg Richter  
-Jul 31, 2018
+Oct 6, 2018
