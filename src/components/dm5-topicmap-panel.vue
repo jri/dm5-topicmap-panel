@@ -28,7 +28,7 @@ export default {
   mixins: [
     require('./mixins/object').default,
     require('./mixins/writable').default,
-    require('./mixins/object-renderers').default
+    require('./mixins/detail-renderers').default
   ],
 
   props: {
