@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.17** -- Oct 21, 2018
+
+* Rename component prop `object-renderers` to `detail-renderers`. It contains both, `object` and `value` renderers.
+
 **0.16** -- Oct 6, 2018
 
 * Component supports manual mounting in conjunction with manual data update ("props" are mirrored as "data")
@@ -92,4 +96,4 @@
 
 ------------
 Jörg Richter  
-Oct 6, 2018
+Oct 21, 2018

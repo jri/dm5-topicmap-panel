@@ -81,7 +81,7 @@ function switchTopicmapRenderer (topicmapTopic) {
         // the topicmap renderer, only to the topicmap panel)? But it doesn't hurt.
         state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...renderer.comp})
         _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
-        // 3) call mounted() callback
+        // 3) call mounted() callback ### TODO: currently not needed
         topicmapType.mounted && topicmapType.mounted()
         //
         resolve()
