@@ -80,6 +80,8 @@ function switchTopicmapRenderer (topicmapTopic) {
         // TODO: don't pass *all* props ("toolbarCompDefs" and "topicmapTypes" are not meaningful to
         // the topicmap renderer, only to the topicmap panel)? But it doesn't hurt.
         state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...renderer.comp})
+        // ### FIXME: former renderer component is apparently not destroyed.
+        // Their computed properties are still recomputed.
         _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
         // 3) call mounted() callback ### TODO: currently not needed
         topicmapType.mounted && topicmapType.mounted()
@@ -94,7 +96,7 @@ function switchTopicmapRenderer (topicmapTopic) {
 }
 
 function getTopicmapTypeUri (topicmapTopic) {
-  const child = topicmapTopic.getChildTopic('dmx.topicmaps.topicmap_renderer_uri')
+  const child = topicmapTopic.childs['dmx.topicmaps.topicmap_renderer_uri']
   if (!child) {
     throw Error(`Topicmap topic ${topicmapTopic.id} has no dmx.topicmaps.topicmap_renderer_uri child topic`)
   }
