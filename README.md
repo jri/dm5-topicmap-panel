@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.18** -- Dec 21, 2018
+
+* Chore: adapt to `dm5` library (drop getChildTopic())
+
 **0.17** -- Oct 21, 2018
 
 * Rename component prop `object-renderers` to `detail-renderers`. It contains both, `object` renderers and `value` renderers.
@@ -96,4 +100,4 @@
 
 ------------
 Jörg Richter  
-Oct 21, 2018
+Dec 21, 2018
