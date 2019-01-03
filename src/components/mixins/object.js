@@ -4,6 +4,6 @@ export default {
   props: {
     // The selected topic/assoc.
     // Undefined if nothing is selected.
-    object: dm5.DeepaMehtaObject
+    object: dm5.DMXObject
   }
 }
