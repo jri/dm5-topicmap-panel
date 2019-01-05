@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.19** -- Jan 5, 2019
+
+* Adapt to `dm5` library (class `DMXObject`)
+
 **0.18** -- Dec 21, 2018
 
 * Chore: adapt to `dm5` library (drop getChildTopic())
@@ -100,4 +104,4 @@
 
 ------------
 Jörg Richter  
-Dec 21, 2018
+Jan 5, 2019
