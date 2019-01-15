@@ -30,6 +30,9 @@ const actions = {
       .then(() => getTopicmap(topicmapTopic.id, dispatch))
       .then(topicmap => dispatch('renderTopicmap', {topicmap, writable, selection}))
       .then(() => state.loading = false)
+      .catch(error => {
+        console.error(`Rendering topicmap ${topicmapTopic.id} failed`, error)
+      })
   },
 
   clearTopicmapCache () {
