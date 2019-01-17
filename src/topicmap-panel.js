@@ -29,8 +29,12 @@ const actions = {
     return switchTopicmapRenderer(topicmapTopic)
       .then(() => getTopicmap(topicmapTopic.id, dispatch))
       .then(topicmap => dispatch('renderTopicmap', {topicmap, writable, selection}))
-      .then(() => state.loading = false)
+      .then(topicmap => {
+        state.loading = false
+        return topicmap
+      })
       .catch(error => {
+        // TODO: handle error at higher level?
         console.error(`Rendering topicmap ${topicmapTopic.id} failed`, error)
       })
   },
