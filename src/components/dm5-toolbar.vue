@@ -27,8 +27,10 @@ export default {
   display: flex;              /* arrange childs as a row */
   position: absolute;         /* share space with Cytoscape canvas */
   z-index: 1001;              /* render on top of Leaflet container */
+  box-sizing: border-box;
   width: 100%;
-  margin: 3px;
+  padding-top: 4px;
+  padding-left: 4px;
   pointer-events: none;       /* make toolbar click-through */
 }
 
