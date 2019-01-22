@@ -28,6 +28,7 @@ export default {
   position: absolute;         /* share space with Cytoscape canvas */
   z-index: 1001;              /* render on top of Leaflet container */
   width: 100%;
+  margin: 3px;
   pointer-events: none;       /* make toolbar click-through */
 }
 
