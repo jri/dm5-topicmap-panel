@@ -105,18 +105,18 @@ function switchTopicmapRenderer (topicmapTopic) {
 function getTopicmapTypeUri (topicmapTopic) {
   const child = topicmapTopic.childs['dmx.topicmaps.topicmap_renderer_uri']
   if (!child) {
-    throw Error(`Topicmap topic ${topicmapTopic.id} has no dmx.topicmaps.topicmap_renderer_uri child topic`)
+    throw Error(`topicmap topic ${topicmapTopic.id} has no dmx.topicmaps.topicmap_renderer_uri child topic`)
   }
   return child.value
 }
 
 function getTopicmapType (topicmapTypeUri) {
   if (!_topicmapTypes) {
-    throw Error(`No topicmap types passed to dm5-topicmap-panel`)
+    throw Error(`no topicmap types passed to dm5-topicmap-panel`)
   }
   const topicmapType = _topicmapTypes[topicmapTypeUri]
   if (!topicmapType) {
-    throw Error(`Topicmap type '${topicmapTypeUri}' is not known to dm5-topicmap-panel`)
+    throw Error(`topicmap type '${topicmapTypeUri}' is not known to dm5-topicmap-panel`)
   }
   return topicmapType
 }
@@ -125,21 +125,21 @@ function getRenderer (topicmapType) {
   return new Promise(resolve => {
     const rendererFunc = topicmapType.renderer
     if (typeof rendererFunc !== 'function') {
-      throw Error(`Topicmap renderer is expected to be a function, got ${typeof rendererFunc}
+      throw Error(`topicmap renderer is expected to be a function, got ${typeof rendererFunc}
         (topicmap type '${topicmapType.uri}')`)
     }
     const p = rendererFunc()
     if (!(p instanceof Promise)) {
-      throw Error(`Topicmap renderer function is expected to return a Promise, got ${p.constructor.name} (${p})
+      throw Error(`topicmap renderer function is expected to return a Promise, got ${p.constructor.name} (${p})
         (topicmap type '${topicmapType.uri}')`)
     }
     p.then(module => {
       const renderer = module.default
       if (!renderer.storeModule) {
-        throw Error(`No store module set for topicmap type '${topicmapType.uri}'`)
+        throw Error(`no store module set for topicmap type '${topicmapType.uri}'`)
       }
       if (!renderer.comp) {
-        throw Error(`No renderer component set for topicmap type '${topicmapType.uri}'`)
+        throw Error(`no renderer component set for topicmap type '${topicmapType.uri}'`)
       }
       resolve(renderer)
     })

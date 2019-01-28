@@ -70,7 +70,7 @@ export default {
   methods: {
     checkTopicmapRenderer () {
       if (!this.topicmapRenderer) {
-        throw Error('Topicmap renderer not yet instantiated')
+        throw Error('topicmap renderer not yet instantiated')
       }
     }
   },
