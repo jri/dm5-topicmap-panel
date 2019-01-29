@@ -1,6 +1,6 @@
 {
   "name": "dm5-topicmap-panel",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "description": "The DeepaMehta 5 topicmap panel as a composable GUI component",
   "author": "Jörg Richter",
   "license": "GPL-3.0-or-later",

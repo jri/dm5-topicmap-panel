@@ -2,6 +2,11 @@
 
 ## Version History
 
+**0.20** -- Jan 29, 2019
+
+* API: promise returned by `showTopicmap` action resolves with topicmap
+* Change license to `GPL-3.0-or-later`
+
 **0.19** -- Jan 5, 2019
 
 * Adapt to `dm5` library (class `DMXObject`)
@@ -104,4 +109,4 @@
 
 ------------
 Jörg Richter  
-Jan 5, 2019
+Jan 29, 2019
