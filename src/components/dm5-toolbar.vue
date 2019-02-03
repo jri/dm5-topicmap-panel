@@ -25,6 +25,7 @@ export default {
 <style>
 .dm5-toolbar {
   display: flex;              /* arrange childs as a row */
+  align-items: flex-start;
   position: absolute;         /* share space with Cytoscape canvas */
   z-index: 1001;              /* render on top of Leaflet container */
   box-sizing: border-box;
