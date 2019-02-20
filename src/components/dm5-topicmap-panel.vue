@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
-    <dm5-toolbar :comp-defs="toolbarCompDefs_"></dm5-toolbar>
+    <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
     <div ref="mountElement"></div><!-- topicmap renderer mount element -->
   </div>
 </template>
@@ -32,6 +32,7 @@ export default {
   ],
 
   props: {
+    showInmapDetails: Boolean,
     toolbarCompDefs: Object,
     topicmapTypes: Object,
     contextCommands: Object,
@@ -40,10 +41,11 @@ export default {
 
   data () {
     return {
-      // mirror props ### FIXME: add remaining props?
-      object_:          this.object,
-      writable_:        this.writable,
-      toolbarCompDefs_: this.toolbarCompDefs
+      // mirror props (dynamic props are sufficient)
+      object_:           this.object,
+      writable_:         this.writable,
+      showInmapDetails_: this.showInmapDetails
+      // toolbarCompDefs_:  this.toolbarCompDefs   // FIXME: needed?
     }
   },
 
@@ -64,13 +66,19 @@ export default {
       // console.log('writable_ watcher', this.writable_)
       this.checkTopicmapRenderer()
       this.topicmapRenderer.writable = this.writable_
+    },
+
+    showInmapDetails_ () {
+      // console.log('showInmapDetails_ watcher', this.showInmapDetails_)
+      this.checkTopicmapRenderer()
+      this.topicmapRenderer.showInmapDetails = this.showInmapDetails_
     }
   },
 
   methods: {
     checkTopicmapRenderer () {
       if (!this.topicmapRenderer) {
-        throw Error('topicmap renderer not yet instantiated')
+        throw Error('no topicmap renderer instantiated')
       }
     }
   },
@@ -80,6 +88,3 @@ export default {
   }
 }
 </script>
-
-<style>
-</style>

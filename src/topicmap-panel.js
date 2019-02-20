@@ -47,7 +47,7 @@ const actions = {
     // empty dummy action to catch a "resize" request when no renderer is mounted yet
   },
 
-  // Module internal
+  // Module internal (dispatched from dm5-topicmap-panel component)
 
   _initTopicmapPanel (_, {store, props, mountElement, parent}) {
     // console.log('_initTopicmapPanel', parent)
