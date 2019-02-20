@@ -13,13 +13,13 @@ import { mapState } from 'vuex'
 export default {
 
   created () {
-    // console.log('dm5-topicmap-panel created', this.topicmapTypes)
+    // console.log('dm5-topicmap-panel created', this.topicmapTypes, this.$store)
     this.$store.registerModule('topicmapPanel', require('../topicmap-panel').default)
+    this.$store.dispatch('_initTopicmapPanel', this)
   },
 
   mounted () {
     // console.log('dm5-topicmap-panel mounted')
-    this.$store.dispatch('_initTopicmapPanel', this)
   },
 
   mixins: [
@@ -39,7 +39,7 @@ export default {
   data () {
     return {
       topicmapRenderer: undefined,
-      // mirror props (dynamic props are sufficient)
+      // mirror props (mirroring the *dynamic* props is sufficient)
       object_:           this.object,
       writable_:         this.writable,
       showInmapDetails_: this.showInmapDetails

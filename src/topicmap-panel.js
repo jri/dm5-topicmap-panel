@@ -50,6 +50,8 @@ const actions = {
     topicmapPanel = _topicmapPanel
     topicmapTypes = _topicmapPanel.topicmapTypes
     store         = _topicmapPanel.$store
+    // Note: we need the real store object here.
+    // The store-like context object ("_") does not have the un/registerModule() functions.
   }
 }
 
