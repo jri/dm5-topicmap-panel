@@ -1,7 +1,9 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <div ref="mountElement"></div><!-- topicmap renderer mount element -->
+    <component :is="topicmapRenderer" :object="object_" :writable="writable_" :showInmapDetails="showInmapDetails_"
+      :contextCommands="contextCommands" :quillConfig="quillConfig">
+    </component>
   </div>
 </template>
 
@@ -17,12 +19,7 @@ export default {
 
   mounted () {
     // console.log('dm5-topicmap-panel mounted')
-    this.$store.dispatch('_initTopicmapPanel', {
-      store:        this.$store,
-      props:        this.$props,
-      mountElement: this.$refs.mountElement,
-      parent:       this
-    })
+    this.$store.dispatch('_initTopicmapPanel', this)
   },
 
   mixins: [
@@ -41,6 +38,7 @@ export default {
 
   data () {
     return {
+      topicmapRenderer: undefined,
       // mirror props (dynamic props are sufficient)
       object_:           this.object,
       writable_:         this.writable,
@@ -50,38 +48,8 @@ export default {
   },
 
   computed: mapState({
-    topicmapRenderer: state => state.topicmapPanel.topicmapRenderer,
-    loading:          state => state.topicmapPanel.loading
+    loading: state => state.topicmapPanel.loading
   }),
-
-  watch: {
-
-    object_ () {
-      // console.log('object_ watcher', this.object_)
-      this.checkTopicmapRenderer()
-      this.topicmapRenderer.object = this.object_
-    },
-
-    writable_ () {
-      // console.log('writable_ watcher', this.writable_)
-      this.checkTopicmapRenderer()
-      this.topicmapRenderer.writable = this.writable_
-    },
-
-    showInmapDetails_ () {
-      // console.log('showInmapDetails_ watcher', this.showInmapDetails_)
-      this.checkTopicmapRenderer()
-      this.topicmapRenderer.showInmapDetails = this.showInmapDetails_
-    }
-  },
-
-  methods: {
-    checkTopicmapRenderer () {
-      if (!this.topicmapRenderer) {
-        throw Error('no topicmap renderer instantiated')
-      }
-    }
-  },
 
   components: {
     'dm5-toolbar': require('./dm5-toolbar').default

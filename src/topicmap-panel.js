@@ -1,20 +1,17 @@
 import Vue from 'vue'
 
-let _topicmapTopic        // Topicmap topic of the displayed topicmap
-
-let _store
-let _props
-let _topicmapTypes        // Registered topicmap types
-let _mountElement         // The DOM element where to mount the topicmap renderers
-let _parent
-
+let topicmapPanel         // Component instance
+let topicmapTypes         // Registered topicmap types
 let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
                           //   {
                           //     topicmapId: Topicmap         # a dm5.Topicmap
                           //   }
 
+let topicmapTopic         // Topicmap topic of the displayed topicmap
+
+let store
+
 const state = {
-  topicmapRenderer: undefined,
   loading: true
 }
 
@@ -49,13 +46,10 @@ const actions = {
 
   // Module internal (dispatched from dm5-topicmap-panel component)
 
-  _initTopicmapPanel (_, {store, props, mountElement, parent}) {
-    // console.log('_initTopicmapPanel', parent)
-    _store = store
-    _props = props
-    _topicmapTypes = props.topicmapTypes
-    _mountElement = mountElement
-    _parent = parent
+  _initTopicmapPanel (_, _topicmapPanel) {
+    topicmapPanel = _topicmapPanel
+    topicmapTypes = _topicmapPanel.topicmapTypes
+    store         = _topicmapPanel.$store
   }
 }
 
@@ -72,33 +66,26 @@ export default {
  *
  * @return  A promise resolved once the topicmap renderer is ready.
  */
-function switchTopicmapRenderer (topicmapTopic) {
+function switchTopicmapRenderer (_topicmapTopic) {
   return new Promise(resolve => {
-    const oldTypeUri = _topicmapTopic && getTopicmapTypeUri(_topicmapTopic)
-    const newTypeUri = getTopicmapTypeUri(topicmapTopic)
+    const oldTypeUri = topicmapTopic && getTopicmapTypeUri(topicmapTopic)
+    const newTypeUri = getTopicmapTypeUri(_topicmapTopic)
     if (oldTypeUri !== newTypeUri) {
       // console.log(`switching renderer from '${oldTypeUri}' to '${newTypeUri}'`)
       const topicmapType = getTopicmapType(newTypeUri)
       getRenderer(topicmapType).then(renderer => {
         // 1) switch store module
-        oldTypeUri && _store.unregisterModule(oldTypeUri)
-        _store.registerModule(newTypeUri, renderer.storeModule)
-        // 2) instantiate renderer component
-        // TODO: don't pass *all* props ("toolbarCompDefs" and "topicmapTypes" are not meaningful to
-        // the topicmap renderer, only to the topicmap panel)? But it doesn't hurt.
-        state.topicmapRenderer = new Vue({parent: _parent, propsData: _props, ...renderer.comp})
-        // ### FIXME: former renderer component is apparently not destroyed.
-        // Their computed properties are still recomputed.
-        _mountElement = state.topicmapRenderer.$mount(_mountElement).$el
-        // 3) call mounted() callback ### TODO: currently not needed
-        topicmapType.mounted && topicmapType.mounted()
+        oldTypeUri && store.unregisterModule(oldTypeUri)
+        store.registerModule(newTypeUri, renderer.storeModule)
+        // 2) mount renderer
+        topicmapPanel.topicmapRenderer = renderer.comp
         //
         resolve()
       })
     } else {
       resolve()
     }
-    _topicmapTopic = topicmapTopic
+    topicmapTopic = _topicmapTopic
   })
 }
 
@@ -111,10 +98,10 @@ function getTopicmapTypeUri (topicmapTopic) {
 }
 
 function getTopicmapType (topicmapTypeUri) {
-  if (!_topicmapTypes) {
+  if (!topicmapTypes) {
     throw Error(`no topicmap types passed to dm5-topicmap-panel`)
   }
-  const topicmapType = _topicmapTypes[topicmapTypeUri]
+  const topicmapType = topicmapTypes[topicmapTypeUri]
   if (!topicmapType) {
     throw Error(`topicmap type '${topicmapTypeUri}' is not known to dm5-topicmap-panel`)
   }
