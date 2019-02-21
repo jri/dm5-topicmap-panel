@@ -1,8 +1,8 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="topicmapRenderer" :object="object_" :writable="writable_" :showInmapDetails="showInmapDetails_"
-      :contextCommands="contextCommands" :quillConfig="quillConfig">
+    <component :is="topicmapRenderer" :object="object_" :writable="writable_" :show-inmap-details="showInmapDetails_"
+      :detail-renderers="detailRenderers" :context-commands="contextCommands" :quill-config="quillConfig">
     </component>
   </div>
 </template>
