@@ -30,8 +30,7 @@ export default {
   z-index: 1001;              /* render on top of Leaflet container */
   box-sizing: border-box;
   width: 100%;
-  padding-top: 4px;
-  padding-left: 4px;
+  padding: 4px 8px 0 4px;
   pointer-events: none;       /* make toolbar click-through */
 }
 
