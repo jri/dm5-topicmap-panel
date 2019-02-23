@@ -1,8 +1,8 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
     <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
-    <component :is="topicmapRenderer" :object="object_" :writable="writable_" :show-inmap-details="showInmapDetails_"
-      :detail-renderers="detailRenderers" :context-commands="contextCommands" :quill-config="quillConfig">
+    <component :is="topicmapRenderer" :object="object_" :writable="writable_" :detail-renderers="detailRenderers"
+      :context-commands="contextCommands" :quill-config="quillConfig">
     </component>
   </div>
 </template>
@@ -29,20 +29,18 @@ export default {
   ],
 
   props: {
-    showInmapDetails: Boolean,
     toolbarCompDefs: Object,
-    topicmapTypes: Object,
+    topicmapTypes:   Object,
     contextCommands: Object,
-    quillConfig: Object
+    quillConfig:     Object
   },
 
   data () {
     return {
       topicmapRenderer: undefined,
       // mirror props (mirroring the *dynamic* props is sufficient)
-      object_:           this.object,
-      writable_:         this.writable,
-      showInmapDetails_: this.showInmapDetails
+      object_:   this.object,
+      writable_: this.writable
       // toolbarCompDefs_:  this.toolbarCompDefs   // FIXME: needed?
     }
   },
