@@ -92,9 +92,9 @@ function switchTopicmapRenderer (_topicmapTopic) {
 }
 
 function getTopicmapTypeUri (topicmapTopic) {
-  const child = topicmapTopic.childs['dmx.topicmaps.topicmap_renderer_uri']
+  const child = topicmapTopic.childs['dmx.topicmaps.topicmap_type_uri']
   if (!child) {
-    throw Error(`topicmap topic ${topicmapTopic.id} has no dmx.topicmaps.topicmap_renderer_uri child topic`)
+    throw Error(`topicmap topic ${topicmapTopic.id} has no dmx.topicmaps.topicmap_type_uri child topic`)
   }
   return child.value
 }
