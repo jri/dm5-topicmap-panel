@@ -2,6 +2,12 @@
 
 ## Version History
 
+**0.21** -- Mar 2, 2019
+
+* Internal refactoring: switch topicmap renderers via dynamic component
+* Adapt to Topicmaps REST API change
+* Minor style changes
+
 **0.20** -- Jan 29, 2019
 
 * API: promise returned by `showTopicmap` action resolves with topicmap
@@ -109,4 +115,4 @@
 
 ------------
 Jörg Richter  
-Jan 29, 2019
+Mar 2, 2019
