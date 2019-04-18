@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
-    <dm5-toolbar :comp-defs="toolbarCompDefs"></dm5-toolbar>
+    <dm5-toolbar :comp-defs="toolbarCompDefs_"></dm5-toolbar>
     <component :is="topicmapRenderer" :object="object_" :writable="writable_" :detail-renderers="detailRenderers"
       :context-commands="contextCommands" :quill-config="quillConfig">
     </component>
@@ -39,9 +39,11 @@ export default {
     return {
       topicmapRenderer: undefined,
       // mirror props (mirroring the *dynamic* props is sufficient)
-      object_:   this.object,
-      writable_: this.writable
-      // toolbarCompDefs_:  this.toolbarCompDefs   // FIXME: needed?
+      // Note: making `toolbarCompDefs` dynamic allows components to be added *after* dm5-topicmap-panel instantiation.
+      // E.g. the DMX Webclient does *not* synchronize plugin loading and instantiation of the toplevel components.
+      object_:           this.object,
+      writable_:         this.writable,
+      toolbarCompDefs_:  this.toolbarCompDefs
     }
   },
 
