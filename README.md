@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.22** -- Apr 22, 2019
+
+* Fix: adding toolbar components after instantiation is supported
+
 **0.21** -- Mar 2, 2019
 
 * Internal refactoring: switch topicmap renderers via dynamic component
@@ -115,4 +119,4 @@
 
 ------------
 Jörg Richter  
-Mar 2, 2019
+Apr 22, 2019

@@ -40,7 +40,7 @@ export default {
       topicmapRenderer: undefined,
       // mirror props (mirroring the *dynamic* props is sufficient)
       // Note: making `toolbarCompDefs` dynamic allows components to be added *after* dm5-topicmap-panel instantiation.
-      // E.g. the DMX Webclient does *not* synchronize plugin loading and instantiation of the toplevel components.
+      // E.g. the DMX Webclient does *not* synchronize plugin loading and instantiation of its toplevel components.
       object_:           this.object,
       writable_:         this.writable,
       toolbarCompDefs_:  this.toolbarCompDefs
