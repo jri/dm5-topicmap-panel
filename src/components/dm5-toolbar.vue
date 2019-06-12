@@ -24,7 +24,7 @@ export default {
 
 <style>
 .dm5-toolbar {
-  display: flex;              /* arrange childs as a row */
+  display: flex;              /* arrange children as a row */
   align-items: flex-start;
   position: absolute;         /* share space with Cytoscape canvas */
   z-index: 1001;              /* render on top of Leaflet container */
@@ -44,6 +44,6 @@ export default {
 }
 
 .dm5-toolbar > div > * {
-  pointer-events: initial;    /* childs still act on clicks */
+  pointer-events: initial;    /* children still act on clicks */
 }
 </style>
