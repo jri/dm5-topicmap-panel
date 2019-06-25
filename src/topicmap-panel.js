@@ -1,11 +1,19 @@
+// Responsibilities:
+//   - fetching topicmaps
+//   - caching topicmaps
+//   - switching topicmap type renderers
+//   - triggering topicmap rendering
+
 import Vue from 'vue'
 
 let topicmapPanel         // Component instance
 let topicmapTypes         // Registered topicmap types
 let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
                           //   {
-                          //     topicmapId: Topicmap         # a dm5.Topicmap
+                          //     topicmapId: topicmap         # e.g. a dm5.Topicmap, dm5.Geomap, ...
                           //   }
+                          // Note: to the Topicmap Panel the structure of a topicmap object is completely opaque.
+                          // Only the corresponding topicmap renderer interprets it.
 
 let topicmapTopic         // Topicmap topic of the displayed topicmap
 
@@ -150,7 +158,7 @@ function getTopicmap (id, dispatch) {
       if (Array.isArray(topicmap)) {
         throw Error(`${topicmap.length} renderers competed for fetching topicmap ${id}`)
       }
-      topicmapCache[topicmap.id] = topicmap
+      topicmapCache[id] = topicmap
       return topicmap
     })
   }
