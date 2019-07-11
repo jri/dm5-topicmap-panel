@@ -156,7 +156,7 @@ function getTopicmap (id, dispatch) {
     // console.log('Fetching topicmap', id)
     p = dispatch('fetchTopicmap', id).then(topicmap => {
       if (Array.isArray(topicmap)) {
-        throw Error(`${topicmap.length} renderers competed for fetching topicmap ${id}`)
+        throw Error(`${topicmap.length} store modules competed for fetching topicmap ${id}`)
       }
       topicmapCache[id] = topicmap
       return topicmap
