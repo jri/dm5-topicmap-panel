@@ -2,6 +2,15 @@
 
 ## Version History
 
+**0.23** -- Jul 22, 2019
+
+* Improvements:
+    * Make no assumption about the topicmap data format
+    * Correct "competing store modules" error message
+* Chore:
+    * Adapt to `dm5` library ("children" renaming)
+    * Change license to `AGPL-3.0`
+
 **0.22** -- Apr 22, 2019
 
 * Fix: adding toolbar components after instantiation is supported
@@ -119,4 +128,4 @@
 
 ------------
 Jörg Richter  
-Apr 22, 2019
+Jul 22, 2019
