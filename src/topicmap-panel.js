@@ -52,6 +52,22 @@ const actions = {
     // empty dummy action to catch a "resize" request when no renderer is mounted yet
   },
 
+  // WebSocket messages
+
+  _processDirectives ({rootState}, directives) {
+    // ### FIXME: don't access app root state. Move "selections" app state to this module? Or topimap cache to app?
+    directives.forEach(dir => {
+      switch (dir.type) {
+      case "DELETE_TOPIC":
+        deleteTopic(dir.arg, rootState)
+        break
+      case "DELETE_ASSOCIATION":
+        deleteAssoc(dir.arg, rootState)
+        break
+      }
+    })
+  },
+
   // Module internal (dispatched from dm5-topicmap-panel component)
 
   _initTopicmapPanel (_, _topicmapPanel) {
@@ -163,4 +179,34 @@ function getTopicmap (id, dispatch) {
     })
   }
   return p
+}
+
+// Process directives
+
+/**
+ * Processes a DELETE_TOPIC directive.
+ */
+function deleteTopic (topic, rootState) {
+  // update state
+  Object.keys(topicmapCache).forEach(topicmapId => {
+    // Note: topicmap.removeAssocsWithPlayer() is not called. The assocs will be removed while processing
+    // the DELETE_ASSOCIATION directives as received along with the DELETE_TOPIC directive.
+    topicmapCache[topicmapId].removeTopic(topic.id)
+    rootState.topicmaps.selections[topicmapId].remove(topic.id)
+  })
+  // Note: the view is updated by the particular renderer
+}
+
+/**
+ * Processes a DELETE_ASSOCIATION directive.
+ */
+function deleteAssoc (assoc, rootState) {
+  // update state
+  Object.keys(topicmapCache).forEach(topicmapId => {
+    // Note: topicmap.removeAssocsWithPlayer() is not called. The assocs will be removed while processing
+    // the DELETE_ASSOCIATION directives as received along with the DELETE_ASSOCIATION directive.
+    topicmapCache[topicmapId].removeAssoc(assoc.id)
+    rootState.topicmaps.selections[topicmapId].remove(assoc.id)
+  })
+  // Note: the view is updated by the particular renderer
 }
