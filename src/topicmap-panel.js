@@ -55,7 +55,6 @@ const actions = {
   // WebSocket messages
 
   _processDirectives ({rootState}, directives) {
-    // ### FIXME: don't access app root state. Move "selections" app state to this module? Or topimap cache to app?
     directives.forEach(dir => {
       switch (dir.type) {
       case "DELETE_TOPIC":
@@ -192,6 +191,7 @@ function deleteTopic (topic, rootState) {
     // Note: topicmap.removeAssocsWithPlayer() is not called. The assocs will be removed while processing
     // the DELETE_ASSOCIATION directives as received along with the DELETE_TOPIC directive.
     topicmapCache[topicmapId].removeTopic(topic.id)
+    // ### FIXME: don't access app root state. TODO: refactor state; decouple module from app
     rootState.topicmaps.selections[topicmapId].remove(topic.id)
   })
   // Note: the view is updated by the particular renderer
@@ -206,6 +206,7 @@ function deleteAssoc (assoc, rootState) {
     // Note: topicmap.removeAssocsWithPlayer() is not called. The assocs will be removed while processing
     // the DELETE_ASSOCIATION directives as received along with the DELETE_ASSOCIATION directive.
     topicmapCache[topicmapId].removeAssoc(assoc.id)
+    // ### FIXME: don't access app root state. TODO: refactor state; decouple module from app
     rootState.topicmaps.selections[topicmapId].remove(assoc.id)
   })
   // Note: the view is updated by the particular renderer

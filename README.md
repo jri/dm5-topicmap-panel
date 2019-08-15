@@ -2,6 +2,11 @@
 
 ## Version History
 
+**0.24** -- Aug 16, 2019
+
+* Fixes:
+    * Deleting a topic/assoc removes it from all loaded topicmaps
+
 **0.23** -- Jul 22, 2019
 
 * Improvements:
@@ -13,7 +18,7 @@
 
 **0.22** -- Apr 22, 2019
 
-* Fix: adding toolbar components after instantiation is supported
+* Fix: support for adding toolbar components after instantiation
 
 **0.21** -- Mar 2, 2019
 
@@ -28,7 +33,7 @@
 
 **0.19** -- Jan 5, 2019
 
-* Adapt to `dm5` library (class `DMXObject`)
+* Chore: adapt to `dm5` library (class `DMXObject`)
 
 **0.18** -- Dec 21, 2018
 
@@ -128,4 +133,4 @@
 
 ------------
 Jörg Richter  
-Jul 22, 2019
+Aug 16, 2019
