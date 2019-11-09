@@ -54,14 +54,14 @@ const actions = {
 
   // WebSocket messages
 
-  _processDirectives ({rootState}, directives) {
+  _processDirectives (_, directives) {
     directives.forEach(dir => {
       switch (dir.type) {
       case "DELETE_TOPIC":
-        deleteTopic(dir.arg, rootState)
+        deleteTopic(dir.arg.id)
         break
       case "DELETE_ASSOCIATION":
-        deleteAssoc(dir.arg, rootState)
+        deleteAssoc(dir.arg.id)
         break
       }
     })
@@ -185,14 +185,12 @@ function getTopicmap (id, dispatch) {
 /**
  * Processes a DELETE_TOPIC directive.
  */
-function deleteTopic (topic, rootState) {
+function deleteTopic (id) {
   // update state
   Object.keys(topicmapCache).forEach(topicmapId => {
     // Note: topicmap.removeAssocsWithPlayer() is not called. The assocs will be removed while processing
     // the DELETE_ASSOCIATION directives as received along with the DELETE_TOPIC directive.
-    topicmapCache[topicmapId].removeTopic(topic.id)
-    // ### FIXME: don't access app root state. TODO: refactor state; decouple module from app
-    rootState.topicmaps.selections[topicmapId].remove(topic.id)
+    topicmapCache[topicmapId].removeTopic(id)
   })
   // Note: the view is updated by the particular renderer
 }
@@ -200,14 +198,12 @@ function deleteTopic (topic, rootState) {
 /**
  * Processes a DELETE_ASSOCIATION directive.
  */
-function deleteAssoc (assoc, rootState) {
+function deleteAssoc (id) {
   // update state
   Object.keys(topicmapCache).forEach(topicmapId => {
     // Note: topicmap.removeAssocsWithPlayer() is not called. The assocs will be removed while processing
     // the DELETE_ASSOCIATION directives as received along with the DELETE_ASSOCIATION directive.
-    topicmapCache[topicmapId].removeAssoc(assoc.id)
-    // ### FIXME: don't access app root state. TODO: refactor state; decouple module from app
-    rootState.topicmaps.selections[topicmapId].remove(assoc.id)
+    topicmapCache[topicmapId].removeAssoc(id)
   })
   // Note: the view is updated by the particular renderer
 }
