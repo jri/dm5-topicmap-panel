@@ -2,6 +2,10 @@
 
 ## Version History
 
+**0.25** -- Nov 21, 2019
+
+* Improved composability: component does not access app state (`selections`)
+
 **0.24** -- Aug 16, 2019
 
 * Fixes:
@@ -133,4 +137,4 @@
 
 ------------
 Jörg Richter  
-Aug 16, 2019
+Nov 21, 2019
