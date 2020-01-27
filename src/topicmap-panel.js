@@ -4,6 +4,8 @@
 //   - switching topicmap type renderers
 //   - triggering topicmap rendering
 
+import dm5 from 'dm5'
+import axios from 'axios'
 import Vue from 'vue'
 
 let topicmapPanel         // Component instance
@@ -101,7 +103,9 @@ function switchTopicmapRenderer (_topicmapTopic) {
       getRenderer(topicmapType).then(renderer => {
         // 1) switch store module
         oldTypeUri && store.unregisterModule(oldTypeUri)
-        store.registerModule(newTypeUri, renderer.storeModule)
+        const storeModule = renderer.storeModule
+        const _storeModule = typeof storeModule === 'function' ? storeModule({store, dm5, axios, Vue}) : storeModule
+        store.registerModule(newTypeUri, _storeModule)
         // 2) mount renderer
         topicmapPanel.topicmapRenderer = renderer.comp
         //
