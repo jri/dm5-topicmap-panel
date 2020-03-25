@@ -45,5 +45,6 @@ export default {
 
 .dm5-toolbar > div > * {
   pointer-events: initial;    /* children still act on clicks */
+  background-color: white;    /* toolbar elements are opaque */
 }
 </style>
