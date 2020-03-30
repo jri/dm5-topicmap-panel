@@ -2,6 +2,12 @@
 
 ## Version History
 
+**0.26** -- Mar 30, 2020
+
+* Improvements:
+    * Inject Webclient dependencies into maptype store module
+    * Apply white background to all toolbar elements
+
 **0.25** -- Nov 21, 2019
 
 * Improved composability: component does not access app state (`selections`)
@@ -137,4 +143,4 @@
 
 ------------
 Jörg Richter  
-Nov 21, 2019
+Mar 30, 2020
