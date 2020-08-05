@@ -1,6 +1,11 @@
-# DeepaMehta 5 Topicmap Panel
+# DMX 5 Topicmap Panel
 
 ## Version History
+
+**1.0** -- Aug 5, 2020
+
+* Chore:
+    * Rename this package `dm5-topicmap-panel` -> `dmx-topicmap-panel`
 
 **0.26** -- Mar 30, 2020
 
@@ -143,4 +148,4 @@
 
 ------------
 Jörg Richter  
-Mar 30, 2020
+Aug 5, 2020

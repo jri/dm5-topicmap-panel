@@ -4,7 +4,7 @@
 //   - switching topicmap type renderers
 //   - triggering topicmap rendering
 
-import dm5 from 'dm5'
+import dm5 from 'dmx-api'
 import axios from 'axios'
 import Vue from 'vue'
 
@@ -132,7 +132,7 @@ function getTopicmapType (topicmapTypeUri) {
   }
   const topicmapType = topicmapTypes[topicmapTypeUri]
   if (!topicmapType) {
-    throw Error(`topicmap type '${topicmapTypeUri}' is not known to dm5-topicmap-panel`)
+    throw Error(`unknown topicmap type '${topicmapTypeUri}'`)
   }
   return topicmapType
 }
