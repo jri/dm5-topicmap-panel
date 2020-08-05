@@ -2,6 +2,10 @@
 
 ## Version History
 
+**1.0.1** -- Aug 5, 2020
+
+* Fix imports
+
 **1.0** -- Aug 5, 2020
 
 * Chore:
