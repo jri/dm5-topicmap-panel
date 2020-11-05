@@ -12,7 +12,7 @@ let topicmapPanel         // Component instance
 let topicmapTypes         // Registered topicmap types
 let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
                           //   {
-                          //     topicmapId: topicmap         # e.g. a dm5.Topicmap, dm5.Geomap, ...
+                          //     topicmapId: topicmap         # e.g. a dm5.Topicmap, Geomap, ...
                           //   }
                           // Note: to the Topicmap Panel the structure of a topicmap object is completely opaque.
                           // Only the corresponding topicmap renderer interprets it.

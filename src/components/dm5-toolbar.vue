@@ -1,10 +1,13 @@
 <template>
   <div class="dm5-toolbar">
     <div class="left">
-      <component v-for="compDef in compDefs.left" :is="compDef.comp" :key="compDef.id"></component>
+      <component v-for="compDef in compDefs.left" :is="compDef.comp" :key="compDef.id"
+        :topicmap-commands="topicmapCommands">
+      </component>
     </div>
     <div class="right">
-      <component v-for="compDef in compDefs.right" :is="compDef.comp" :key="compDef.id"></component>
+      <component v-for="compDef in compDefs.right" :is="compDef.comp" :key="compDef.id">
+      </component>
     </div>
   </div>
 </template>
@@ -13,11 +16,15 @@
 export default {
 
   created () {
-    // console.log('dm5-toolbar created', this.compDefs)
+    // console.log('dm5-toolbar created', this.topicmapCommands)
   },
 
   props: {
-    compDefs: Object
+    compDefs: Object,
+    topicmapCommands: Object
+    // Note: being part of a reusable component (dmx-topicmap-panel) the toolbar is just a container for components.
+    // It must not know about e.g. workspaces and topicmaps. The "topicmapCommands" prop should be dropped. Actually
+    // the toolbar should be regarded application-specific. TODO: move the toolbar component to the main application.
   }
 }
 </script>
