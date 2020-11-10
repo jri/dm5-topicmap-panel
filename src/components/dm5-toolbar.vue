@@ -36,6 +36,7 @@ export default {
 
 .dm5-toolbar > div {
   display: flex;
+  align-items: baseline;
 }
 
 .dm5-toolbar > div.right {
