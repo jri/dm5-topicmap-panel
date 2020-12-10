@@ -4,7 +4,7 @@
 //   - switching topicmap type renderers
 //   - triggering topicmap rendering
 
-import dm5 from 'dmx-api'
+import dmx from 'dmx-api'
 import axios from 'axios'
 import Vue from 'vue'
 
@@ -12,7 +12,7 @@ let topicmapPanel         // Component instance
 let topicmapTypes         // Registered topicmap types
 let topicmapCache = {}    // Loaded topicmaps, keyed by ID:
                           //   {
-                          //     topicmapId: topicmap         # e.g. a dm5.Topicmap, Geomap, ...
+                          //     topicmapId: topicmap         # e.g. a dmx.Topicmap, Geomap, ...
                           //   }
                           // Note: to the Topicmap Panel the structure of a topicmap object is completely opaque.
                           // Only the corresponding topicmap renderer interprets it.
@@ -104,7 +104,7 @@ function switchTopicmapRenderer (_topicmapTopic) {
         // 1) switch store module
         oldTypeUri && store.unregisterModule(oldTypeUri)
         const storeModule = renderer.storeModule
-        const _storeModule = typeof storeModule === 'function' ? storeModule({store, dm5, axios, Vue}) : storeModule
+        const _storeModule = typeof storeModule === 'function' ? storeModule({store, dmx, axios, Vue}) : storeModule
         store.registerModule(newTypeUri, _storeModule)
         // 2) mount renderer
         topicmapPanel.topicmapRenderer = renderer.comp
@@ -167,7 +167,7 @@ function getRenderer (topicmapType) {
 
 // TODO: store promises in topicmap cache
 function getTopicmap (id, dispatch) {
-  var p   // a promise for a dm5.Topicmap
+  var p   // a promise for a dmx.Topicmap
   const topicmap = topicmapCache[id]
   if (topicmap) {
     p = Promise.resolve(topicmap)
