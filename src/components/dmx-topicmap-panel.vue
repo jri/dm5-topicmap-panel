@@ -1,6 +1,6 @@
 <template>
   <div class="dm5-topicmap-panel" v-loading="loading">
-    <dm5-toolbar :comp-defs="toolbarCompDefs_"></dm5-toolbar>
+    <dmx-toolbar :comp-defs="toolbarCompDefs_"></dmx-toolbar>
     <component :is="topicmapRenderer" :object="object_" :writable="writable_" :detail-renderers="detailRenderers"
       :context-commands="contextCommands" :quill-config="quillConfig">
     </component>
@@ -53,7 +53,7 @@ export default {
   }),
 
   components: {
-    'dm5-toolbar': require('./dm5-toolbar').default
+    'dmx-toolbar': require('./dmx-toolbar').default
   }
 }
 </script>
