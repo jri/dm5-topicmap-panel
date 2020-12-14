@@ -1,5 +1,5 @@
 <template>
-  <div class="dm5-toolbar">
+  <div class="dmx-toolbar">
     <div class="left">
       <component v-for="compDef in compDefs.left" :is="compDef.comp" :key="compDef.id"></component>
     </div>
@@ -23,7 +23,7 @@ export default {
 </script>
 
 <style>
-.dm5-toolbar {
+.dmx-toolbar {
   display: flex;              /* arrange children as a row */
   align-items: flex-start;
   position: absolute;         /* share space with Cytoscape canvas */
@@ -34,17 +34,17 @@ export default {
   pointer-events: none;       /* make toolbar click-through */
 }
 
-.dm5-toolbar > div {
+.dmx-toolbar > div {
   display: flex;
   align-items: baseline;
 }
 
-.dm5-toolbar > div.right {
+.dmx-toolbar > div.right {
   flex: auto;
   justify-content: flex-end;
 }
 
-.dm5-toolbar > div > * {
+.dmx-toolbar > div > * {
   pointer-events: initial;    /* children still act on clicks */
   background-color: white;    /* toolbar elements are opaque */
 }
