@@ -13,7 +13,7 @@
 export default {
 
   created () {
-    // console.log('dm5-toolbar created', this.compDefs)
+    // console.log('dmx-toolbar created', this.compDefs)
   },
 
   props: {

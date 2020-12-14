@@ -69,7 +69,7 @@ const actions = {
     })
   },
 
-  // Module internal (dispatched from dm5-topicmap-panel component)
+  // Module internal (dispatched from dmx-topicmap-panel component)
 
   _initTopicmapPanel (_, _topicmapPanel) {
     topicmapPanel = _topicmapPanel
@@ -128,7 +128,7 @@ function getTopicmapTypeUri (topicmapTopic) {
 
 function getTopicmapType (topicmapTypeUri) {
   if (!topicmapTypes) {
-    throw Error(`no topicmap types passed to dm5-topicmap-panel`)
+    throw Error(`no topicmap types passed to dmx-topicmap-panel`)
   }
   const topicmapType = topicmapTypes[topicmapTypeUri]
   if (!topicmapType) {

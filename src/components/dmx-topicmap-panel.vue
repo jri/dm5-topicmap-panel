@@ -13,13 +13,13 @@ import { mapState } from 'vuex'
 export default {
 
   created () {
-    // console.log('dm5-topicmap-panel created', this.topicmapTypes, this.$store)
+    // console.log('dmx-topicmap-panel created', this.topicmapTypes, this.$store)
     this.$store.registerModule('topicmapPanel', require('../topicmap-panel').default)
     this.$store.dispatch('_initTopicmapPanel', this)
   },
 
   mounted () {
-    // console.log('dm5-topicmap-panel mounted')
+    // console.log('dmx-topicmap-panel mounted')
   },
 
   mixins: [
@@ -39,7 +39,7 @@ export default {
     return {
       topicmapRenderer: undefined,
       // mirror props (mirroring the *dynamic* props is sufficient)
-      // Note: making `toolbarCompDefs` dynamic allows components to be added *after* dm5-topicmap-panel instantiation.
+      // Note: making `toolbarCompDefs` dynamic allows components to be added *after* dmx-topicmap-panel instantiation.
       // E.g. the DMX Webclient does *not* synchronize plugin loading and instantiation of its toplevel components.
       // TODO: still true?
       object_:          this.object,
