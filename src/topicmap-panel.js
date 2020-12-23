@@ -59,10 +59,10 @@ const actions = {
   _processDirectives (_, directives) {
     directives.forEach(dir => {
       switch (dir.type) {
-      case "DELETE_TOPIC":
+      case 'DELETE_TOPIC':
         deleteTopic(dir.arg.id)
         break
-      case "DELETE_ASSOCIATION":
+      case 'DELETE_ASSOCIATION':
         deleteAssoc(dir.arg.id)
         break
       }
@@ -128,7 +128,7 @@ function getTopicmapTypeUri (topicmapTopic) {
 
 function getTopicmapType (topicmapTypeUri) {
   if (!topicmapTypes) {
-    throw Error(`no topicmap types passed to dmx-topicmap-panel`)
+    throw Error('no topicmap types passed to dmx-topicmap-panel')
   }
   const topicmapType = topicmapTypes[topicmapTypeUri]
   if (!topicmapType) {
@@ -167,7 +167,7 @@ function getRenderer (topicmapType) {
 
 // TODO: store promises in topicmap cache
 function getTopicmap (id, dispatch) {
-  var p   // a promise for a dmx.Topicmap
+  let p   // a promise for a dmx.Topicmap
   const topicmap = topicmapCache[id]
   if (topicmap) {
     p = Promise.resolve(topicmap)
